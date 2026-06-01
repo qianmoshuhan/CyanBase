@@ -1,0 +1,9 @@
+cd /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend
+java -jar target/cyanbase-backend-1.0.0.jar
+
+cd /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-frontend
+npm install
+npm run dev
+
+用户名：admin
+密码：admin123

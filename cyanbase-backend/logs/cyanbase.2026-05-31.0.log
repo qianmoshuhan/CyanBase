@@ -1,0 +1,1076 @@
+2026-05-31 13:50:32.908 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:192ms
+2026-05-31 13:51:57.031 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:199ms
+2026-05-31 13:52:22.196 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 14:03:46.146 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:206ms
+2026-05-31 14:03:51.138 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 14:05:00.247 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:189ms
+2026-05-31 14:13:55.488 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 14:14:09.825 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:186ms
+2026-05-31 15:18:42.124 [http-nio-8090-exec-6] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 15:18:42.187 [http-nio-8090-exec-6] WARN  org.mariadb.jdbc.message.server.ErrorPacket - Error: 1364-HY000: Field 'process_key' doesn't have a default value
+2026-05-31 15:18:42.310 [http-nio-8090-exec-6] ERROR com.cyan.common.exception.AuthExceptionHandler - 系统异常：
+org.springframework.dao.DataIntegrityViolationException: 
+### Error updating database.  Cause: java.sql.SQLException: (conn=194) Field 'process_key' doesn't have a default value
+### The error may exist in com/cyan/modules/workflow/mapper/WorkflowDefinitionMapper.java (best guess)
+### The error may involve com.cyan.modules.workflow.mapper.WorkflowDefinitionMapper.insert-Inline
+### The error occurred while setting parameters
+### SQL: INSERT INTO wf_process_definition  ( version, status,   create_time,  update_time )  VALUES (  ?, ?,   ?,  ?  )
+### Cause: java.sql.SQLException: (conn=194) Field 'process_key' doesn't have a default value
+; (conn=194) Field 'process_key' doesn't have a default value
+	at org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator.doTranslate(SQLErrorCodeSQLExceptionTranslator.java:258)
+	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:73)
+	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:92)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:439)
+	at jdk.proxy2/jdk.proxy2.$Proxy95.insert(Unknown Source)
+	at org.mybatis.spring.SqlSessionTemplate.insert(SqlSessionTemplate.java:272)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:59)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:152)
+	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:89)
+	at jdk.proxy2/jdk.proxy2.$Proxy100.insert(Unknown Source)
+	at com.baomidou.mybatisplus.extension.service.IService.save(IService.java:60)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:343)
+	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:699)
+	at com.cyan.modules.workflow.service.impl.WorkflowDefinitionServiceImpl$$SpringCGLIB$$0.save(<generated>)
+	at com.cyan.modules.workflow.controller.WorkflowDefinitionController.add(WorkflowDefinitionController.java:70)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:884)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:797)
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1081)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:974)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
+	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340)
+	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128)
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at com.cyan.security.filter.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:76)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323)
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224)
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:340)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: java.sql.SQLException: (conn=194) Field 'process_key' doesn't have a default value
+	at org.mariadb.jdbc.export.ExceptionFactory.createException(ExceptionFactory.java:299)
+	at org.mariadb.jdbc.export.ExceptionFactory.create(ExceptionFactory.java:370)
+	at org.mariadb.jdbc.message.ClientMessage.readPacket(ClientMessage.java:134)
+	at org.mariadb.jdbc.client.impl.StandardClient.readPacket(StandardClient.java:872)
+	at org.mariadb.jdbc.client.impl.StandardClient.readResults(StandardClient.java:811)
+	at org.mariadb.jdbc.client.impl.StandardClient.readResponse(StandardClient.java:730)
+	at org.mariadb.jdbc.client.impl.StandardClient.execute(StandardClient.java:654)
+	at org.mariadb.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:95)
+	at org.mariadb.jdbc.ClientPreparedStatement.execute(ClientPreparedStatement.java:268)
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.execute(ProxyPreparedStatement.java:44)
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.execute(HikariProxyPreparedStatement.java)
+	at jdk.internal.reflect.GeneratedMethodAccessor44.invoke(Unknown Source)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.apache.ibatis.logging.jdbc.PreparedStatementLogger.invoke(PreparedStatementLogger.java:58)
+	at jdk.proxy3/jdk.proxy3.$Proxy167.execute(Unknown Source)
+	at org.apache.ibatis.executor.statement.PreparedStatementHandler.update(PreparedStatementHandler.java:48)
+	at org.apache.ibatis.executor.statement.RoutingStatementHandler.update(RoutingStatementHandler.java:75)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:61)
+	at jdk.proxy2/jdk.proxy2.$Proxy165.update(Unknown Source)
+	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:50)
+	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117)
+	at org.apache.ibatis.executor.CachingExecutor.update(CachingExecutor.java:76)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.apache.ibatis.plugin.Invocation.proceed(Invocation.java:49)
+	at com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor.intercept(MybatisPlusInterceptor.java:106)
+	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:59)
+	at jdk.proxy2/jdk.proxy2.$Proxy164.update(Unknown Source)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:197)
+	at org.apache.ibatis.session.defaults.DefaultSqlSession.insert(DefaultSqlSession.java:184)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:425)
+	... 150 common frames omitted
+2026-05-31 15:18:42.375 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:344ms
+2026-05-31 15:27:14.976 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 15:27:39.758 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/form/definition/list | 状态:200 | 耗时:196ms
+2026-05-31 15:27:42.354 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:185ms
+2026-05-31 15:28:00.011 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:112ms
+2026-05-31 15:28:00.065 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:39ms
+2026-05-31 15:28:11.062 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/form/definition/list | 状态:200 | 耗时:193ms
+2026-05-31 15:28:16.527 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:186ms
+2026-05-31 15:28:25.562 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:204ms
+2026-05-31 15:28:28.861 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:136ms
+2026-05-31 15:28:35.581 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:187ms
+2026-05-31 15:29:56.126 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:188ms
+2026-05-31 15:57:09.792 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:193ms
+2026-05-31 15:59:41.593 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-31 15:59:41.674 [main] INFO  com.cyan.CyanBaseApplication - Starting CyanBaseApplication v1.0.0 using Java 17.0.19 with PID 982265 (/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar started by xjgh2025XZD in /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend)
+2026-05-31 15:59:41.677 [main] DEBUG com.cyan.CyanBaseApplication - Running with Spring Boot v3.1.6, Spring v6.0.14
+2026-05-31 15:59:41.681 [main] INFO  com.cyan.CyanBaseApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-31 15:59:45.433 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8090"]
+2026-05-31 15:59:45.437 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-31 15:59:45.437 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-05-31 15:59:45.568 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-05-31 15:59:46.060 [main] DEBUG com.cyan.security.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-05-31 15:59:49.949 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: a77dd17a-7271-4428-90e4-f610df16e498
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-05-31 15:59:51.533 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8090"]
+2026-05-31 15:59:51.609 [main] INFO  com.cyan.CyanBaseApplication - Started CyanBaseApplication in 10.95 seconds (process running for 11.649)
+2026-05-31 16:00:39.483 [http-nio-8090-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-31 16:00:39.667 [http-nio-8090-exec-1] WARN  o.s.web.servlet.handler.HandlerMappingIntrospector - Cache miss for REQUEST dispatch to '/workflow/definition/list' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-05-31 16:00:40.829 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:1125ms
+2026-05-31 16:01:04.299 [http-nio-8090-exec-2] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 16:01:04.493 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:203ms
+2026-05-31 16:27:47.640 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-31 16:27:47.713 [main] INFO  com.cyan.CyanBaseApplication - Starting CyanBaseApplication v1.0.0 using Java 17.0.19 with PID 989591 (/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar started by xjgh2025XZD in /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend)
+2026-05-31 16:27:47.714 [main] DEBUG com.cyan.CyanBaseApplication - Running with Spring Boot v3.1.6, Spring v6.0.14
+2026-05-31 16:27:47.716 [main] INFO  com.cyan.CyanBaseApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-31 16:27:51.431 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8090"]
+2026-05-31 16:27:51.436 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-31 16:27:51.437 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-05-31 16:27:51.556 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-05-31 16:27:52.029 [main] DEBUG com.cyan.security.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-05-31 16:27:55.659 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: 5ade057f-5b6d-445b-8a60-863686bd0d79
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-05-31 16:27:57.256 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8090"]
+2026-05-31 16:27:57.323 [main] INFO  com.cyan.CyanBaseApplication - Started CyanBaseApplication in 10.587 seconds (process running for 11.267)
+2026-05-31 16:37:14.118 [http-nio-8090-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-31 16:37:14.194 [http-nio-8090-exec-1] WARN  o.s.web.servlet.handler.HandlerMappingIntrospector - Cache miss for REQUEST dispatch to '/workflow/designer' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-05-31 16:37:14.361 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:111ms
+2026-05-31 16:37:14.465 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:78ms
+2026-05-31 16:37:23.440 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:1085ms
+2026-05-31 16:37:23.443 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:1090ms
+2026-05-31 16:37:23.467 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:1120ms
+2026-05-31 16:37:26.633 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:230ms
+2026-05-31 16:37:49.531 [http-nio-8090-exec-5] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 16:37:49.736 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:204ms
+2026-05-31 16:38:23.218 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:106ms
+2026-05-31 16:38:23.229 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 16:38:27.688 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:2ms
+2026-05-31 16:38:27.702 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:4ms
+2026-05-31 16:38:33.625 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:182ms
+2026-05-31 16:38:33.634 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:189ms
+2026-05-31 16:38:33.648 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:204ms
+2026-05-31 16:39:02.174 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:205ms
+2026-05-31 16:39:18.883 [http-nio-8090-exec-4] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 16:39:19.063 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:123ms
+2026-05-31 16:42:42.852 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:108ms
+2026-05-31 16:42:42.861 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 16:43:04.365 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:187ms
+2026-05-31 16:43:04.371 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:198ms
+2026-05-31 16:43:04.377 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:203ms
+2026-05-31 16:43:08.481 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/form/definition/list | 状态:200 | 耗时:207ms
+2026-05-31 16:43:30.133 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 16:43:56.466 [http-nio-8090-exec-10] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 16:43:56.652 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:129ms
+2026-05-31 16:50:12.899 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:116ms
+2026-05-31 16:50:12.909 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 16:50:29.284 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:105ms
+2026-05-31 16:50:29.293 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 16:50:36.102 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:173ms
+2026-05-31 16:50:36.106 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:177ms
+2026-05-31 16:50:36.114 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:184ms
+2026-05-31 16:50:39.632 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:204ms
+2026-05-31 16:51:04.291 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:200ms
+2026-05-31 16:51:36.278 [http-nio-8090-exec-7] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 16:51:36.449 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:115ms
+2026-05-31 16:52:33.021 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:189ms
+2026-05-31 16:52:54.480 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:195ms
+2026-05-31 16:53:33.956 [http-nio-8090-exec-9] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 16:53:34.139 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:125ms
+2026-05-31 16:56:14.739 [http-nio-8090-exec-2] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 16:56:14.915 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:120ms
+2026-05-31 17:01:34.422 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:199ms
+2026-05-31 17:01:49.369 [http-nio-8090-exec-3] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:01:49.543 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:120ms
+2026-05-31 17:02:16.214 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:188ms
+2026-05-31 17:02:29.360 [http-nio-8090-exec-5] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:02:29.545 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:127ms
+2026-05-31 17:03:26.648 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:195ms
+2026-05-31 17:03:28.266 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 17:03:30.350 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:191ms
+2026-05-31 17:03:40.981 [http-nio-8090-exec-10] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:03:41.162 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:122ms
+2026-05-31 17:04:47.895 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:198ms
+2026-05-31 17:04:49.834 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:191ms
+2026-05-31 17:05:00.940 [http-nio-8090-exec-4] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:05:01.116 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:122ms
+2026-05-31 17:05:02.026 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/13 | 状态:200 | 耗时:122ms
+2026-05-31 17:07:49.883 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/13 | 状态:200 | 耗时:121ms
+2026-05-31 17:09:26.188 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:130ms
+2026-05-31 17:09:26.197 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 17:11:58.104 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:183ms
+2026-05-31 17:11:58.105 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:184ms
+2026-05-31 17:11:58.112 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:191ms
+2026-05-31 17:12:06.456 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 17:12:20.539 [http-nio-8090-exec-9] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:12:20.718 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:122ms
+2026-05-31 17:12:21.579 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:118ms
+2026-05-31 17:14:10.092 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:103ms
+2026-05-31 17:14:10.101 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 17:14:17.086 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:177ms
+2026-05-31 17:14:17.091 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:180ms
+2026-05-31 17:14:17.094 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:184ms
+2026-05-31 17:14:20.379 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:188ms
+2026-05-31 17:14:36.608 [http-nio-8090-exec-7] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:14:36.783 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:120ms
+2026-05-31 17:18:18.736 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:104ms
+2026-05-31 17:18:18.744 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 17:18:24.538 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:179ms
+2026-05-31 17:18:24.538 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:182ms
+2026-05-31 17:18:24.547 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:185ms
+2026-05-31 17:18:26.927 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:199ms
+2026-05-31 17:18:40.363 [http-nio-8090-exec-8] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:18:40.543 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:123ms
+2026-05-31 17:20:30.024 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:131ms
+2026-05-31 17:20:30.042 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:5ms
+2026-05-31 17:21:24.810 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:184ms
+2026-05-31 17:21:24.829 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:204ms
+2026-05-31 17:21:24.830 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:206ms
+2026-05-31 17:21:27.697 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:188ms
+2026-05-31 17:21:36.751 [http-nio-8090-exec-2] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:21:36.926 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:119ms
+2026-05-31 17:21:37.837 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:117ms
+2026-05-31 17:23:29.166 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:139ms
+2026-05-31 17:23:29.174 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 17:23:53.718 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:183ms
+2026-05-31 17:23:53.717 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:182ms
+2026-05-31 17:23:53.718 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:184ms
+2026-05-31 17:23:57.206 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:190ms
+2026-05-31 17:24:06.979 [http-nio-8090-exec-6] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 17:24:07.155 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:119ms
+2026-05-31 17:24:08.029 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:118ms
+2026-05-31 17:26:59.785 [http-nio-8090-exec-1] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 17:26:59.965 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:135ms
+2026-05-31 17:27:25.192 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:190ms
+2026-05-31 17:27:38.746 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:120ms
+2026-05-31 17:27:41.656 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 17:27:54.032 [http-nio-8090-exec-4] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 17:27:54.212 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:129ms
+2026-05-31 17:27:54.654 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:186ms
+2026-05-31 17:27:57.041 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:116ms
+2026-05-31 17:27:58.561 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:186ms
+2026-05-31 17:30:23.455 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:187ms
+2026-05-31 17:30:32.866 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:192ms
+2026-05-31 17:32:24.631 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 17:32:26.553 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 17:32:32.239 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:121ms
+2026-05-31 17:32:39.813 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 17:32:42.146 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:118ms
+2026-05-31 17:37:14.716 [http-nio-8090-exec-5] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 17:37:14.890 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:121ms
+2026-05-31 17:37:22.978 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:185ms
+2026-05-31 17:37:46.460 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:115ms
+2026-05-31 17:37:48.428 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 17:37:51.147 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:118ms
+2026-05-31 17:37:52.645 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 17:37:54.234 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:118ms
+2026-05-31 17:37:55.760 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 17:37:57.232 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:117ms
+2026-05-31 17:37:58.732 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:193ms
+2026-05-31 17:38:04.544 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 17:38:08.008 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 17:38:10.408 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 17:38:13.471 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 17:42:00.912 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:119ms
+2026-05-31 17:42:06.089 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 17:42:42.211 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:119ms
+2026-05-31 17:42:45.077 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 17:42:59.546 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:205ms
+2026-05-31 17:43:02.051 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 17:43:07.368 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 17:43:21.089 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 17:43:23.358 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 17:43:25.754 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:192ms
+2026-05-31 17:43:30.405 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 17:43:30.406 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:185ms
+2026-05-31 17:44:11.212 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:199ms
+2026-05-31 17:58:10.896 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:192ms
+2026-05-31 17:59:53.548 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:185ms
+2026-05-31 17:59:59.047 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:119ms
+2026-05-31 17:59:59.253 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:64ms
+2026-05-31 18:00:12.536 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 18:00:15.204 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:117ms
+2026-05-31 18:00:15.501 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:62ms
+2026-05-31 18:00:17.838 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 18:00:20.836 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:118ms
+2026-05-31 18:00:21.186 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:117ms
+2026-05-31 18:00:22.845 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 18:00:35.633 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:115ms
+2026-05-31 18:00:35.930 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:60ms
+2026-05-31 18:00:37.311 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 18:00:43.547 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:115ms
+2026-05-31 18:00:43.849 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:64ms
+2026-05-31 18:00:49.237 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:00:54.697 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:118ms
+2026-05-31 18:00:55.046 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:117ms
+2026-05-31 18:00:59.459 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 18:01:01.914 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:115ms
+2026-05-31 18:01:02.202 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:62ms
+2026-05-31 18:01:06.120 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:01:30.592 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:116ms
+2026-05-31 18:01:30.887 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:66ms
+2026-05-31 18:01:49.862 [http-nio-8090-exec-7] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 18:01:50.032 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:117ms
+2026-05-31 18:01:52.019 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:172ms
+2026-05-31 18:01:54.228 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:117ms
+2026-05-31 18:01:54.577 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:116ms
+2026-05-31 18:01:55.688 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:01:56.894 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:112ms
+2026-05-31 18:01:57.183 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:62ms
+2026-05-31 18:02:00.834 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:03:56.386 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:185ms
+2026-05-31 18:03:58.743 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 18:04:02.623 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:05:16.770 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:110ms
+2026-05-31 18:05:17.056 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:62ms
+2026-05-31 18:06:51.823 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:108ms
+2026-05-31 18:06:52.114 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:59ms
+2026-05-31 18:06:56.242 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:126ms
+2026-05-31 18:06:56.257 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:11ms
+2026-05-31 18:07:02.571 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:176ms
+2026-05-31 18:07:02.572 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:177ms
+2026-05-31 18:07:02.578 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:183ms
+2026-05-31 18:07:05.432 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:07:08.276 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 18:07:08.452 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:60ms
+2026-05-31 18:07:13.716 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 18:07:15.432 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:117ms
+2026-05-31 18:07:15.725 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:61ms
+2026-05-31 18:07:17.263 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 18:07:27.194 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 18:07:27.489 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:61ms
+2026-05-31 18:07:36.088 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:07:54.683 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:118ms
+2026-05-31 18:07:54.984 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:63ms
+2026-05-31 18:08:14.841 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:08:22.950 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:116ms
+2026-05-31 18:08:23.245 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:62ms
+2026-05-31 18:13:10.761 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:102ms
+2026-05-31 18:13:10.768 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 18:13:24.392 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:178ms
+2026-05-31 18:13:24.392 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:178ms
+2026-05-31 18:13:24.393 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:179ms
+2026-05-31 18:13:28.139 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 18:15:20.894 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:15:42.441 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:115ms
+2026-05-31 18:15:52.876 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:104ms
+2026-05-31 18:15:52.883 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:3ms
+2026-05-31 18:16:06.328 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:177ms
+2026-05-31 18:16:06.328 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:176ms
+2026-05-31 18:16:06.335 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:182ms
+2026-05-31 18:16:09.850 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:16:18.378 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 18:16:24.279 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 18:16:26.485 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 18:16:33.839 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 18:16:37.437 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:114ms
+2026-05-31 18:16:39.964 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 18:16:42.353 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:113ms
+2026-05-31 18:16:58.464 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:17:01.446 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:112ms
+2026-05-31 18:17:19.649 [http-nio-8090-exec-4] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 18:17:19.819 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:117ms
+2026-05-31 18:17:22.079 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:170ms
+2026-05-31 18:17:24.205 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:113ms
+2026-05-31 18:17:26.902 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 18:17:30.310 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:116ms
+2026-05-31 18:17:37.894 [http-nio-8090-exec-7] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 18:17:38.063 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:116ms
+2026-05-31 18:17:40.309 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:17:42.227 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:114ms
+2026-05-31 18:17:45.681 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:177ms
+2026-05-31 18:17:45.682 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:178ms
+2026-05-31 18:17:45.685 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:181ms
+2026-05-31 18:17:49.833 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:17:55.600 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:114ms
+2026-05-31 18:18:03.435 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 18:18:05.560 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 18:18:10.438 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:18:21.296 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/13 | 状态:200 | 耗时:113ms
+2026-05-31 18:18:24.424 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:18:26.228 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:116ms
+2026-05-31 18:18:34.850 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:18:40.951 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:19:06.841 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:172ms
+2026-05-31 18:19:11.314 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:19:17.977 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:19:19.699 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:19:31.374 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:19:34.850 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 18:19:38.653 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:19:40.266 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:19:46.840 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:19:50.923 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:20:53.611 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:25:05.541 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:26:56.403 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:28:15.339 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:29:35.980 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:29:42.925 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:29:45.189 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:29:46.438 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:29:48.574 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:189ms
+2026-05-31 18:29:58.284 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 18:30:01.272 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:30:07.436 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:30:17.251 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:172ms
+2026-05-31 18:30:18.913 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:30:25.568 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 18:30:36.397 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:36:51.994 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:36:56.234 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:37:02.167 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:37:06.474 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:37:10.987 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:37:15.533 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:37:19.869 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 18:37:23.870 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:37:25.724 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:38:26.259 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/8 | 状态:200 | 耗时:118ms
+2026-05-31 18:38:31.688 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 18:38:35.353 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:116ms
+2026-05-31 18:38:40.029 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:38:41.664 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 18:38:44.345 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:42:25.954 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:42:30.728 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:42:33.864 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:42:42.844 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:42:44.462 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 18:42:46.502 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:42:48.631 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:42:54.012 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:42:55.910 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:112ms
+2026-05-31 18:42:57.913 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:43:00.346 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:115ms
+2026-05-31 18:43:07.625 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:43:10.048 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:112ms
+2026-05-31 18:43:13.077 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:43:15.061 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:112ms
+2026-05-31 18:43:20.147 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:43:21.650 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 18:43:23.845 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:43:25.249 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:115ms
+2026-05-31 18:43:27.226 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:169ms
+2026-05-31 18:43:28.745 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 18:43:29.965 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:43:31.441 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 18:43:38.295 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:46:33.268 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:46:37.427 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:110ms
+2026-05-31 18:46:38.891 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:46:41.146 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:46:42.716 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:46:44.686 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:113ms
+2026-05-31 18:46:46.451 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:46:47.927 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:112ms
+2026-05-31 18:46:49.180 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 18:46:50.440 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:111ms
+2026-05-31 18:46:58.476 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:47:00.078 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:47:06.767 [http-nio-8090-exec-4] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 18:47:06.936 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:118ms
+2026-05-31 18:47:08.849 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 18:47:10.509 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 18:47:12.022 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:47:14.402 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:112ms
+2026-05-31 18:47:18.477 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:47:32.747 [http-nio-8090-exec-8] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 18:47:32.916 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:115ms
+2026-05-31 18:47:33.230 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:61ms
+2026-05-31 18:53:07.711 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:114ms
+2026-05-31 18:54:40.966 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:115ms
+2026-05-31 18:54:40.973 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:4ms
+2026-05-31 18:54:47.464 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:165ms
+2026-05-31 18:54:47.469 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:162ms
+2026-05-31 18:54:47.471 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:165ms
+2026-05-31 18:54:51.425 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:54:54.849 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:112ms
+2026-05-31 18:54:57.331 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:169ms
+2026-05-31 18:54:58.911 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:112ms
+2026-05-31 18:55:00.698 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:55:04.278 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 18:55:06.080 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 18:55:08.054 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:142ms
+2026-05-31 18:55:09.872 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:55:13.034 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:114ms
+2026-05-31 18:55:19.666 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:55:22.054 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:55:28.270 [http-nio-8090-exec-9] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 18:55:28.439 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:115ms
+2026-05-31 18:55:30.089 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:55:33.784 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:111ms
+2026-05-31 18:55:34.933 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 18:55:36.246 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:55:37.655 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:172ms
+2026-05-31 18:55:40.562 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:113ms
+2026-05-31 18:55:44.468 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 18:55:46.406 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:114ms
+2026-05-31 18:55:48.216 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:55:49.366 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 18:55:52.612 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:172ms
+2026-05-31 18:55:54.166 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:112ms
+2026-05-31 18:55:56.257 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 18:55:59.341 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:114ms
+2026-05-31 18:56:03.582 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:56:24.239 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 18:56:25.674 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 18:57:38.544 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:113ms
+2026-05-31 18:57:48.292 [http-nio-8090-exec-10] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 18:57:48.459 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:115ms
+2026-05-31 18:57:51.911 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 18:57:53.845 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 18:57:55.702 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:57:57.469 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:107ms
+2026-05-31 18:58:01.637 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 18:58:03.465 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:114ms
+2026-05-31 18:58:06.570 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 18:58:59.651 [http-nio-8090-exec-2] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 18:58:59.819 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:115ms
+2026-05-31 18:59:00.178 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:111ms
+2026-05-31 19:01:09.523 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:111ms
+2026-05-31 19:01:37.653 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/designer | 状态:404 | 耗时:136ms
+2026-05-31 19:01:37.663 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/error | 状态:404 | 耗时:4ms
+2026-05-31 19:01:44.084 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:173ms
+2026-05-31 19:01:44.084 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:174ms
+2026-05-31 19:01:44.084 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:173ms
+2026-05-31 19:01:46.722 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 19:01:50.143 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:110ms
+2026-05-31 19:01:53.674 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 19:01:55.343 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:114ms
+2026-05-31 19:01:58.603 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 19:02:00.475 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:112ms
+2026-05-31 19:02:03.161 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 19:02:04.754 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:113ms
+2026-05-31 19:02:09.419 [http-nio-8090-exec-7] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 19:02:09.589 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:116ms
+2026-05-31 19:02:11.286 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 19:02:13.579 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:112ms
+2026-05-31 19:02:14.897 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:173ms
+2026-05-31 19:02:16.332 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/17 | 状态:200 | 耗时:114ms
+2026-05-31 19:02:17.952 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 19:02:20.654 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:111ms
+2026-05-31 19:02:21.504 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 19:02:23.502 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:113ms
+2026-05-31 19:02:25.384 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 19:07:32.609 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:171ms
+2026-05-31 19:07:36.479 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:115ms
+2026-05-31 19:07:37.673 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:174ms
+2026-05-31 19:07:39.443 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:116ms
+2026-05-31 19:07:43.908 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 19:07:47.005 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:114ms
+2026-05-31 19:07:49.778 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 19:07:53.406 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/19 | 状态:200 | 耗时:114ms
+2026-05-31 19:07:55.353 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 19:07:57.590 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 19:07:59.426 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 19:08:03.559 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:115ms
+2026-05-31 19:08:06.915 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 19:15:00.879 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/gen/list | 状态:200 | 耗时:138ms
+2026-05-31 19:15:06.919 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/file/list | 状态:200 | 耗时:128ms
+2026-05-31 19:15:15.275 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/gen/list | 状态:200 | 耗时:116ms
+2026-05-31 20:51:31.668 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:199ms
+2026-05-31 20:58:58.660 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/menu/list | 状态:200 | 耗时:197ms
+2026-05-31 20:59:06.605 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 20:59:08.716 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:116ms
+2026-05-31 20:59:11.073 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:180ms
+2026-05-31 20:59:12.841 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:114ms
+2026-05-31 21:01:26.196 [http-nio-8090-exec-3] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 21:01:26.373 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:126ms
+2026-05-31 21:01:29.079 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:184ms
+2026-05-31 21:01:30.989 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/18 | 状态:200 | 耗时:152ms
+2026-05-31 21:01:34.097 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 21:01:50.066 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:115ms
+2026-05-31 21:01:52.831 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 21:12:23.300 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:111ms
+2026-05-31 21:12:26.298 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:185ms
+2026-05-31 21:16:08.954 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 21:16:14.441 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/20 | 状态:200 | 耗时:113ms
+2026-05-31 21:16:21.009 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 21:16:29.322 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:113ms
+2026-05-31 21:16:46.073 [http-nio-8090-exec-1] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 21:16:46.242 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:116ms
+2026-05-31 21:16:48.101 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:177ms
+2026-05-31 21:16:52.439 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:114ms
+2026-05-31 21:16:55.000 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 21:17:02.572 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:112ms
+2026-05-31 21:17:07.829 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:175ms
+2026-05-31 21:17:14.029 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/15 | 状态:200 | 耗时:112ms
+2026-05-31 21:17:27.968 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:181ms
+2026-05-31 21:17:31.715 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/16 | 状态:200 | 耗时:116ms
+2026-05-31 21:17:36.843 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 21:17:41.259 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:114ms
+2026-05-31 21:17:57.219 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:183ms
+2026-05-31 21:18:03.304 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:111ms
+2026-05-31 21:18:20.210 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 21:18:23.859 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:112ms
+2026-05-31 21:18:27.768 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:182ms
+2026-05-31 21:18:34.446 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:115ms
+2026-05-31 21:18:43.576 [http-nio-8090-exec-6] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 21:18:43.743 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:115ms
+2026-05-31 21:18:45.571 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 21:18:48.919 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:113ms
+2026-05-31 21:18:57.022 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:179ms
+2026-05-31 21:19:00.137 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/14 | 状态:200 | 耗时:112ms
+2026-05-31 21:19:23.178 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:178ms
+2026-05-31 21:19:34.507 [http-nio-8090-exec-10] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始插入填充...
+2026-05-31 21:19:34.675 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/workflow/definition | 状态:200 | 耗时:114ms
+2026-05-31 21:19:35.009 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/21 | 状态:200 | 耗时:58ms
+2026-05-31 21:22:46.037 [http-nio-8090-exec-8] DEBUG c.c.common.mybatisplus.config.MyMetaObjectHandler - 开始更新填充...
+2026-05-31 21:22:46.212 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/workflow/definition | 状态:200 | 耗时:124ms
+2026-05-31 21:22:50.504 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:234ms
+2026-05-31 21:22:53.193 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/21 | 状态:200 | 耗时:109ms
+2026-05-31 21:23:05.248 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:235ms
+2026-05-31 21:23:06.624 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/21 | 状态:200 | 耗时:116ms
+2026-05-31 21:23:15.019 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:235ms
+2026-05-31 21:23:19.110 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:176ms
+2026-05-31 21:23:20.927 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/workflow/definition/list | 状态:200 | 耗时:236ms
+2026-05-31 21:23:39.671 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/form/definition/list | 状态:200 | 耗时:193ms
+2026-05-31 21:23:50.726 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/form/definition/42 | 状态:200 | 耗时:120ms
+2026-05-31 21:24:23.988 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:179ms
+2026-05-31 21:29:31.995 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:177ms
+2026-05-31 21:29:57.331 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:172ms
+2026-05-31 21:31:03.251 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/system/dept | 状态:200 | 耗时:136ms
+2026-05-31 21:31:03.608 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:120ms
+2026-05-31 22:15:14.693 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:176ms
+2026-05-31 22:16:38.845 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:165ms
+2026-05-31 22:33:59.313 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:181ms
+2026-05-31 22:34:04.328 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:175ms
+2026-05-31 22:34:34.830 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/dept | 状态:200 | 耗时:125ms
+2026-05-31 22:34:35.198 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:122ms
+2026-05-31 22:34:47.944 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/dept | 状态:200 | 耗时:116ms
+2026-05-31 22:34:48.369 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:122ms
+2026-05-31 22:34:57.743 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/dept | 状态:200 | 耗时:113ms
+2026-05-31 22:34:58.099 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:122ms
+2026-05-31 22:35:48.525 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/system/dept | 状态:200 | 耗时:112ms
+2026-05-31 22:35:48.870 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:114ms
+2026-05-31 22:36:28.907 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/dept | 状态:200 | 耗时:108ms
+2026-05-31 22:36:29.272 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:120ms
+2026-05-31 22:36:37.732 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/dept | 状态:200 | 耗时:111ms
+2026-05-31 22:36:38.090 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:123ms
+2026-05-31 22:39:15.593 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:DELETE | URI:/system/dept/7 | 状态:200 | 耗时:116ms
+2026-05-31 22:39:15.947 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:118ms
+2026-05-31 22:51:40.559 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-31 22:51:40.747 [main] INFO  com.cyan.CyanBaseApplication - Starting CyanBaseApplication v1.0.0 using Java 17.0.19 with PID 1088126 (/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar started by xjgh2025XZD in /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend)
+2026-05-31 22:51:40.748 [main] DEBUG com.cyan.CyanBaseApplication - Running with Spring Boot v3.1.6, Spring v6.0.14
+2026-05-31 22:51:40.750 [main] INFO  com.cyan.CyanBaseApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-31 22:51:44.364 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8090"]
+2026-05-31 22:51:44.369 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-31 22:51:44.370 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-05-31 22:51:44.501 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-05-31 22:51:45.010 [main] DEBUG com.cyan.security.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-05-31 22:51:47.592 [main] ERROR org.mybatis.spring.mapper.MapperFactoryBean - Error while adding the mapper 'interface com.cyan.mapper.SysDeptMapper' to configuration.
+com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at com.baomidou.mybatisplus.core.toolkit.ExceptionUtils.mpe(ExceptionUtils.java:49)
+	at com.baomidou.mybatisplus.core.toolkit.Assert.isTrue(Assert.java:38)
+	at com.baomidou.mybatisplus.core.metadata.TableInfo.setFieldList(TableInfo.java:516)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableFields(TableInfoHelper.java:372)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:198)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:174)
+	at com.baomidou.mybatisplus.core.injector.AbstractSqlInjector.inspectInject(AbstractSqlInjector.java:48)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parserInjector(MybatisMapperAnnotationBuilder.java:130)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parse(MybatisMapperAnnotationBuilder.java:120)
+	at com.baomidou.mybatisplus.core.MybatisMapperRegistry.addMapper(MybatisMapperRegistry.java:90)
+	at com.baomidou.mybatisplus.core.MybatisConfiguration.addMapper(MybatisConfiguration.java:129)
+	at org.mybatis.spring.mapper.MapperFactoryBean.checkDaoConfig(MapperFactoryBean.java:80)
+	at org.springframework.dao.support.DaoSupport.afterPropertiesSet(DaoSupport.java:44)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1817)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1766)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:598)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:768)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:751)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:492)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1416)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:597)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.cyan.CyanBaseApplication.main(CyanBaseApplication.java:11)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:49)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:95)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:58)
+	at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:65)
+2026-05-31 22:51:47.600 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'sysDeptServiceImpl': Unsatisfied dependency expressed through field 'baseMapper': Error creating bean with name 'sysDeptMapper' defined in URL [jar:file:/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar!/BOOT-INF/classes!/com/cyan/mapper/SysDeptMapper.class]: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+2026-05-31 22:51:47.639 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
+2026-05-31 22:51:47.690 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'sysDeptServiceImpl': Unsatisfied dependency expressed through field 'baseMapper': Error creating bean with name 'sysDeptMapper' defined in URL [jar:file:/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar!/BOOT-INF/classes!/com/cyan/mapper/SysDeptMapper.class]: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:771)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:751)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:492)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1416)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:597)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.cyan.CyanBaseApplication.main(CyanBaseApplication.java:11)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:49)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:95)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:58)
+	at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:65)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'sysDeptMapper' defined in URL [jar:file:/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar!/BOOT-INF/classes!/com/cyan/mapper/SysDeptMapper.class]: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1770)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:598)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:768)
+	... 28 common frames omitted
+Caused by: java.lang.IllegalArgumentException: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at org.mybatis.spring.mapper.MapperFactoryBean.checkDaoConfig(MapperFactoryBean.java:83)
+	at org.springframework.dao.support.DaoSupport.afterPropertiesSet(DaoSupport.java:44)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1817)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1766)
+	... 38 common frames omitted
+Caused by: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at com.baomidou.mybatisplus.core.toolkit.ExceptionUtils.mpe(ExceptionUtils.java:49)
+	at com.baomidou.mybatisplus.core.toolkit.Assert.isTrue(Assert.java:38)
+	at com.baomidou.mybatisplus.core.metadata.TableInfo.setFieldList(TableInfo.java:516)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableFields(TableInfoHelper.java:372)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:198)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:174)
+	at com.baomidou.mybatisplus.core.injector.AbstractSqlInjector.inspectInject(AbstractSqlInjector.java:48)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parserInjector(MybatisMapperAnnotationBuilder.java:130)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parse(MybatisMapperAnnotationBuilder.java:120)
+	at com.baomidou.mybatisplus.core.MybatisMapperRegistry.addMapper(MybatisMapperRegistry.java:90)
+	at com.baomidou.mybatisplus.core.MybatisConfiguration.addMapper(MybatisConfiguration.java:129)
+	at org.mybatis.spring.mapper.MapperFactoryBean.checkDaoConfig(MapperFactoryBean.java:80)
+	... 41 common frames omitted
+2026-05-31 22:55:18.360 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-31 22:55:18.419 [main] INFO  com.cyan.CyanBaseApplication - Starting CyanBaseApplication v1.0.0 using Java 17.0.19 with PID 1089191 (/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar started by xjgh2025XZD in /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend)
+2026-05-31 22:55:18.421 [main] DEBUG com.cyan.CyanBaseApplication - Running with Spring Boot v3.1.6, Spring v6.0.14
+2026-05-31 22:55:18.422 [main] INFO  com.cyan.CyanBaseApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-31 22:55:22.177 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8090"]
+2026-05-31 22:55:22.182 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-31 22:55:22.182 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-05-31 22:55:22.302 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-05-31 22:55:22.749 [main] DEBUG com.cyan.security.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-05-31 22:55:25.527 [main] ERROR org.mybatis.spring.mapper.MapperFactoryBean - Error while adding the mapper 'interface com.cyan.mapper.SysDeptMapper' to configuration.
+com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at com.baomidou.mybatisplus.core.toolkit.ExceptionUtils.mpe(ExceptionUtils.java:49)
+	at com.baomidou.mybatisplus.core.toolkit.Assert.isTrue(Assert.java:38)
+	at com.baomidou.mybatisplus.core.metadata.TableInfo.setFieldList(TableInfo.java:516)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableFields(TableInfoHelper.java:372)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:198)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:174)
+	at com.baomidou.mybatisplus.core.injector.AbstractSqlInjector.inspectInject(AbstractSqlInjector.java:48)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parserInjector(MybatisMapperAnnotationBuilder.java:130)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parse(MybatisMapperAnnotationBuilder.java:120)
+	at com.baomidou.mybatisplus.core.MybatisMapperRegistry.addMapper(MybatisMapperRegistry.java:90)
+	at com.baomidou.mybatisplus.core.MybatisConfiguration.addMapper(MybatisConfiguration.java:129)
+	at org.mybatis.spring.mapper.MapperFactoryBean.checkDaoConfig(MapperFactoryBean.java:80)
+	at org.springframework.dao.support.DaoSupport.afterPropertiesSet(DaoSupport.java:44)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1817)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1766)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:598)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:768)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:751)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:492)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1416)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:597)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.cyan.CyanBaseApplication.main(CyanBaseApplication.java:11)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:49)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:95)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:58)
+	at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:65)
+2026-05-31 22:55:25.535 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'sysDeptServiceImpl': Unsatisfied dependency expressed through field 'baseMapper': Error creating bean with name 'sysDeptMapper' defined in URL [jar:file:/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar!/BOOT-INF/classes!/com/cyan/mapper/SysDeptMapper.class]: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+2026-05-31 22:55:25.581 [main] INFO  org.apache.catalina.core.StandardService - Stopping service [Tomcat]
+2026-05-31 22:55:25.639 [main] ERROR org.springframework.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'sysDeptServiceImpl': Unsatisfied dependency expressed through field 'baseMapper': Error creating bean with name 'sysDeptMapper' defined in URL [jar:file:/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar!/BOOT-INF/classes!/com/cyan/mapper/SysDeptMapper.class]: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:771)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.inject(AutowiredAnnotationBeanPostProcessor.java:751)
+	at org.springframework.beans.factory.annotation.InjectionMetadata.inject(InjectionMetadata.java:145)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor.postProcessProperties(AutowiredAnnotationBeanPostProcessor.java:492)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.populateBean(AbstractAutowireCapableBeanFactory.java:1416)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:597)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:973)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:950)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:738)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:440)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:316)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1306)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1295)
+	at com.cyan.CyanBaseApplication.main(CyanBaseApplication.java:11)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
+	at org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:49)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:95)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:58)
+	at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:65)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'sysDeptMapper' defined in URL [jar:file:/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar!/BOOT-INF/classes!/com/cyan/mapper/SysDeptMapper.class]: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1770)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:598)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:520)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1417)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1337)
+	at org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor$AutowiredFieldElement.resolveFieldValue(AutowiredAnnotationBeanPostProcessor.java:768)
+	... 28 common frames omitted
+Caused by: java.lang.IllegalArgumentException: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at org.mybatis.spring.mapper.MapperFactoryBean.checkDaoConfig(MapperFactoryBean.java:83)
+	at org.springframework.dao.support.DaoSupport.afterPropertiesSet(DaoSupport.java:44)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1817)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1766)
+	... 38 common frames omitted
+Caused by: com.baomidou.mybatisplus.core.exceptions.MybatisPlusException: @TableLogic not support more than one in Class: "com.cyan.entity.SysDept"
+	at com.baomidou.mybatisplus.core.toolkit.ExceptionUtils.mpe(ExceptionUtils.java:49)
+	at com.baomidou.mybatisplus.core.toolkit.Assert.isTrue(Assert.java:38)
+	at com.baomidou.mybatisplus.core.metadata.TableInfo.setFieldList(TableInfo.java:516)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableFields(TableInfoHelper.java:372)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:198)
+	at com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(TableInfoHelper.java:174)
+	at com.baomidou.mybatisplus.core.injector.AbstractSqlInjector.inspectInject(AbstractSqlInjector.java:48)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parserInjector(MybatisMapperAnnotationBuilder.java:130)
+	at com.baomidou.mybatisplus.core.MybatisMapperAnnotationBuilder.parse(MybatisMapperAnnotationBuilder.java:120)
+	at com.baomidou.mybatisplus.core.MybatisMapperRegistry.addMapper(MybatisMapperRegistry.java:90)
+	at com.baomidou.mybatisplus.core.MybatisConfiguration.addMapper(MybatisConfiguration.java:129)
+	at org.mybatis.spring.mapper.MapperFactoryBean.checkDaoConfig(MapperFactoryBean.java:80)
+	... 41 common frames omitted
+2026-05-31 22:58:23.134 [background-preinit] INFO  org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 8.0.1.Final
+2026-05-31 22:58:23.199 [main] INFO  com.cyan.CyanBaseApplication - Starting CyanBaseApplication v1.0.0 using Java 17.0.19 with PID 1090132 (/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar started by xjgh2025XZD in /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend)
+2026-05-31 22:58:23.201 [main] DEBUG com.cyan.CyanBaseApplication - Running with Spring Boot v3.1.6, Spring v6.0.14
+2026-05-31 22:58:23.202 [main] INFO  com.cyan.CyanBaseApplication - No active profile set, falling back to 1 default profile: "default"
+2026-05-31 22:58:26.917 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Initializing ProtocolHandler ["http-nio-8090"]
+2026-05-31 22:58:26.920 [main] INFO  org.apache.catalina.core.StandardService - Starting service [Tomcat]
+2026-05-31 22:58:26.921 [main] INFO  org.apache.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-05-31 22:58:27.043 [main] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring embedded WebApplicationContext
+2026-05-31 22:58:27.474 [main] DEBUG com.cyan.security.filter.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-05-31 22:58:31.066 [main] WARN  o.s.b.a.s.s.UserDetailsServiceAutoConfiguration - 
+
+Using generated security password: a86efce5-2d4f-4a3a-8dc4-5a08feede1c6
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-05-31 22:58:32.485 [main] INFO  org.apache.coyote.http11.Http11NioProtocol - Starting ProtocolHandler ["http-nio-8090"]
+2026-05-31 22:58:32.623 [main] INFO  com.cyan.CyanBaseApplication - Started CyanBaseApplication in 10.352 seconds (process running for 11.016)
+2026-05-31 22:58:49.444 [http-nio-8090-exec-1] INFO  o.a.c.core.ContainerBase.[Tomcat].[localhost].[/] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-05-31 22:58:49.607 [http-nio-8090-exec-1] WARN  o.s.web.servlet.handler.HandlerMappingIntrospector - Cache miss for REQUEST dispatch to '/system/dept/list' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-05-31 22:58:50.692 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:1057ms
+2026-05-31 22:59:29.739 [http-nio-8090-exec-2] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/system/dept | 状态:200 | 耗时:186ms
+2026-05-31 22:59:30.146 [http-nio-8090-exec-3] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:144ms
+2026-05-31 22:59:53.034 [http-nio-8090-exec-5] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:DELETE | URI:/system/dept/6 | 状态:200 | 耗时:133ms
+2026-05-31 23:00:13.607 [http-nio-8090-exec-4] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:DELETE | URI:/system/dept/9 | 状态:200 | 耗时:183ms
+2026-05-31 23:00:14.072 [http-nio-8090-exec-6] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:141ms
+2026-05-31 23:00:17.807 [http-nio-8090-exec-7] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:DELETE | URI:/system/dept/6 | 状态:200 | 耗时:182ms
+2026-05-31 23:00:18.196 [http-nio-8090-exec-8] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:140ms
+2026-05-31 23:00:28.237 [http-nio-8090-exec-9] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/dept | 状态:200 | 耗时:141ms
+2026-05-31 23:00:28.638 [http-nio-8090-exec-10] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:150ms
+2026-05-31 23:08:06.259 [http-nio-8090-exec-1] INFO  c.c.common.log.interceptor.RequestLogInterceptor - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:213ms

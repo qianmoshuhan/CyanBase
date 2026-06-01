@@ -1,0 +1,95 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: cyanbase-backend
+  
+  datasource:
+    url: jdbc:mariadb://120.48.47.253:3306/cyan_base?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: petclinic
+    password: xJgh2021@xzd
+    driver-class-name: org.mariadb.jdbc.Driver
+  
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: 
+      database: 0
+      timeout: 3000ms
+      jedis:
+        pool:
+          max-active: 8
+          max-wait: -1ms
+          max-idle: 8
+          min-idle: 0
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: del_flag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# JWT配置
+jwt:
+  secret: cyanbase2026secretkey666888999abcdefghijklmnopqrstuvwxyz123456
+  expire: 3600000
+  tokenHeader: Authorization
+  tokenPrefix: Bearer
+
+# ==================== 阶段八新增配置 ====================
+
+# SpringDoc 接口文档配置
+springdoc:
+  enabled: true
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+# Actuator 监控配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+  health:
+    db:
+      enabled: true
+    redis:
+      enabled: true
+    diskspace:
+      enabled: true
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.cyan: DEBUG
+  file:
+    name: logs/cyanbase.log
+  logback:
+    rollingpolicy:
+      max-file-size: 100MB
+      max-history: 30
+      file-name-pattern: logs/cyanbase.%d{yyyy-MM-dd}.%i.log
+
+# 全局线程池配置
+thread-pool:
+  core-pool-size: 10
+  max-pool-size: 50
+  queue-capacity: 200
+  keep-alive-seconds: 60
+
+# 允许循环依赖（临时方案，后续优化）
+spring.main.allow-circular-references: true

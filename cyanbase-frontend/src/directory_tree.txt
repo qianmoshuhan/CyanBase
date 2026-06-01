@@ -1,0 +1,118 @@
+.
+├── api
+│   ├── apiMonitor.js
+│   ├── auth.js
+│   ├── common.js
+│   ├── config.js
+│   ├── dept.js
+│   ├── dictData.js
+│   ├── dictType.js
+│   ├── file.js
+│   ├── form.js
+│   ├── gen.js
+│   ├── job.js
+│   ├── jobLog.js
+│   ├── loginLog.js
+│   ├── menu.js
+│   ├── message.js
+│   ├── monitor.js
+│   ├── notice.js
+│   ├── online.js
+│   ├── operLog.js
+│   ├── post.js
+│   ├── role.js
+│   ├── storage.js
+│   ├── thirdConfig.js
+│   ├── user.js
+│   └── wfDefinition.js
+├── App.vue
+├── assets
+│   └── styles
+│       └── index.css
+├── components
+├── directory_tree.txt
+├── layout
+│   └── index.vue
+├── main.js
+├── router
+│   └── index.js
+├── store
+│   └── user.js
+├── utils
+│   ├── request.js
+│   └── storage.js
+└── views
+    ├── form
+    │   ├── dataList
+    │   │   └── index.vue
+    │   └── submit
+    ├── home
+    │   └── index.vue
+    ├── login
+    │   └── index.vue
+    ├── message
+    │   └── myMessage
+    │       └── index.vue
+    ├── monitor
+    │   ├── job
+    │   │   └── index.vue
+    │   ├── jobLog
+    │   │   └── index.vue
+    │   ├── log
+    │   │   └── index.vue
+    │   ├── loginLog
+    │   │   └── index.vue
+    │   ├── online
+    │   │   └── index.vue
+    │   ├── operLog
+    │   │   └── index.vue
+    │   └── server
+    │       └── index.vue
+    ├── security
+    │   ├── rateLimit
+    │   │   └── index.vue
+    │   └── xss
+    │       └── index.vue
+    ├── system
+    │   ├── config
+    │   │   └── index.vue
+    │   ├── dept
+    │   │   └── index.vue
+    │   ├── dict
+    │   │   ├── data
+    │   │   │   └── index.vue
+    │   │   └── type
+    │   │       └── index.vue
+    │   ├── file
+    │   │   └── index.vue
+    │   ├── gen
+    │   │   └── index.vue
+    │   ├── menu
+    │   │   └── index.vue
+    │   ├── message
+    │   │   └── index.vue
+    │   ├── notice
+    │   │   └── index.vue
+    │   ├── post
+    │   │   └── index.vue
+    │   ├── role
+    │   │   └── index.vue
+    │   ├── sysForm
+    │   │   └── index.vue
+    │   ├── thirdConfig
+    │   │   └── index.vue
+    │   ├── user
+    │   │   └── index.vue
+    │   └── wfDefinition
+    │       └── index.vue
+    └── workflow
+        ├── approve
+        │   └── index.vue
+        ├── done
+        │   └── index.vue
+        ├── start
+        │   └── index.vue
+        └── todo
+            └── index.vue
+
+49 directories, 66 files
