@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @TableName("sys_user")
@@ -75,4 +76,8 @@ public class SysUser implements Serializable {
 
     /** 备注 */
     private String remark;
+
+    /** 前端传入选中角色id集合，非数据库字段 */
+    @TableField(exist = false)
+    private List<Long> roleIds;
 }

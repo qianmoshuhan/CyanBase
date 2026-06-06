@@ -19,3 +19,15 @@ export function updateConfig(data) {
 export function deleteConfig(id) {
   return request({ url: `/system/config/${id}`, method: 'delete' })
 }
+
+export function getConfigByKey(key){
+  return request({url:`/system/config/key/${key}`,method:'get'})
+}
+
+// 新增：获取用户菜单接口
+export function getUserMenu() {
+  return request({ 
+    url: `/system/menu/getUserMenu`, 
+    method: 'get'
+  })
+}

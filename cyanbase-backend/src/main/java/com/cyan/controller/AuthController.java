@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -23,36 +24,38 @@ public class AuthController {
     /**
      * 用户登录
      */
-    @PostMapping("/login")
-    public R<?> login(@RequestBody SysUserLoginRequest loginRequest) {
-        // 查询用户
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysUser::getUserName, loginRequest.getUserName());
-        SysUser sysUser = sysUserService.getOne(wrapper);
-
-        if (sysUser == null) {
-            return R.fail("账号不存在");
-        }
-
-        // 账号禁用
-        if (sysUser.getStatus() == 1) {
-            return R.fail("账号已被禁用");
-        }
-
-        // 密码校验 - 简单字符串比对（测试用）
-        if (!sysUser.getPassword().equals(loginRequest.getPassword())) {
-            return R.fail("密码错误");
-        }
-
-        // 生成令牌（这里简化处理，角色为空）
-        String token = jwtUtil.generateToken(sysUser.getId(), sysUser.getUserName(), "admin");
-
-        // 返回用户信息和令牌
-        LoginUser loginUser = new LoginUser(sysUser, "admin");
-        loginUser.setRoles("admin");
-
-        return R.ok(new LoginResponse(token, loginUser));
+@PostMapping("/login")
+public R<?> login(@RequestBody SysUserLoginRequest loginRequest) {
+    // 查询用户
+    LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+    wrapper.eq(SysUser::getUserName, loginRequest.getUserName());
+    SysUser sysUser = sysUserService.getOne(wrapper);
+    if (sysUser == null) {
+        return R.fail("账号不存在");
     }
+    // 账号禁用判断
+    if (sysUser.getStatus() == 1) {
+        return R.fail("账号已被禁用");
+    }
+    // 密码校验
+    if (!sysUser.getPassword().equals(loginRequest.getPassword())) {
+        return R.fail("密码错误");
+    }
+
+    // ========== 核心修复：获取用户真实角色（无任何语法错误） ==========
+    List<Long> roleIdList = sysUserService.getRoleIdsByUserId(sysUser.getId());
+    String roleStr = "";
+    if (roleIdList != null && !roleIdList.isEmpty()) {
+        roleStr = String.join(",", roleIdList.stream().map(String::valueOf).toList());
+    }
+
+    // 生成 Token（动态角色，不再写死 admin）
+    String token = jwtUtil.generateToken(sysUser.getId(), sysUser.getUserName(), roleStr);
+    LoginUser loginUser = new LoginUser(sysUser, roleStr);
+    loginUser.setRoles(roleStr);
+
+    return R.ok(new LoginResponse(token, loginUser));
+}
 
     /**
      * 获取当前登录用户信息

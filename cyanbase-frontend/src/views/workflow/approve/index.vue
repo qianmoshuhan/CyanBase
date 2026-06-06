@@ -81,7 +81,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox, useRoute, useRouter } from 'element-plus'
 // 导入工作流API（已完成）
-import { getProcessInstanceDetail, approveWorkflow } from '@/api/wfDefinition'
+import {  approveWorkflow } from '@/api/wfDefinition'
 
 // 路由和导航
 const route = useRoute()
@@ -105,31 +105,7 @@ const approveRules = {
   remark: [{ required: true, message: '请输入审批意见', trigger: 'blur' }]
 }
 
-// 获取流程详情
-const getProcessDetail = async () => {
-  const processInstanceId = route.query.processInstanceId
-  if (!processInstanceId) {
-    ElMessage.error('缺少流程实例ID')
-    router.push('/workflow/todo')
-    return
-  }
-  
-  try {
-    const res = await getProcessInstanceDetail(processInstanceId)
-    if (res.code === 200) {
-      processInfo.value = res.data.processInfo
-      formDataList.value = res.data.formDataList
-      approveHistory.value = res.data.approveHistory
-    } else {
-      ElMessage.error(res.msg || '获取流程详情失败')
-      router.push('/workflow/todo')
-    }
-  } catch (error) {
-    ElMessage.error('网络异常，请稍后重试')
-    console.error('获取流程详情失败：', error)
-    router.push('/workflow/todo')
-  }
-}
+
 
 // 提交审批
 const handleApprove = async () => {
@@ -178,10 +154,7 @@ const goBack = () => {
   router.push('/workflow/todo')
 }
 
-// 初始化
-onMounted(() => {
-  getProcessDetail()
-})
+
 </script>
 
 <style scoped>

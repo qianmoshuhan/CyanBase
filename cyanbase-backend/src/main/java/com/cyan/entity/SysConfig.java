@@ -8,11 +8,11 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @TableName("sys_config")
 public class SysConfig extends BaseEntity {
-    @TableId(value = "config_id", type = IdType.AUTO)
-    private Long configId;
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
 
     private String configName;
     private String configKey;
     private String configValue;
-    private String configType;
+    private Integer configType;
 }

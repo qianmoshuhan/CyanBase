@@ -7,6 +7,10 @@ import com.cyan.entity.SysFile;
 import com.cyan.service.SysFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/system/file")
@@ -40,5 +44,35 @@ public class SysFileController {
     public R<?> delete(@PathVariable Long fileId) {
         sysFileService.removeById(fileId);
         return R.ok("删除成功");
+    }
+
+    @PostMapping("/upload")
+    public R<?> upload(@RequestParam("file") MultipartFile file) throws Exception {
+        //1.定义本地保存路径
+        String basePath = System.getProperty("user.dir") + "/upload/";
+        File dir = new File(basePath);
+        if (!dir.exists()) dir.mkdirs();
+
+        //2.拆分文件名、后缀
+        String originalName = file.getOriginalFilename();
+        String suffix = originalName.substring(originalName.lastIndexOf("."));
+        String uuidName = UUID.randomUUID() + suffix;
+        File saveFile = new File(basePath + uuidName);
+        file.transferTo(saveFile);
+
+        //3.组装sys_file实体，存入数据库（完全匹配你SysFile实体+sys_file表）
+        SysFile sysFile = new SysFile();
+        sysFile.setFileName(uuidName);
+        sysFile.setFileOriginalName(originalName);
+        sysFile.setFileSuffix(suffix.replace(".",""));
+        sysFile.setFileSize(String.valueOf(file.getSize()));
+        sysFile.setStorageType("LOCAL");
+        sysFile.setFileUrl("http://localhost:8090/upload/"+uuidName);
+        sysFile.setCreateBy("admin"); //后期登录后替换当前登录用户名，先固定admin
+        sysFile.setCreateTime(LocalDateTime.now());
+
+        //4.保存入库
+        sysFileService.save(sysFile);
+        return R.ok("上传成功");
     }
 }

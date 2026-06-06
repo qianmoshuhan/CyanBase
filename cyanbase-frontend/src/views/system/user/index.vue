@@ -91,6 +91,11 @@
             <el-radio :label="1">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
+        <el-form-item label="分配角色">
+  <el-select v-model="formData.roleIds" multiple placeholder="请选择角色">
+    <el-option v-for="item in roleOptions" :key="item.id" :label="item.roleName" :value="item.id"/>
+  </el-select>
+</el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -101,9 +106,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed ,onMounted} from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getUserList, addUser, updateUser, deleteUser } from '@/api/user'
+import { getUserList, addUser, updateUser, deleteUser , getAllRole, getUserSelectedRoleIds} from '@/api/user'
 
 const searchForm = reactive({
   userName: ''
@@ -133,13 +138,22 @@ const formData = reactive({
   email: '',
   sex: 0,
   status: 0,
-  remark: ''
+  remark: '',
+  roleIds: []
 })
+
+//定义角色下拉数据源
+const roleOptions = ref([])
 
 const formRules = {
   userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
+
+onMounted(async()=>{
+  const res = await getAllRole()
+  roleOptions.value = res.data
+})
 
 const fetchData = async () => {
   try {
@@ -167,15 +181,19 @@ const handleAdd = () => {
     email: '',
     sex: 0,
     status: 0,
-    remark: ''
+    remark: '',
+    roleIds:[]
   })
   dialogVisible.value = true
 }
 
-const handleEdit = (row) => {
+const handleEdit = async (row) => {
   isEdit.value = true
   Object.assign(formData, row)
   formData.password = ''
+  //回显已绑定角色
+  const res = await getUserSelectedRoleIds(row.id)
+  formData.roleIds = res.data
   dialogVisible.value = true
 }
 

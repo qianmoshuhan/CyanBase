@@ -7,487 +7,310 @@
  =========|_|==============|___/=/_/_/_/
  :: Spring Boot ::                (v3.1.6)
 
-2026-06-01 01:06:07.792 [background-preinit] [34mINFO [0;39m [36morg.hibernate.validator.internal.util.Version[0;39m - HV000001: Hibernate Validator 8.0.1.Final
-2026-06-01 01:06:07.853 [main] [34mINFO [0;39m [36mcom.cyan.CyanBaseApplication[0;39m - Starting CyanBaseApplication v1.0.0 using Java 17.0.19 with PID 1123265 (/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar started by xjgh2025XZD in /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend)
-2026-06-01 01:06:07.855 [main] [39mDEBUG[0;39m [36mcom.cyan.CyanBaseApplication[0;39m - Running with Spring Boot v3.1.6, Spring v6.0.14
-2026-06-01 01:06:07.857 [main] [34mINFO [0;39m [36mcom.cyan.CyanBaseApplication[0;39m - No active profile set, falling back to 1 default profile: "default"
-2026-06-01 01:06:11.586 [main] [34mINFO [0;39m [36morg.apache.coyote.http11.Http11NioProtocol[0;39m - Initializing ProtocolHandler ["http-nio-8090"]
-2026-06-01 01:06:11.589 [main] [34mINFO [0;39m [36morg.apache.catalina.core.StandardService[0;39m - Starting service [Tomcat]
-2026-06-01 01:06:11.590 [main] [34mINFO [0;39m [36morg.apache.catalina.core.StandardEngine[0;39m - Starting Servlet engine: [Apache Tomcat/10.1.16]
-2026-06-01 01:06:11.714 [main] [34mINFO [0;39m [36mo.a.c.core.ContainerBase.[Tomcat].[localhost].[/][0;39m - Initializing Spring embedded WebApplicationContext
-2026-06-01 01:06:12.196 [main] [39mDEBUG[0;39m [36mcom.cyan.security.filter.JwtAuthenticationFilter[0;39m - Filter 'jwtAuthenticationFilter' configured for use
+2026-06-06 18:07:21.143 [background-preinit] [34mINFO [0;39m [36morg.hibernate.validator.internal.util.Version[0;39m - HV000001: Hibernate Validator 8.0.1.Final
+2026-06-06 18:07:21.204 [main] [34mINFO [0;39m [36mcom.cyan.CyanBaseApplication[0;39m - Starting CyanBaseApplication v1.0.0 using Java 17.0.19 with PID 84294 (/home/admin/CyanBase/cyanbase-backend/target/cyanbase-backend-1.0.0.jar started by admin in /home/admin/CyanBase/cyanbase-backend)
+2026-06-06 18:07:21.205 [main] [39mDEBUG[0;39m [36mcom.cyan.CyanBaseApplication[0;39m - Running with Spring Boot v3.1.6, Spring v6.0.14
+2026-06-06 18:07:21.207 [main] [34mINFO [0;39m [36mcom.cyan.CyanBaseApplication[0;39m - No active profile set, falling back to 1 default profile: "default"
+2026-06-06 18:07:23.901 [main] [34mINFO [0;39m [36morg.apache.coyote.http11.Http11NioProtocol[0;39m - Initializing ProtocolHandler ["http-nio-8090"]
+2026-06-06 18:07:23.903 [main] [34mINFO [0;39m [36morg.apache.catalina.core.StandardService[0;39m - Starting service [Tomcat]
+2026-06-06 18:07:23.904 [main] [34mINFO [0;39m [36morg.apache.catalina.core.StandardEngine[0;39m - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2026-06-06 18:07:24.004 [main] [34mINFO [0;39m [36mo.a.c.core.ContainerBase.[Tomcat].[localhost].[/][0;39m - Initializing Spring embedded WebApplicationContext
+2026-06-06 18:07:24.313 [main] [39mDEBUG[0;39m [36mcom.cyan.security.filter.JwtAuthenticationFilter[0;39m - Filter 'jwtAuthenticationFilter' configured for use
 Logging initialized using 'class org.apache.ibatis.logging.stdout.StdOutImpl' adapter.
-Initialization Sequence datacenterId:25 workerId:13
+Initialization Sequence datacenterId:1 workerId:0
  _ _   |_  _ _|_. ___ _ |    _ 
 | | |\/|_)(_| | |_\  |_)||_|_\ 
      /               |         
                         3.5.5 
-2026-06-01 01:06:16.094 [main] [31mWARN [0;39m [36mo.s.b.a.s.s.UserDetailsServiceAutoConfiguration[0;39m - 
+2026-06-06 18:07:27.391 [main] [31mWARN [0;39m [36mo.s.b.a.s.s.UserDetailsServiceAutoConfiguration[0;39m - 
 
-Using generated security password: 3a87a0fc-f552-43cc-9b1d-3d68b8f7c4c7
+Using generated security password: 1c4fea8c-b556-4ff9-b79a-4ba95109d00a
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 
-2026-06-01 01:06:17.575 [main] [34mINFO [0;39m [36morg.apache.coyote.http11.Http11NioProtocol[0;39m - Starting ProtocolHandler ["http-nio-8090"]
-2026-06-01 01:06:17.637 [main] [34mINFO [0;39m [36mcom.cyan.CyanBaseApplication[0;39m - Started CyanBaseApplication in 10.777 seconds (process running for 11.452)
+2026-06-06 18:07:28.694 [main] [34mINFO [0;39m [36morg.apache.coyote.http11.Http11NioProtocol[0;39m - Starting ProtocolHandler ["http-nio-8090"]
+2026-06-06 18:07:28.796 [main] [34mINFO [0;39m [36mcom.cyan.CyanBaseApplication[0;39m - Started CyanBaseApplication in 8.453 seconds (process running for 9.136)
 ===== CyanBase青渊数字底座 启动成功 =====
-2026-06-01 01:11:49.656 [http-nio-8090-exec-1] [34mINFO [0;39m [36mo.a.c.core.ContainerBase.[Tomcat].[localhost].[/][0;39m - Initializing Spring DispatcherServlet 'dispatcherServlet'
-2026-06-01 01:11:49.879 [http-nio-8090-exec-1] [31mWARN [0;39m [36mo.s.web.servlet.handler.HandlerMappingIntrospector[0;39m - Cache miss for REQUEST dispatch to '/system/role/list' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
+2026-06-06 18:07:43.650 [http-nio-8090-exec-2] [34mINFO [0;39m [36mo.a.c.core.ContainerBase.[Tomcat].[localhost].[/][0;39m - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-06-06 18:07:43.948 [http-nio-8090-exec-6] [31mWARN [0;39m [36mo.s.web.servlet.handler.HandlerMappingIntrospector[0;39m - Cache miss for REQUEST dispatch to '/system/config/key/system_name' (previous null). Performing MatchableHandlerMapping lookup. This is logged once only at WARN level, and every time at TRACE.
 Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6584a0a6] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1542993227 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@40f23239] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@67e84481] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2046b0d6] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1384828252 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0
 ==> Parameters: 
-<==    Columns: total
-<==        Row: 1
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
-<==        Row: 1, 1, 超级管理员, admin, 1, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
-<==      Total: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6584a0a6]
-2026-06-01 01:11:51.065 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:1139ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@a7d2a1b] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1262493728 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 1
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
-<==        Row: 1, 1, 超级管理员, admin, 1, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
-<==      Total: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@a7d2a1b]
-2026-06-01 01:11:53.098 [http-nio-8090-exec-2] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:176ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@657535d6] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@608714733 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 1
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
-<==        Row: 1, 1, 超级管理员, admin, 1, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
-<==      Total: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@657535d6]
-2026-06-01 01:11:55.162 [http-nio-8090-exec-3] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:187ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@aec1dbd] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@554103120 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 AND (role_key LIKE ?) ORDER BY role_key DESC
-==> Parameters: ROLE_20260601_%(String)
-<==      Total: 0
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@aec1dbd]
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4d2565dc] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1301627332 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: INSERT INTO sys_role ( tenant_id, role_name, role_key, data_scope, sort_num, status, remark ) VALUES ( ?, ?, ?, ?, ?, ?, ? )
-==> Parameters: 1(Long), 测试角色01(String), ROLE_20260601_0001(String), 1(Integer), 4(Integer), 0(Integer), (String)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4d2565dc]
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1be4d46f] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@51909468 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: INSERT INTO sys_oper_log ( title, business_type, oper_name, oper_ip, status, oper_time ) VALUES ( ?, ?, ?, ?, ?, ? )
-==> Parameters: /system/role(String), 1(Integer), admin(String), 127.0.0.1(String), 0(Integer), 2026-06-01T01:12:27.015232741(LocalDateTime)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1be4d46f]
-2026-06-01 01:12:27.082 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/system/role | 状态:200 | 耗时:271ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2eb9cf04] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1870972223 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 2
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
-<==        Row: 1, 1, 超级管理员, admin, 1, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
-<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
-<==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2eb9cf04]
-2026-06-01 01:12:27.485 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:145ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7c69fe02] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@93578565 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: UPDATE sys_role SET tenant_id=?, role_name=?, role_key=?, data_scope=?, sort_num=?, status=?, create_by=?, create_time=?, update_by=?, update_time=?, remark=? WHERE id=? AND del_flag=0
-==> Parameters: 1(Long), 测试角色01(String), ROLE_20260601_0001(String), 1(Integer), 4(Integer), 1(Integer), (String), 2026-06-01T01:12:26(LocalDateTime), (String), 2026-06-01T01:12:26(LocalDateTime), (String), 2(Long)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7c69fe02]
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3639821b] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@2036555906 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: INSERT INTO sys_oper_log ( title, business_type, oper_name, oper_ip, status, oper_time ) VALUES ( ?, ?, ?, ?, ?, ? )
-==> Parameters: /system/role(String), 2(Integer), admin(String), 127.0.0.1(String), 0(Integer), 2026-06-01T01:15:13.338084388(LocalDateTime)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3639821b]
-2026-06-01 01:15:13.398 [http-nio-8090-exec-7] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/role | 状态:200 | 耗时:132ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@787a4c40] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@146071404 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 2
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
-<==        Row: 1, 1, 超级管理员, admin, 1, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
-<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 1, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
-<==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@787a4c40]
-2026-06-01 01:15:13.847 [http-nio-8090-exec-8] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:147ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2d20f22a] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@2117418197 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: UPDATE sys_role SET tenant_id=?, role_name=?, role_key=?, data_scope=?, sort_num=?, status=?, create_by=?, create_time=?, update_by=?, update_time=?, remark=? WHERE id=? AND del_flag=0
-==> Parameters: 1(Long), 测试角色01(String), ROLE_20260601_0001(String), 1(Integer), 4(Integer), 0(Integer), (String), 2026-06-01T01:12:26(LocalDateTime), (String), 2026-06-01T01:12:26(LocalDateTime), (String), 2(Long)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2d20f22a]
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f1ca2f3] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1994555632 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: INSERT INTO sys_oper_log ( title, business_type, oper_name, oper_ip, status, oper_time ) VALUES ( ?, ?, ?, ?, ?, ? )
-==> Parameters: /system/role(String), 2(Integer), admin(String), 127.0.0.1(String), 0(Integer), 2026-06-01T01:15:18.507147452(LocalDateTime)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3f1ca2f3]
-2026-06-01 01:15:18.568 [http-nio-8090-exec-6] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/role | 状态:200 | 耗时:132ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@ee95b14] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1339314479 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 2
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
-<==        Row: 1, 1, 超级管理员, admin, 1, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
-<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
-<==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@ee95b14]
-2026-06-01 01:15:19.005 [http-nio-8090-exec-9] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:143ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3c32ad34] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@110332691 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: UPDATE sys_role SET tenant_id=?, role_name=?, role_key=?, data_scope=?, sort_num=?, status=?, create_by=?, create_time=?, update_by=?, update_time=?, remark=? WHERE id=? AND del_flag=0
-==> Parameters: 1(Long), 超级管理员(String), admin(String), 1(Integer), 1(Integer), 0(Integer), admin(String), 2026-05-24T12:28:11(LocalDateTime), admin(String), 2026-05-24T12:28:11(LocalDateTime), 最高权限角色(String), 1(Long)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3c32ad34]
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@608f42ca] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@738420980 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: INSERT INTO sys_oper_log ( title, business_type, oper_name, oper_ip, status, oper_time ) VALUES ( ?, ?, ?, ?, ?, ? )
-==> Parameters: /system/role(String), 2(Integer), admin(String), 127.0.0.1(String), 0(Integer), 2026-06-01T01:16:18.807250864(LocalDateTime)
-<==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@608f42ca]
-2026-06-01 01:16:18.866 [http-nio-8090-exec-10] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:PUT | URI:/system/role | 状态:200 | 耗时:128ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4a113b0a] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1124595879 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 2
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
 <==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
 <==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
 <==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
-<==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4a113b0a]
-2026-06-01 01:16:19.298 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:140ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7a414c48] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@728751983 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_dept WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 2
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,parent_id,dept_name,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark,is_deleted FROM sys_dept WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, parent_id, dept_name, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark, is_deleted
-<==        Row: 1, 1, 0, 青渊集团总部, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 顶级部门, 0
-<==        Row: 8, 1, 1, 开发事业部, 2, 0, , 2026-05-31 21:31:03, , 2026-05-31 21:31:03, 0, , 0
-<==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7a414c48]
-2026-06-01 01:27:10.234 [http-nio-8090-exec-2] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:197ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@593169e2] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@565523502 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
-==> Parameters: 
-<==    Columns: total
-<==        Row: 2
-<==      Total: 1
-==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
-==> Parameters: 10(Long)
-<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
-<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
-<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
-<==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@593169e2]
-2026-06-01 01:27:11.475 [http-nio-8090-exec-3] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:200ms
-Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@280be8b] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1786091968 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@2046b0d6]
+JDBC Connection [HikariProxyConnection@798311010 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_name(String)
+JDBC Connection [HikariProxyConnection@1706482087 wrapping org.mariadb.jdbc.Connection@345a0100] will not be managed by Spring
 ==>  Preparing: SELECT COUNT(*) AS total FROM sys_user WHERE del_flag = 0
 ==> Parameters: 
+2026-06-06 18:07:44.697 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/user/allRole | 状态:200 | 耗时:724ms
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 1, 系统名称, system_name, CyanBase, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:01:05, 左上角显示的系统名称
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@67e84481]
+2026-06-06 18:07:44.730 [http-nio-8090-exec-6] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_name | 状态:200 | 耗时:757ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@57b0323] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@21268308 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_logo(String)
 <==    Columns: total
 <==        Row: 2
 <==      Total: 1
 ==>  Preparing: SELECT id,tenant_id,dept_id,user_name,password,nick_name,phone,email,avatar,sex,status,login_ip,login_time,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_user WHERE del_flag=0 ORDER BY create_time DESC LIMIT ?
 ==> Parameters: 10(Long)
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 2, 系统Logo, system_logo, /cyanbase.svg, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:43:40, 左上角Logo地址，空则显示文字
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@57b0323]
+2026-06-06 18:07:44.867 [http-nio-8090-exec-8] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_logo | 状态:200 | 耗时:107ms
 <==    Columns: id, tenant_id, dept_id, user_name, password, nick_name, phone, email, avatar, sex, status, login_ip, login_time, create_by, create_time, update_by, update_time, del_flag, remark
 <==        Row: 4, 0, 0, test, 123456, , , , , 0, 0, , null, , 2026-05-27 17:14:01, , 2026-05-27 17:14:01, 0, 
 <==        Row: 1, 1, 1, admin, admin123, 系统管理员, , , , 0, 0, , null, admin, 2026-05-24 12:28:11, admin, 2026-05-24 14:49:04, 0, 超级管理员
 <==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@280be8b]
-2026-06-01 01:27:29.267 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:211ms
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@40f23239]
+2026-06-06 18:07:44.945 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:972ms
 Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1de87a43] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@785497919 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: INSERT INTO sys_user ( tenant_id, dept_id, user_name, password, nick_name, phone, email, sex, status, remark ) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ? )
-==> Parameters: 1(Long), 0(Long), test(String), admin123(String), (String), (String), (String), 0(Integer), 0(Integer), (String)
-2026-06-01 01:30:07.558 [http-nio-8090-exec-5] [31mWARN [0;39m [36morg.mariadb.jdbc.message.server.ErrorPacket[0;39m - Error: 1062-23000: Duplicate entry 'test' for key 'user_name'
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@1de87a43]
-2026-06-01 01:30:07.674 [http-nio-8090-exec-5] [1;31mERROR[0;39m [36mcom.cyan.common.exception.AuthExceptionHandler[0;39m - 系统异常：
-org.springframework.dao.DuplicateKeyException: 
-### Error updating database.  Cause: java.sql.SQLIntegrityConstraintViolationException: (conn=412) Duplicate entry 'test' for key 'user_name'
-### The error may exist in com/cyan/mapper/SysUserMapper.java (best guess)
-### The error may involve com.cyan.mapper.SysUserMapper.insert-Inline
-### The error occurred while setting parameters
-### SQL: INSERT INTO sys_user  ( tenant_id, dept_id, user_name, password, nick_name, phone, email,  sex, status,        remark )  VALUES (  ?, ?, ?, ?, ?, ?, ?,  ?, ?,        ?  )
-### Cause: java.sql.SQLIntegrityConstraintViolationException: (conn=412) Duplicate entry 'test' for key 'user_name'
-; (conn=412) Duplicate entry 'test' for key 'user_name'
-	at org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator.doTranslate(SQLErrorCodeSQLExceptionTranslator.java:254)
-	at org.springframework.jdbc.support.AbstractFallbackSQLExceptionTranslator.translate(AbstractFallbackSQLExceptionTranslator.java:73)
-	at org.mybatis.spring.MyBatisExceptionTranslator.translateExceptionIfPossible(MyBatisExceptionTranslator.java:92)
-	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:439)
-	at jdk.proxy2/jdk.proxy2.$Proxy95.insert(Unknown Source)
-	at org.mybatis.spring.SqlSessionTemplate.insert(SqlSessionTemplate.java:272)
-	at com.baomidou.mybatisplus.core.override.MybatisMapperMethod.execute(MybatisMapperMethod.java:59)
-	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy$PlainMethodInvoker.invoke(MybatisMapperProxy.java:152)
-	at com.baomidou.mybatisplus.core.override.MybatisMapperProxy.invoke(MybatisMapperProxy.java:89)
-	at jdk.proxy2/jdk.proxy2.$Proxy125.insert(Unknown Source)
-	at com.baomidou.mybatisplus.extension.service.IService.save(IService.java:60)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:343)
-	at org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor.intercept(CglibAopProxy.java:699)
-	at com.cyan.service.impl.SysUserServiceImpl$$SpringCGLIB$$0.save(<generated>)
-	at com.cyan.controller.SysUserController.add(SysUserController.java:54)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:205)
-	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:150)
-	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118)
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:884)
-	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:797)
-	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87)
-	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1081)
-	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:974)
-	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014)
-	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
-	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885)
-	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:205)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:110)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231)
-	at org.springframework.security.web.ObservationFilterChainDecorator$FilterObservation$SimpleFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:479)
-	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$1(ObservationFilterChainDecorator.java:340)
-	at org.springframework.security.web.ObservationFilterChainDecorator.lambda$wrapSecured$0(ObservationFilterChainDecorator.java:82)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:128)
-	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126)
-	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131)
-	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at com.cyan.security.filter.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:76)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107)
-	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
-	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82)
-	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:227)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:240)
-	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:323)
-	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:224)
-	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:137)
-	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233)
-	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191)
-	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352)
-	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:109)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
-	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
-	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:174)
-	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:149)
-	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
-	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
-	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
-	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
-	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
-	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
-	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:340)
-	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:391)
-	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
-	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:896)
-	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1744)
-	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1191)
-	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
-	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-Caused by: java.sql.SQLIntegrityConstraintViolationException: (conn=412) Duplicate entry 'test' for key 'user_name'
-	at org.mariadb.jdbc.export.ExceptionFactory.createException(ExceptionFactory.java:290)
-	at org.mariadb.jdbc.export.ExceptionFactory.create(ExceptionFactory.java:370)
-	at org.mariadb.jdbc.message.ClientMessage.readPacket(ClientMessage.java:134)
-	at org.mariadb.jdbc.client.impl.StandardClient.readPacket(StandardClient.java:872)
-	at org.mariadb.jdbc.client.impl.StandardClient.readResults(StandardClient.java:811)
-	at org.mariadb.jdbc.client.impl.StandardClient.readResponse(StandardClient.java:730)
-	at org.mariadb.jdbc.client.impl.StandardClient.execute(StandardClient.java:654)
-	at org.mariadb.jdbc.ClientPreparedStatement.executeInternal(ClientPreparedStatement.java:95)
-	at org.mariadb.jdbc.ClientPreparedStatement.execute(ClientPreparedStatement.java:268)
-	at com.zaxxer.hikari.pool.ProxyPreparedStatement.execute(ProxyPreparedStatement.java:44)
-	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.execute(HikariProxyPreparedStatement.java)
-	at jdk.internal.reflect.GeneratedMethodAccessor22.invoke(Unknown Source)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.apache.ibatis.logging.jdbc.PreparedStatementLogger.invoke(PreparedStatementLogger.java:58)
-	at jdk.proxy3/jdk.proxy3.$Proxy167.execute(Unknown Source)
-	at org.apache.ibatis.executor.statement.PreparedStatementHandler.update(PreparedStatementHandler.java:48)
-	at org.apache.ibatis.executor.statement.RoutingStatementHandler.update(RoutingStatementHandler.java:75)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:61)
-	at jdk.proxy2/jdk.proxy2.$Proxy165.update(Unknown Source)
-	at org.apache.ibatis.executor.SimpleExecutor.doUpdate(SimpleExecutor.java:50)
-	at org.apache.ibatis.executor.BaseExecutor.update(BaseExecutor.java:117)
-	at org.apache.ibatis.executor.CachingExecutor.update(CachingExecutor.java:76)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.apache.ibatis.plugin.Invocation.proceed(Invocation.java:49)
-	at com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor.intercept(MybatisPlusInterceptor.java:106)
-	at org.apache.ibatis.plugin.Plugin.invoke(Plugin.java:59)
-	at jdk.proxy2/jdk.proxy2.$Proxy164.update(Unknown Source)
-	at org.apache.ibatis.session.defaults.DefaultSqlSession.update(DefaultSqlSession.java:197)
-	at org.apache.ibatis.session.defaults.DefaultSqlSession.insert(DefaultSqlSession.java:184)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:569)
-	at org.mybatis.spring.SqlSessionTemplate$SqlSessionInterceptor.invoke(SqlSessionTemplate.java:425)
-	... 150 common frames omitted
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@44a80441] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1937566967 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,role_id FROM sys_user_role WHERE (user_id = ?)
+==> Parameters: null
+<==      Total: 0
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@44a80441]
+2026-06-06 18:07:46.109 [http-nio-8090-exec-10] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/getUserMenu | 状态:200 | 耗时:1212ms
 Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4a8beeb5] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@692658245 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@543f2ee] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1860577327 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,tenant_id,dept_id,user_name,password,nick_name,phone,email,avatar,sex,status,login_ip,login_time,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_user WHERE del_flag=0 AND (user_name = ?)
+==> Parameters: admin(String)
+<==    Columns: id, tenant_id, dept_id, user_name, password, nick_name, phone, email, avatar, sex, status, login_ip, login_time, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 1, 1, admin, admin123, 系统管理员, , , , 0, 0, , null, admin, 2026-05-24 12:28:11, admin, 2026-05-24 14:49:04, 0, 超级管理员
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@543f2ee]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@76fe431e] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1551593008 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,user_id,role_id FROM sys_user_role WHERE (user_id = ?)
+==> Parameters: 1(Long)
+<==    Columns: id, user_id, role_id
+<==        Row: 1, 1, 1
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@76fe431e]
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6d0e44d2] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@930339777 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
 ==>  Preparing: INSERT INTO sys_oper_log ( title, business_type, oper_name, oper_ip, status, oper_time ) VALUES ( ?, ?, ?, ?, ?, ? )
-==> Parameters: /system/user(String), 1(Integer), admin(String), 127.0.0.1(String), 0(Integer), 2026-06-01T01:30:07.685526244(LocalDateTime)
+==> Parameters: /auth/login(String), 1(Integer), admin(String), 172.31.80.1(String), 0(Integer), 2026-06-06T18:07:58.668705410(LocalDateTime)
 <==    Updates: 1
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4a8beeb5]
-2026-06-01 01:30:07.748 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:POST | URI:/system/user | 状态:200 | 耗时:250ms
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@6d0e44d2]
+2026-06-06 18:07:58.728 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:POST | URI:/auth/login | 状态:200 | 耗时:215ms
 Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@500b79ec] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@426187822 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
-==>  Preparing: SELECT COUNT(*) AS total FROM sys_menu WHERE del_flag = 0
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5f1cd261] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@12a5fd1e] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21efb133] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@68aebed] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@512218563 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_name(String)
+JDBC Connection [HikariProxyConnection@1825515320 wrapping org.mariadb.jdbc.Connection@345a0100] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
+==> Parameters: 
+JDBC Connection [HikariProxyConnection@1639601493 wrapping org.mariadb.jdbc.Connection@bf7ec76] will not be managed by Spring
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+JDBC Connection [HikariProxyConnection@1367428210 wrapping org.mariadb.jdbc.Connection@3af5dbf0] will not be managed by Spring
+<==        Row: 1, 系统名称, system_name, CyanBase, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:01:05, 左上角显示的系统名称
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_user WHERE del_flag = 0
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_dept WHERE del_flag = 0
+==> Parameters: 
+==> Parameters: 
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21efb133]
+2026-06-06 18:07:58.983 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_name | 状态:200 | 耗时:114ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@17b0ff68] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1960649862 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_logo(String)
+<==    Columns: total
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+<==    Columns: total
+<==    Columns: total
+<==        Row: 2
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==      Total: 1
+<==        Row: 2
+<==        Row: 2, 系统Logo, system_logo, /cyanbase.svg, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:43:40, 左上角Logo地址，空则显示文字
+<==      Total: 1
+<==      Total: 1
+==>  Preparing: SELECT id,tenant_id,dept_id,user_name,password,nick_name,phone,email,avatar,sex,status,login_ip,login_time,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_user WHERE del_flag=0 ORDER BY create_time DESC LIMIT ?
+==>  Preparing: SELECT id,tenant_id,parent_id,dept_name,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark,is_deleted FROM sys_dept WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@17b0ff68]
+==> Parameters: 10(Long)
+==> Parameters: 10(Long)
+2026-06-06 18:07:59.088 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_logo | 状态:200 | 耗时:84ms
+<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==    Columns: id, tenant_id, parent_id, dept_name, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark, is_deleted
+<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
+<==        Row: 1, 1, 0, 青渊集团总部, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 顶级部门, 0
+<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
+<==        Row: 8, 1, 1, 开发事业部, 2, 0, , 2026-05-31 21:31:03, , 2026-05-31 21:31:03, 0, , 0
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 2
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@12a5fd1e]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5f1cd261]
+2026-06-06 18:07:59.142 [http-nio-8090-exec-10] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:278ms
+2026-06-06 18:07:59.145 [http-nio-8090-exec-3] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:279ms
+<==    Columns: id, tenant_id, dept_id, user_name, password, nick_name, phone, email, avatar, sex, status, login_ip, login_time, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 4, 0, 0, test, 123456, , , , , 0, 0, , null, , 2026-05-27 17:14:01, , 2026-05-27 17:14:01, 0, 
+<==        Row: 1, 1, 1, admin, admin123, 系统管理员, , , , 0, 0, , null, admin, 2026-05-24 12:28:11, admin, 2026-05-24 14:49:04, 0, 超级管理员
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@68aebed]
+2026-06-06 18:07:59.165 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:291ms
+2026-06-06 18:07:59.233 [http-nio-8090-exec-8] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/getUserMenu | 状态:200 | 耗时:128ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c7c0b55] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@490799470 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
 ==> Parameters: 
 <==    Columns: total
-<==        Row: 28
+<==        Row: 3
 <==      Total: 1
-==>  Preparing: SELECT id,parent_id,menu_name,menu_type,route_path,component,perms,icon,sort_num,visible,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_menu WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
+<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c7c0b55]
+2026-06-06 18:08:01.485 [http-nio-8090-exec-7] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:180ms
+2026-06-06 18:08:02.964 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/all | 状态:200 | 耗时:64ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7ea52a37] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1853804852 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,role_id,menu_id FROM sys_role_menu WHERE (role_id = ?)
+==> Parameters: 3(Long)
+<==    Columns: id, role_id, menu_id
+<==        Row: 125, 3, 38
+<==        Row: 126, 3, 19
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@7ea52a37]
+2026-06-06 18:08:03.118 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/getMenuIds/3 | 状态:200 | 耗时:114ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@45b85841] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3d435a80] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1514092039 wrapping org.mariadb.jdbc.Connection@3af5dbf0] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
+==> Parameters: 
+JDBC Connection [HikariProxyConnection@1521001279 wrapping org.mariadb.jdbc.Connection@bf7ec76] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_name(String)
+<==    Columns: total
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 1, 系统名称, system_name, CyanBase, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:01:05, 左上角显示的系统名称
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3d435a80]
+2026-06-06 18:08:12.887 [http-nio-8090-exec-3] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_name | 状态:200 | 耗时:221ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@68b1d828] was not registered for synchronization because synchronization is not active
+<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
+<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@45b85841]
+2026-06-06 18:08:12.979 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:317ms
+JDBC Connection [HikariProxyConnection@275814054 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_logo(String)
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 2, 系统Logo, system_logo, /cyanbase.svg, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:43:40, 左上角Logo地址，空则显示文字
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@68b1d828]
+2026-06-06 18:08:13.129 [http-nio-8090-exec-7] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_logo | 状态:200 | 耗时:209ms
+2026-06-06 18:08:13.213 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/getUserMenu | 状态:200 | 耗时:64ms
+2026-06-06 18:08:24.571 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/all | 状态:200 | 耗时:72ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@69d3b86] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@2094281828 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,role_id,menu_id FROM sys_role_menu WHERE (role_id = ?)
+==> Parameters: 1(Long)
+<==    Columns: id, role_id, menu_id
+<==        Row: 57, 1, 1
+<==        Row: 58, 1, 2
+<==        Row: 59, 1, 3
+<==        Row: 60, 1, 4
+<==        Row: 61, 1, 5
+<==        Row: 62, 1, 6
+<==        Row: 63, 1, 7
+<==        Row: 64, 1, 8
+<==        Row: 65, 1, 9
+<==        Row: 66, 1, 10
+<==        Row: 67, 1, 11
+<==        Row: 68, 1, 12
+<==        Row: 69, 1, 13
+<==        Row: 70, 1, 14
+<==        Row: 71, 1, 15
+<==        Row: 72, 1, 16
+<==        Row: 73, 1, 17
+<==        Row: 74, 1, 18
+<==        Row: 75, 1, 19
+<==        Row: 76, 1, 20
+<==        Row: 77, 1, 21
+<==        Row: 78, 1, 22
+<==        Row: 79, 1, 23
+<==        Row: 80, 1, 24
+<==        Row: 81, 1, 25
+<==        Row: 82, 1, 26
+<==        Row: 83, 1, 27
+<==        Row: 84, 1, 28
+<==        Row: 85, 1, 29
+<==        Row: 86, 1, 30
+<==        Row: 87, 1, 31
+<==        Row: 88, 1, 32
+<==        Row: 89, 1, 33
+<==        Row: 90, 1, 34
+<==        Row: 91, 1, 35
+<==        Row: 92, 1, 36
+<==        Row: 93, 1, 37
+<==        Row: 94, 1, 38
+<==        Row: 95, 1, 39
+<==        Row: 96, 1, 40
+<==      Total: 40
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@69d3b86]
+2026-06-06 18:08:24.752 [http-nio-8090-exec-6] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/getMenuIds/1 | 状态:200 | 耗时:114ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@567ee6a4] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@2052219617 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_menu
+==> Parameters: 
+<==    Columns: total
+<==        Row: 40
+<==      Total: 1
+==>  Preparing: SELECT id,parent_id,menu_name,menu_type,route_path,component,perms,icon,sort_num,visible,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_menu ORDER BY sort_num ASC LIMIT ?
 ==> Parameters: 10(Long)
 <==    Columns: id, parent_id, menu_name, menu_type, route_path, component, perms, icon, sort_num, visible, status, create_by, create_time, update_by, update_time, del_flag, remark
 <==        Row: 1, 0, 系统管理, 1, system, Layout, , system, 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
@@ -497,17 +320,91 @@ JDBC Connection [HikariProxyConnection@426187822 wrapping org.mariadb.jdbc.Conne
 <==        Row: 22, 5, 字典新增, 3, , , system:dict:add, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
 <==        Row: 25, 8, 强退用户, 3, , , monitor:online:kick, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
 <==        Row: 26, 9, 任务执行, 3, , , monitor:job:start, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
-<==        Row: 2, 0, 系统监控, 1, monitor, Layout, , monitor, 2, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
-<==        Row: 9, 2, 定时任务, 2, job, monitor/job/index, monitor:job:list, job, 2, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
-<==        Row: 14, 3, 消息管理, 2, message, system/message/index, system:message:list, message, 2, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 29, 1, 用户管理, 2, user, system/user/index, system:user:list, user, 1, 0, 0, , 2026-06-05 23:26:45, , 2026-06-05 23:40:15, 0, 
+<==        Row: 32, 29, 用户新增, 3, , , system:user:add, , 1, 0, 0, , 2026-06-05 23:27:03, , 2026-06-05 23:32:53, 0, 
+<==        Row: 35, 30, 角色新增, 3, , , system:role:add, , 1, 0, 0, , 2026-06-05 23:27:03, , 2026-06-05 23:33:05, 0, 
 <==      Total: 10
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@500b79ec]
-2026-06-01 01:31:37.203 [http-nio-8090-exec-7] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/menu/list | 状态:200 | 耗时:213ms
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@567ee6a4]
+2026-06-06 18:08:46.105 [http-nio-8090-exec-8] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/list | 状态:200 | 耗时:202ms
 Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@18f37d1d] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@1678461519 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@231aef8] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@60f5beac] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@301757711 wrapping org.mariadb.jdbc.Connection@3af5dbf0] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_menu
+==> Parameters: 
+JDBC Connection [HikariProxyConnection@1690969706 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_name(String)
+<==    Columns: total
+<==        Row: 40
+<==      Total: 1
+==>  Preparing: SELECT id,parent_id,menu_name,menu_type,route_path,component,perms,icon,sort_num,visible,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_menu ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 1, 系统名称, system_name, CyanBase, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:01:05, 左上角显示的系统名称
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@60f5beac]
+2026-06-06 18:08:48.792 [http-nio-8090-exec-9] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_name | 状态:200 | 耗时:220ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4afa82e9] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@799582736 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_logo(String)
+<==    Columns: id, parent_id, menu_name, menu_type, route_path, component, perms, icon, sort_num, visible, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 0, 系统管理, 1, system, Layout, , system, 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 8, 2, 在线用户, 2, online, monitor/online/index, monitor:online:list, online, 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 13, 3, 文件管理, 2, file, system/file/index, system:file:list, file, 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 19, 4, 岗位新增, 3, , , system:post:add, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 22, 5, 字典新增, 3, , , system:dict:add, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 25, 8, 强退用户, 3, , , monitor:online:kick, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 26, 9, 任务执行, 3, , , monitor:job:start, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 29, 1, 用户管理, 2, user, system/user/index, system:user:list, user, 1, 0, 0, , 2026-06-05 23:26:45, , 2026-06-05 23:40:15, 0, 
+<==        Row: 32, 29, 用户新增, 3, , , system:user:add, , 1, 0, 0, , 2026-06-05 23:27:03, , 2026-06-05 23:32:53, 0, 
+<==        Row: 35, 30, 角色新增, 3, , , system:role:add, , 1, 0, 0, , 2026-06-05 23:27:03, , 2026-06-05 23:33:05, 0, 
+<==      Total: 10
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@231aef8]
+2026-06-06 18:08:48.846 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/list | 状态:200 | 耗时:282ms
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 2, 系统Logo, system_logo, /cyanbase.svg, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:43:40, 左上角Logo地址，空则显示文字
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4afa82e9]
+2026-06-06 18:08:48.937 [http-nio-8090-exec-2] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_logo | 状态:200 | 耗时:124ms
+2026-06-06 18:08:49.047 [http-nio-8090-exec-10] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/getUserMenu | 状态:200 | 耗时:63ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@b728d53] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@2009152976 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
+==> Parameters: 
+<==    Columns: total
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
+<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@b728d53]
+2026-06-06 18:29:45.285 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:226ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3761e60f] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@333c4410] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@381909469 wrapping org.mariadb.jdbc.Connection@345a0100] will not be managed by Spring
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0
+==> Parameters: 
+JDBC Connection [HikariProxyConnection@1330013322 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
 ==>  Preparing: SELECT COUNT(*) AS total FROM sys_user WHERE del_flag = 0
 ==> Parameters: 
+<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
+<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@3761e60f]
+2026-06-06 18:29:46.908 [http-nio-8090-exec-10] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/user/allRole | 状态:200 | 耗时:172ms
 <==    Columns: total
 <==        Row: 2
 <==      Total: 1
@@ -517,21 +414,165 @@ JDBC Connection [HikariProxyConnection@1678461519 wrapping org.mariadb.jdbc.Conn
 <==        Row: 4, 0, 0, test, 123456, , , , , 0, 0, , null, , 2026-05-27 17:14:01, , 2026-05-27 17:14:01, 0, 
 <==        Row: 1, 1, 1, admin, admin123, 系统管理员, , , , 0, 0, , null, admin, 2026-05-24 12:28:11, admin, 2026-05-24 14:49:04, 0, 超级管理员
 <==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@18f37d1d]
-2026-06-01 01:31:57.328 [http-nio-8090-exec-8] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:190ms
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@333c4410]
+2026-06-06 18:29:47.051 [http-nio-8090-exec-5] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:312ms
 Creating a new SqlSession
-SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4151f393] was not registered for synchronization because synchronization is not active
-JDBC Connection [HikariProxyConnection@64476653 wrapping org.mariadb.jdbc.Connection@75c619a9] will not be managed by Spring
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c91da05] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@47656bba] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@45a0d323] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1227022288 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_dept WHERE del_flag = 0
+==> Parameters: 
+JDBC Connection [HikariProxyConnection@459522644 wrapping org.mariadb.jdbc.Connection@3af5dbf0] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@895283740 wrapping org.mariadb.jdbc.Connection@345a0100] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_user WHERE del_flag = 0
 ==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
+==> Parameters: 
 ==> Parameters: 
 <==    Columns: total
 <==        Row: 2
+<==      Total: 1
+==>  Preparing: SELECT id,tenant_id,parent_id,dept_name,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark,is_deleted FROM sys_dept WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+<==    Columns: total
+<==        Row: 2
+<==    Columns: total
+<==      Total: 1
+<==        Row: 3
+<==      Total: 1
+==>  Preparing: SELECT id,tenant_id,dept_id,user_name,password,nick_name,phone,email,avatar,sex,status,login_ip,login_time,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_user WHERE del_flag=0 ORDER BY create_time DESC LIMIT ?
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+==> Parameters: 10(Long)
+<==    Columns: id, tenant_id, parent_id, dept_name, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark, is_deleted
+<==        Row: 1, 1, 0, 青渊集团总部, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 顶级部门, 0
+<==        Row: 8, 1, 1, 开发事业部, 2, 0, , 2026-05-31 21:31:03, , 2026-05-31 21:31:03, 0, , 0
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@47656bba]
+2026-06-06 18:31:52.819 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:278ms
+<==    Columns: id, tenant_id, dept_id, user_name, password, nick_name, phone, email, avatar, sex, status, login_ip, login_time, create_by, create_time, update_by, update_time, del_flag, remark
+<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 4, 0, 0, test, 123456, , , , , 0, 0, , null, , 2026-05-27 17:14:01, , 2026-05-27 17:14:01, 0, 
+<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
+<==        Row: 1, 1, 1, admin, admin123, 系统管理员, , , , 0, 0, , null, admin, 2026-05-24 12:28:11, admin, 2026-05-24 14:49:04, 0, 超级管理员
+<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
+<==      Total: 2
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@45a0d323]
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5c91da05]
+2026-06-06 18:31:52.870 [http-nio-8090-exec-2] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:330ms
+2026-06-06 18:31:52.870 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:328ms
+Creating a new SqlSession
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4f18db9f] was not registered for synchronization because synchronization is not active
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21c8b497] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@37735499] was not registered for synchronization because synchronization is not active
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5081f391] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1537720694 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_name(String)
+JDBC Connection [HikariProxyConnection@270775030 wrapping org.mariadb.jdbc.Connection@345a0100] will not be managed by Spring
+JDBC Connection [HikariProxyConnection@1664060225 wrapping org.mariadb.jdbc.Connection@3af5dbf0] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_user WHERE del_flag = 0
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_dept WHERE del_flag = 0
+JDBC Connection [HikariProxyConnection@1361236354 wrapping org.mariadb.jdbc.Connection@bf7ec76] will not be managed by Spring
+==> Parameters: 
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
+==> Parameters: 
+==> Parameters: 
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 1, 系统名称, system_name, CyanBase, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:01:05, 左上角显示的系统名称
+<==      Total: 1
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@37735499]
+2026-06-06 18:32:00.829 [http-nio-8090-exec-1] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_name | 状态:200 | 耗时:166ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@283c95bd] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@768115596 wrapping org.mariadb.jdbc.Connection@13b00f0] will not be managed by Spring
+==>  Preparing: SELECT id,config_name,config_key,config_value,config_type,create_by,create_time,update_by,update_time,remark FROM sys_config WHERE (config_key = ?)
+==> Parameters: system_logo(String)
+<==    Columns: total
+<==        Row: 3
+<==    Columns: total
+<==        Row: 2
+<==      Total: 1
+<==    Columns: total
+<==        Row: 2
+<==      Total: 1
+<==      Total: 1
+==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==>  Preparing: SELECT id,tenant_id,parent_id,dept_name,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark,is_deleted FROM sys_dept WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
+==>  Preparing: SELECT id,tenant_id,dept_id,user_name,password,nick_name,phone,email,avatar,sex,status,login_ip,login_time,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_user WHERE del_flag=0 ORDER BY create_time DESC LIMIT ?
+==> Parameters: 10(Long)
+==> Parameters: 10(Long)
+==> Parameters: 10(Long)
+<==    Columns: id, config_name, config_key, config_value, config_type, create_by, create_time, update_by, update_time, remark
+<==        Row: 2, 系统Logo, system_logo, /cyanbase.svg, 1, , 2026-06-03 23:48:51, , 2026-06-04 01:43:40, 左上角Logo地址，空则显示文字
+<==    Columns: id, tenant_id, dept_id, user_name, password, nick_name, phone, email, avatar, sex, status, login_ip, login_time, create_by, create_time, update_by, update_time, del_flag, remark
+<==    Columns: id, tenant_id, parent_id, dept_name, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark, is_deleted
+<==        Row: 4, 0, 0, test, 123456, , , , , 0, 0, , null, , 2026-05-27 17:14:01, , 2026-05-27 17:14:01, 0, 
+<==      Total: 1
+<==        Row: 1, 1, 0, 青渊集团总部, 0, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 顶级部门, 0
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@283c95bd]
+<==        Row: 1, 1, 1, admin, admin123, 系统管理员, , , , 0, 0, , null, admin, 2026-05-24 12:28:11, admin, 2026-05-24 14:49:04, 0, 超级管理员
+<==        Row: 8, 1, 1, 开发事业部, 2, 0, , 2026-05-31 21:31:03, , 2026-05-31 21:31:03, 0, , 0
+<==      Total: 2
+<==      Total: 2
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@21c8b497]
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@5081f391]
+2026-06-06 18:32:00.970 [http-nio-8090-exec-4] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/config/key/system_logo | 状态:200 | 耗时:113ms
+2026-06-06 18:32:00.971 [http-nio-8090-exec-9] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/user/list | 状态:200 | 耗时:308ms
+2026-06-06 18:32:00.972 [http-nio-8090-exec-8] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/dept/list | 状态:200 | 耗时:301ms
+<==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
+<==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4f18db9f]
+2026-06-06 18:32:01.023 [http-nio-8090-exec-7] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:358ms
+2026-06-06 18:32:01.116 [http-nio-8090-exec-6] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/getUserMenu | 状态:200 | 耗时:115ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@256f3fee] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@1872640994 wrapping org.mariadb.jdbc.Connection@345a0100] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_role WHERE del_flag = 0
+==> Parameters: 
+<==    Columns: total
+<==        Row: 3
 <==      Total: 1
 ==>  Preparing: SELECT id,tenant_id,role_name,role_key,data_scope,sort_num,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_role WHERE del_flag=0 ORDER BY sort_num ASC LIMIT ?
 ==> Parameters: 10(Long)
 <==    Columns: id, tenant_id, role_name, role_key, data_scope, sort_num, status, create_by, create_time, update_by, update_time, del_flag, remark
 <==        Row: 1, 1, 超级管理员, admin, 1, 1, 0, admin, 2026-05-24 12:28:11, admin, 2026-05-24 12:28:11, 0, 最高权限角色
 <==        Row: 2, 1, 测试角色01, ROLE_20260601_0001, 1, 4, 0, , 2026-06-01 01:12:26, , 2026-06-01 01:12:26, 0, 
-<==      Total: 2
-Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4151f393]
-2026-06-01 01:31:59.505 [http-nio-8090-exec-6] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:127.0.0.1 | 地址:本地 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:189ms
+<==        Row: 3, 1, AAA, ROLE_20260605_0001, 1, 5, 0, , 2026-06-05 20:20:03, , 2026-06-05 20:20:03, 0, 
+<==      Total: 3
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@256f3fee]
+2026-06-06 18:33:16.508 [http-nio-8090-exec-9] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/role/list | 状态:200 | 耗时:208ms
+Creating a new SqlSession
+SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4487c045] was not registered for synchronization because synchronization is not active
+JDBC Connection [HikariProxyConnection@393327980 wrapping org.mariadb.jdbc.Connection@345a0100] will not be managed by Spring
+==>  Preparing: SELECT COUNT(*) AS total FROM sys_menu
+==> Parameters: 
+<==    Columns: total
+<==        Row: 40
+<==      Total: 1
+==>  Preparing: SELECT id,parent_id,menu_name,menu_type,route_path,component,perms,icon,sort_num,visible,status,create_by,create_time,update_by,update_time,del_flag,remark FROM sys_menu ORDER BY sort_num ASC LIMIT ?
+==> Parameters: 10(Long)
+<==    Columns: id, parent_id, menu_name, menu_type, route_path, component, perms, icon, sort_num, visible, status, create_by, create_time, update_by, update_time, del_flag, remark
+<==        Row: 1, 0, 系统管理, 1, system, Layout, , system, 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 8, 2, 在线用户, 2, online, monitor/online/index, monitor:online:list, online, 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 13, 3, 文件管理, 2, file, system/file/index, system:file:list, file, 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 19, 4, 岗位新增, 3, , , system:post:add, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 22, 5, 字典新增, 3, , , system:dict:add, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 25, 8, 强退用户, 3, , , monitor:online:kick, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 26, 9, 任务执行, 3, , , monitor:job:start, , 1, 0, 0, , 2026-05-24 21:28:16, , 2026-05-24 21:28:16, 0, 
+<==        Row: 29, 1, 用户管理, 2, user, system/user/index, system:user:list, user, 1, 0, 0, , 2026-06-05 23:26:45, , 2026-06-05 23:40:15, 0, 
+<==        Row: 32, 29, 用户新增, 3, , , system:user:add, , 1, 0, 0, , 2026-06-05 23:27:03, , 2026-06-05 23:32:53, 0, 
+<==        Row: 35, 30, 角色新增, 3, , , system:role:add, , 1, 0, 0, , 2026-06-05 23:27:03, , 2026-06-05 23:33:05, 0, 
+<==      Total: 10
+Closing non transactional SqlSession [org.apache.ibatis.session.defaults.DefaultSqlSession@4487c045]
+2026-06-06 18:33:24.067 [http-nio-8090-exec-10] [34mINFO [0;39m [36mc.c.common.log.interceptor.RequestLogInterceptor[0;39m - 【请求日志】操作人:admin | IP:172.31.80.1 | 地址:未知 | 方法:GET | URI:/system/menu/list | 状态:200 | 耗时:174ms

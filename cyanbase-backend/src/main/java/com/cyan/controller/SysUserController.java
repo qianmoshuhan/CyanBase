@@ -4,11 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.entity.SysUser;
+import com.cyan.entity.SysRole;
 import com.cyan.service.SysUserService;
+import com.cyan.service.SysRoleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import com.cyan.common.log.annotation.Log;
 import com.cyan.common.log.enums.BusinessType;
+import java.util.List;
 
 @RestController
 @RequestMapping("/system/user")
@@ -16,6 +19,7 @@ import com.cyan.common.log.enums.BusinessType;
 public class SysUserController {
 
     private final SysUserService sysUserService;
+    private final SysRoleService sysRoleService;
 
     @GetMapping("/list")
     public R<Page<SysUser>> list(
@@ -51,16 +55,28 @@ public class SysUserController {
     @PostMapping
     @Log(title = "用户管理", businessType = BusinessType.INSERT)
     public R<Void> add(@RequestBody SysUser sysUser) {
-        return sysUserService.save(sysUser) ? R.ok() : R.fail("新增失败");
+        return sysUserService.saveUserAndRole(sysUser) ? R.ok() : R.fail("新增失败");
     }
 
     @PutMapping
     public R<Void> update(@RequestBody SysUser sysUser) {
-        return sysUserService.updateById(sysUser) ? R.ok() : R.fail("更新失败");
+        return sysUserService.updateUserAndRole(sysUser) ? R.ok() : R.fail("更新失败");
     }
 
     @DeleteMapping("/{id}")
     public R<Void> delete(@PathVariable Long id) {
         return sysUserService.removeById(id) ? R.ok() : R.fail("删除失败");
+    }
+
+    //新增1：获取全部角色下拉选项
+    @GetMapping("/allRole")
+    public R<List<SysRole>> getAllRole(){
+        return R.ok(sysRoleService.list());
+    }
+
+    //新增2：根据用户ID查询已选角色ID
+    @GetMapping("/getRoleIds/{uid}")
+    public R<List<Long>> getUserBindRoleIds(@PathVariable Long uid){
+        return R.ok(sysUserService.getRoleIdsByUserId(uid));
     }
 }

@@ -12,6 +12,7 @@
     "@form-create/designer": "^3.4.0",
     "@form-create/element-ui": "^3.3.0",
     "axios": "^1.6.0",
+    "bpmn-js": "^18.16.1",
     "element-plus": "^2.4.0",
     "pinia": "^2.1.0",
     "vue": "^3.4.0",

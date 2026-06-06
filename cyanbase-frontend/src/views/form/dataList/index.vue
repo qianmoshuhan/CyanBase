@@ -54,14 +54,6 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">查看详情</el-button>
-            <el-button 
-              v-if="row.status === 'SUBMITTED'"
-              type="danger" 
-              link 
-              @click="handleRecall(row)"
-            >
-              撤回
-            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -110,9 +102,8 @@
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // 导入表单API（已完成）
-import { getFormDefinitionList, getFormDataList, recallFormData } from '@/api/form'
+import { getFormDefinitionList, getFormDataList } from '@/api/form'
 import FormPreviewDialog from './FormPreviewDialog.vue'
-import { ref } from 'vue'
 
 // 表单列表（用于筛选）
 const formList = ref([])
@@ -185,31 +176,6 @@ const handleView = (row) => {
   detailVisible.value = true
 }
 
-// 撤回表单
-const handleRecall = (row) => {
-  ElMessageBox.confirm(
-    '确定要撤回该表单数据吗？',
-    '提示',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(async () => {
-    try {
-      const res = await recallFormData(row.id)
-      if (res.code === 200) {
-        ElMessage.success('撤回成功')
-        fetchData()
-      } else {
-        ElMessage.error(res.msg || '撤回失败')
-      }
-    } catch (error) {
-      ElMessage.error('网络异常，请稍后重试')
-      console.error('撤回表单数据失败：', error)
-    }
-  })
-}
 
 // 重置搜索
 const handleReset = () => {

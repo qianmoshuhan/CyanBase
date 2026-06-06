@@ -8,17 +8,14 @@ export const useUserStore = defineStore('user', {
     userInfo: null,
     roles: []
   }),
-
   getters: {
     isLoggedIn: state => !!state.token,
     getUserName: state => state.userInfo?.userName || '',
-    getNickName: state => state.userInfo?.sysUser?.nickName || state.userInfo?.userName || ''
+    getNickName: state => state.userInfo?.sysUser?.nickName || state.userInfo?.userName || '',
+    // 新增获取用户ID
+    getUserId: state => state.userInfo?.userId
   },
-
   actions: {
-    /**
-     * 用户登录
-     */
     async login(userName, password) {
       const res = await login({ userName, password })
       this.token = res.data.token
@@ -27,10 +24,6 @@ export const useUserStore = defineStore('user', {
       storage.setToken(this.token)
       return res
     },
-
-    /**
-     * 获取用户信息
-     */
     async fetchUserInfo() {
       try {
         const res = await getUserInfo()
@@ -42,23 +35,14 @@ export const useUserStore = defineStore('user', {
         throw error
       }
     },
-
-    /**
-     * 退出登录
-     */
     async logout() {
       try {
         await logout()
       } catch (e) {
-        // 忽略退出接口错误
       } finally {
         this.clearAuth()
       }
     },
-
-    /**
-     * 清除认证信息
-     */
     clearAuth() {
       this.token = ''
       this.userInfo = null

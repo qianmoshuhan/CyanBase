@@ -20,7 +20,7 @@
       <el-card class="stat-card" shadow="hover">
         <template #header>
           <div class="card-header">
-            <el-icon size="24" color="#67c23a"><Office /></el-icon>
+            <el-icon size="24" color="#67c23a"><OfficeBuilding /></el-icon>
             <span>部门数量</span>
           </div>
         </template>
@@ -63,6 +63,7 @@
 </template>
 
 <script setup>
+import { OfficeBuilding } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useUserStore } from '@/store/user'
 import { getUserList } from '@/api/user'

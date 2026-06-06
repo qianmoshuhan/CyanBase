@@ -52,3 +52,28 @@ export function deleteRole(id) {
     method: 'delete'
   })
 }
+
+// 获取菜单树
+export function getMenuList() {
+  return request({
+    url: '/system/menu/all',
+    method: 'GET'
+  })
+}
+
+// 获取角色已勾选菜单ID
+export function getRoleMenuIds(roleId) {
+  return request({
+    url: `/system/role/getMenuIds/${roleId}`,
+    method: 'GET'
+  })
+}
+
+// 保存角色权限
+export function saveRoleMenuPerm(roleId, menuIds) {
+  return request({
+    url: `/system/role/saveMenuPerm/${roleId}`,
+    method: 'POST',
+    data: menuIds
+  })
+}

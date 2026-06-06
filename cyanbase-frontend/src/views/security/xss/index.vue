@@ -16,8 +16,8 @@
           <el-input v-model="query.keyword" placeholder="请输入规则名称/防护字段" clearable />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="fetchData">查询</el-button>
-          <el-button @click="handleReset">重置</el-button>
+  
+
         </el-form-item>
       </el-form>
 
@@ -54,8 +54,7 @@
         :current-page="pageNum"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="fetchData"
-        @current-change="fetchData"
+
       />
     </el-card>
 
@@ -93,8 +92,7 @@
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-// 导入XSS防护API（已完成）
-import { getXssConfigList, addXssConfig, updateXssConfig, deleteXssConfig } from '@/api/monitor'
+
 
 // 查询条件
 const query = reactive({ keyword: '' })
@@ -126,25 +124,7 @@ const formRules = {
   status: [{ required: true, message: '请选择状态', trigger: 'change' }]
 }
 
-// 获取列表数据
-const fetchData = async () => {
-  try {
-    const res = await getXssConfigList({
-      pageNum: pageNum.value,
-      pageSize: pageSize.value,
-      keyword: query.keyword
-    })
-    if (res.code === 200) {
-      list.value = res.data.list
-      total.value = res.data.total
-    } else {
-      ElMessage.error(res.msg || '获取数据失败')
-    }
-  } catch (error) {
-    ElMessage.error('网络异常，请稍后重试')
-    console.error('获取XSS防护配置列表失败：', error)
-  }
-}
+
 
 // 新增
 const handleAdd = () => {
@@ -176,67 +156,10 @@ const handleEdit = (row) => {
   }
 }
 
-// 删除
-const handleDelete = (row) => {
-  ElMessageBox.confirm(
-    '确定要删除该XSS防护配置吗？',
-    '提示',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(async () => {
-    try {
-      const res = await deleteXssConfig(row.id)
-      if (res.code === 200) {
-        ElMessage.success('删除成功')
-        fetchData()
-      } else {
-        ElMessage.error(res.msg || '删除失败')
-      }
-    } catch (error) {
-      ElMessage.error('网络异常，请稍后重试')
-      console.error('删除XSS防护配置失败：', error)
-    }
-  })
-}
 
-// 提交表单
-const handleSubmit = async () => {
-  if (!formRef.value) return
-  try {
-    await formRef.value.validate()
-    let res
-    if (isEdit.value) {
-      res = await updateXssConfig(formData)
-    } else {
-      res = await addXssConfig(formData)
-    }
-    if (res.code === 200) {
-      ElMessage.success(isEdit.value ? '编辑成功' : '新增成功')
-      dialogVisible.value = false
-      fetchData()
-    } else {
-      ElMessage.error(res.msg || (isEdit.value ? '编辑失败' : '新增失败'))
-    }
-  } catch (error) {
-    if (error.name !== 'ValidationError') {
-      ElMessage.error('网络异常，请稍后重试')
-      console.error('提交XSS防护配置失败：', error)
-    }
-  }
-}
 
-// 重置搜索
-const handleReset = () => {
-  query.keyword = ''
-  pageNum.value = 1
-  fetchData()
-}
 
-// 初始化加载
-fetchData()
+
 </script>
 
 <style scoped>

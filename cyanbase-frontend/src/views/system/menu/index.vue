@@ -48,7 +48,7 @@
           <el-input-number v-model="formData.orderNum" :min="0" />
         </el-form-item>
         <el-form-item label="路由路径" prop="path">
-          <el-input v-model="formData.path" placeholder="请输入路由路径" />
+          <el-input v-model="formData.routePath" placeholder="请输入路由路径" />
         </el-form-item>
         <el-form-item label="组件路径" prop="component">
           <el-input v-model="formData.component" placeholder="请输入组件路径" />
@@ -96,7 +96,7 @@ const formData = reactive({
 
 const formRules = {
   menuName: [{ required: true, message: '请输入菜单名称', trigger: 'blur' }],
-  path: [{ required: true, message: '请输入路由路径', trigger: 'blur' }]
+  routePath: [{ required: true, message: '请输入路由路径', trigger: 'blur' }]
 }
 
 const fetchData = async () => {

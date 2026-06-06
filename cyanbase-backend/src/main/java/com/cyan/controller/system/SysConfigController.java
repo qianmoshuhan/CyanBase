@@ -25,7 +25,7 @@ public class SysConfigController {
         if (configName != null && !configName.isEmpty()) wrapper.like(SysConfig::getConfigName, configName);
         if (configKey != null && !configKey.isEmpty()) wrapper.eq(SysConfig::getConfigKey, configKey);
         if (configType != null && !configType.isEmpty()) wrapper.eq(SysConfig::getConfigType, configType);
-        wrapper.orderByDesc(SysConfig::getConfigId);
+        wrapper.orderByDesc(SysConfig::getId);
         return R.ok(sysConfigService.page(new Page<>(current, size), wrapper));
     }
 
@@ -50,5 +50,13 @@ public class SysConfigController {
     public R<?> delete(@PathVariable Long configId) {
         sysConfigService.removeById(configId);
         return R.ok("删除成功");
+    }
+
+    @GetMapping("/key/{configKey}")
+    public R<String> getByKey(@PathVariable String configKey){
+        LambdaQueryWrapper<SysConfig> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(SysConfig::getConfigKey,configKey);
+        SysConfig one = sysConfigService.getOne(wrapper);
+        return R.ok(one==null?"":one.getConfigValue());
     }
 }

@@ -34,7 +34,7 @@
       </el-table>
     </el-card>
     <!-- 新增/编辑弹窗 -->
-    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="500px" @close="handleDialogClose">
+    <el-dialog v-model="dialogVisible" :title="dialogTitle" width="600px" @close="handleDialogClose">
       <el-form ref="formRef" :model="formData" :rules="formRules" label-width="80px">
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="formData.roleName" placeholder="请输入角色名称" />
@@ -45,6 +45,20 @@
         <el-form-item label="数据范围" prop="dataScope">
           <el-input-number v-model="formData.dataScope" :min="1" :max="10" />
         </el-form-item>
+        <!-- 权限分配（菜单树勾选）-->
+<el-form-item label="分配权限">
+<div style="width: calc(100% + 50px); height: 300px; overflow-y: auto; border:1px solid #eee; padding:10px; ">
+        <el-tree
+          ref="treeRef"
+          :data="menuTreeData"
+          show-checkbox
+          node-key="id"
+          :default-expand-all="false" 
+          :check-strictly="false"
+          :props="{ label: 'menuName', children: 'children' }"
+        />
+      </div>
+</el-form-item>
         <el-form-item label="排序" prop="sortNum">
           <el-input-number v-model="formData.sortNum" :min="0" />
         </el-form-item>
@@ -67,15 +81,21 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed ,nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getRoleList, addRole, updateRole, deleteRole } from '@/api/role'
+import { getRoleList, addRole, updateRole, deleteRole ,getMenuList, getRoleMenuIds, saveRoleMenuPerm } from '@/api/role'
 
 const tableData = ref([])
 const dialogVisible = ref(false)
 const dialogTitle = computed(() => formData.id ? '编辑角色' : '新增角色')
 const isEdit = ref(false)
 const formRef = ref(null)
+// 菜单树数据
+const menuTreeData = ref([])
+// 树组件引用
+const treeRef = ref(null)
+// 提交时用的菜单ID数组
+const checkedMenuIds = ref([])
 
 const formData = reactive({
   id: null,
@@ -111,11 +131,25 @@ const handleAdd = () => {
   dialogVisible.value = true
 }
 
-const handleEdit = (row) => {
+const handleEdit = async (row) => {
   isEdit.value = true
+  // ✅ 安全赋值，绝对不报错
+  formData.id = row.id
+  formData.roleName = row.roleName
+  formData.dataScope = row.dataScope
+  formData.sortNum = row.sortNum
+  formData.status = row.status
+  formData.remark = row.remark
+  formData.roleKey = row.roleKey
   // 编辑回显roleKey，但页面不展示、不可改
-  Object.assign(formData, row)
+  //Object.assign(formData, row)
   dialogVisible.value = true
+  // ================== 新加 ==================
+  // 1. 加载所有菜单树
+  await loadMenuTree()
+  // 2. 回显该角色已勾选的权限
+  await loadRoleCheckedMenus(formData.id)
+  // ==========================================
 }
 
 const handleDelete = (row) => {
@@ -144,6 +178,12 @@ const handleSubmit = async () => {
         await addRole(formData)
         ElMessage.success('新增成功')
       }
+      // ============= 以下是新增的权限保存代码（不影响原有功能）=============
+      // 获取树勾选的菜单ID
+      let menuIds = treeRef.value.getCheckedKeys()
+      // 调用接口保存权限
+      await saveRoleMenuPerm(formData.id, menuIds)
+      // =================================================================
       dialogVisible.value = false
       fetchData()
     } catch (error) {
@@ -154,6 +194,25 @@ const handleSubmit = async () => {
 
 const handleDialogClose = () => {
   formRef.value?.resetFields()
+}
+
+// 加载菜单树（给权限勾选用）
+const loadMenuTree = async () => {
+  const res = await getMenuList()
+  menuTreeData.value = res.data
+}
+
+// 加载角色已勾选的菜单ID
+const loadRoleCheckedMenus = async (roleId) => {
+  const res = await getRoleMenuIds(roleId)
+  checkedMenuIds.value = res.data
+
+  // 让树勾选上
+  nextTick(() => {
+    if (treeRef.value) {
+      treeRef.value.setCheckedKeys(checkedMenuIds.value)
+    }
+  })
 }
 
 fetchData()

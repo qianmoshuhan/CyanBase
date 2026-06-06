@@ -5,7 +5,7 @@ import storage from './storage'
 
 // 创建axios实例 - 开发环境通过Vite代理访问后端
 const service = axios.create({
-  baseURL: import.meta.env.PROD ? import.meta.env.VITE_API_BASE_URL : '',
+  baseURL: 'http://172.31.84.55:8090', // 👈 只改这里
   timeout: 30000
 })
 

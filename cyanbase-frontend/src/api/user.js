@@ -52,3 +52,18 @@ export function deleteUser(id) {
     method: 'delete'
   })
 }
+
+//获取所有角色下拉列表
+export function getAllRole() {
+  return request({
+    url: '/system/user/allRole',
+    method: 'get'
+  })
+}
+//根据用户ID获取已勾选角色ID数组
+export function getUserSelectedRoleIds(uid) {
+  return request({
+    url: `/system/user/getRoleIds/${uid}`,
+    method: 'get'
+  })
+}

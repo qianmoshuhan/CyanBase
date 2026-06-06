@@ -1,14 +1,5 @@
 <template>
   <div class="rate-limit-container">
-    <el-card shadow="hover">
-      <template #header>
-        <div class="card-header">
-          <span>限流规则管理</span>
-          <el-button type="success" @click="handleAdd">
-            <el-icon><Plus /></el-icon> 新增
-          </el-button>
-        </div>
-      </template>
 
       <!-- 搜索表单 -->
       <el-form :inline="true" class="search-form">
@@ -16,7 +7,7 @@
           <el-input v-model="query.keyword" placeholder="请输入规则名称/接口地址" clearable />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="fetchData">查询</el-button>
+
           <el-button @click="handleReset">重置</el-button>
         </el-form-item>
       </el-form>
@@ -36,16 +27,7 @@
         </el-table-column>
       </el-table>
 
-      <!-- 分页 -->
-      <el-pagination
-        :total="total"
-        :current-page="pageNum"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="fetchData"
-        @current-change="fetchData"
-      />
-    </el-card>
+
 
     <!-- 新增/编辑弹窗 -->
     <el-dialog v-model="dialogVisible" :title="dialogTitle" width="80%">
@@ -72,8 +54,7 @@
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
-// 导入限流规则API（已完成）
-import { getRateLimitList, addRateLimit, updateRateLimit, deleteRateLimit } from '@/api/monitor'
+
 
 // 查询条件
 const query = reactive({ keyword: '' })
@@ -103,25 +84,6 @@ const formRules = {
   timeWindow: [{ required: true, message: '请输入时间窗口', trigger: 'blur' }]
 }
 
-// 获取列表数据
-const fetchData = async () => {
-  try {
-    const res = await getRateLimitList({
-      pageNum: pageNum.value,
-      pageSize: pageSize.value,
-      keyword: query.keyword
-    })
-    if (res.code === 200) {
-      list.value = res.data.list
-      total.value = res.data.total
-    } else {
-      ElMessage.error(res.msg || '获取数据失败')
-    }
-  } catch (error) {
-    ElMessage.error('网络异常，请稍后重试')
-    console.error('获取限流规则列表失败：', error)
-  }
-}
 
 // 新增
 const handleAdd = () => {
@@ -153,69 +115,12 @@ const handleEdit = (row) => {
   }
 }
 
-// 删除
-const handleDelete = (row) => {
-  ElMessageBox.confirm(
-    '确定要删除该限流规则吗？',
-    '提示',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(async () => {
-    try {
-      const res = await deleteRateLimit(row.id)
-      if (res.code === 200) {
-        ElMessage.success('删除成功')
-        fetchData() // 重新加载列表
-      } else {
-        ElMessage.error(res.msg || '删除失败')
-      }
-    } catch (error) {
-      ElMessage.error('网络异常，请稍后重试')
-      console.error('删除限流规则失败：', error)
-    }
-  })
-}
 
-// 提交表单（新增/编辑）
-const handleSubmit = async () => {
-  if (!formRef.value) return
-  try {
-    // 表单验证
-    await formRef.value.validate()
-    // 调用API
-    let res
-    if (isEdit.value) {
-      res = await updateRateLimit(formData)
-    } else {
-      res = await addRateLimit(formData)
-    }
-    if (res.code === 200) {
-      ElMessage.success(isEdit.value ? '编辑成功' : '新增成功')
-      dialogVisible.value = false
-      fetchData() // 重新加载列表
-    } else {
-      ElMessage.error(res.msg || (isEdit.value ? '编辑失败' : '新增失败'))
-    }
-  } catch (error) {
-    if (error.name !== 'ValidationError') {
-      ElMessage.error('网络异常，请稍后重试')
-      console.error('提交限流规则失败：', error)
-    }
-  }
-}
 
-// 重置搜索
-const handleReset = () => {
-  query.keyword = ''
-  pageNum.value = 1
-  fetchData()
-}
 
-// 初始化加载数据
-fetchData()
+
+
+
 </script>
 
 <style scoped>
