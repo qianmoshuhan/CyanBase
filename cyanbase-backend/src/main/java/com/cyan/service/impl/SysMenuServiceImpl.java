@@ -36,6 +36,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             rmWrapper.in(SysRoleMenu::getRoleId, roleIds);
             List<Long> menuIds = roleMenuMapper.selectList(rmWrapper).stream().map(SysRoleMenu::getMenuId).distinct().collect(Collectors.toList());
 
+            // ⭐ 空列表防御：没分到任何菜单 → 直接返回空，避免后续 .in(SysMenu::getId, emptySet) 生成 SQL 语法错误 IN ()
+            if (menuIds.isEmpty()) return List.of();
+
             // 3. 获取所有父节点（包含所有层级祖先）
 Set<Long> allMenuIds = new HashSet<>(menuIds);
 for (Long mid : menuIds) {

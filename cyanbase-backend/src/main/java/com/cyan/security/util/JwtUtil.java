@@ -20,8 +20,13 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
 
-    @Value("${jwt.expire}")
-    private Long expire;
+    @Value("${jwt.accessExpire}")
+    private long accessExpire;
+
+    /** Access Token 有效期（毫秒）—— 暴露给外部计算 expiresIn */
+    public long getAccessExpireMs() {
+        return accessExpire;
+    }
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -35,12 +40,33 @@ public class JwtUtil {
         claims.put("userId", userId);
         claims.put("userName", userName);
         claims.put("roles", roles);
+        return createToken(claims); // 👉本次修改：原有Jwt构建逻辑抽离到createToken，对外行为完全不变
+    }
+
+    // 👉本次新增：通用Token构建方法，外部可传入组装好的claims
+    public String createToken(Map<String, Object> claims) {
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expire))
+                .setExpiration(new Date(System.currentTimeMillis() + accessExpire))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    // 👉本次新增：安全写入tenantId，非null才put
+    public void putTenantId(Map<String, Object> claims, Long tenantId) {
+        if (tenantId != null) {
+            claims.put("tenantId", tenantId);
+        }
+    }
+
+    // 👉本次新增：从Claims中读取tenantId，取不到返回null（代表超级管理员）
+    public Long getTenantId(Claims claims) {
+        Object tenantId = claims.get("tenantId");
+        if (tenantId == null) {
+            return null;
+        }
+        return Long.valueOf(tenantId.toString());
     }
 
     /**
@@ -116,5 +142,24 @@ public class JwtUtil {
     public String getRolesFromToken(String token) {
         Claims claims = parseToken(token);
         return claims.get("roles").toString();
+    }
+
+    /**
+     * 从令牌获取租户ID（新增：支持多租户场景下 CustomTenantHandler 自行解析）
+     * <p>
+     * token 中没有 tenantId claim 时返回 null —— 代表超级管理员或旧格式 token。
+     * </p>
+     */
+    public Long getTenantIdFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            Object tenantId = claims.get("tenantId");
+            if (tenantId == null) {
+                return null;
+            }
+            return Long.valueOf(tenantId.toString());
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

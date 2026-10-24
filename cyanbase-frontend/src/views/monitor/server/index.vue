@@ -106,9 +106,9 @@ const memory = reactive({
 
 const memoryUsage = ref(0)
 const colors = [
-  { color: '#67c23a', percentage: 60 },
-  { color: '#e6a23c', percentage: 80 },
-  { color: '#f56c6c', percentage: 100 }
+  { color: '#00b42a', percentage: 60 },
+  { color: '#ff7d00', percentage: 80 },
+  { color: '#f53f3f', percentage: 100 }
 ]
 
 const metricsList = ref([])

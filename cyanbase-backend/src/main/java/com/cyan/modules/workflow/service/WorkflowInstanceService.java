@@ -17,7 +17,9 @@ public interface WorkflowInstanceService extends IService<WorkflowInstance> {
     /**
      * 分页查询我发起的流程
      */
-    Page<WorkflowInstance> queryMyInitiatedList(Integer pageNum, Integer pageSize, Long userId, String status);
+    Page<WorkflowInstance> queryMyInitiatedList(Integer pageNum, Integer pageSize, Long userId,
+                                                String status, String keyword,
+                                                String startTime, String endTime);
 
     /**
      * 分页查询我的待办流程
@@ -33,4 +35,16 @@ public interface WorkflowInstanceService extends IService<WorkflowInstance> {
      * 取消流程
      */
     boolean cancelProcess(Long instanceId, Long userId);
+
+    /**
+     * 根据 businessKey 物理删除流程实例及其所有审批记录（级联清理）
+     * 业务单据删除时调用，防止脏数据残留
+     */
+    void deleteByBusinessKey(String businessKey);
+
+    /**
+     * 手动删除已撤销/已驳回的流程实例（仅限发起人本人）
+     * 已完成/运行中的流程因审计原因不可删除
+     */
+    boolean deleteInstanceById(Long id, Long operatorId);
 }

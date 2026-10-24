@@ -15,7 +15,7 @@ public class SysDictType extends BaseEntity {
     private String dictName;
 
     @TableField("dict_type_code")
-    private String dictType;
+    private String dictTypeCode;
 
     private String status;
 }

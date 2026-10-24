@@ -7,6 +7,7 @@ import App from './App.vue'
 import router from './router'
 import './assets/styles/index.css'
 import formCreatePlugin from './plugins/formCreate'
+import { setupPermissionDirective } from './directives/permission'
 
 const app = createApp(App)
 
@@ -19,5 +20,6 @@ app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
 app.use(formCreatePlugin)
+setupPermissionDirective(app)
 
 app.mount('#app')

@@ -2,8 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import storage from '@/utils/storage'
 
 
-// 路由白名单
-const whiteList = ['/login']
+// 路由白名单（免登录直接访问）
+const whiteList = ['/login', '/tenant-login', '/mobile/home']
 
 const routes = [
   {
@@ -15,6 +15,19 @@ const routes = [
     name: 'Login',
     component: () => import('@/views/login/index.vue'),
     meta: { title: '登录' }
+  },
+  // 移动端 H5 门户首页（独立全屏，不包 Layout）
+  {
+    path: '/mobile/home',
+    name: 'MobileHome',
+    component: () => import('@/views/mobile/home.vue'),
+    meta: { title: '工作台', requiresAuth: true }
+  },
+  {
+    path: '/tenant-login',
+    name: 'TenantLogin',
+    component: () => import('@/views/tenantLogin/index.vue'),
+    meta: { title: '租户登录' }
   },
   {
     path: '/',
@@ -28,7 +41,21 @@ const routes = [
         component: () => import('@/views/home/index.vue'),
         meta: { title: '首页' }
       },
+      // 个人中心（所有身份共用）
+      {
+        path: '/profile',
+        name: 'Profile',
+        component: () => import('@/views/profile/index.vue'),
+        meta: { title: '个人中心' }
+      },
       // ===== 系统管理 =====
+        // 租户管理
+{
+  path: '/system/tenant',
+  name: 'Tenant',
+  component: () => import('@/views/system/tenant/index.vue'),
+  meta: { title: '租户管理' }
+},
       // 用户管理
       {
         path: '/system/user',
@@ -64,18 +91,18 @@ const routes = [
         component: () => import('@/views/system/post/index.vue'),
         meta: { title: '岗位管理' }
       },
-      // 字典类型
+      // 字典管理（Tab 合并入口：Tab1=字典类型，Tab2=字典数据）
+      // 两个路径都指向同一个合并组件，组件内部根据路由自动激活对应 Tab
       {
         path: '/system/dict/type',
         name: 'DictType',
-        component: () => import('@/views/system/dict/type/index.vue'),
+        component: () => import('@/views/system/dict/index.vue'),
         meta: { title: '字典类型' }
       },
-      // 字典数据
       {
         path: '/system/dict/data',
         name: 'DictData',
-        component: () => import('@/views/system/dict/data/index.vue'),
+        component: () => import('@/views/system/dict/index.vue'),
         meta: { title: '字典数据' }
       },
       // 参数配置
@@ -156,6 +183,13 @@ const routes = [
         component: () => import('@/views/monitor/online/index.vue'),
         meta: { title: '在线用户' }
       },
+      // API监控
+      {
+        path: '/monitor/apiMonitor',
+        name: 'ApiMonitor',
+        component: () => import('@/views/monitor/apiMonitor/index.vue'),
+        meta: { title: 'API监控' }
+      },
       // 定时任务
       {
         path: '/monitor/job',
@@ -235,6 +269,20 @@ const routes = [
         component: () => import('@/views/workflow/approve/index.vue'),
         meta: { title: '审批页面' }
       },
+      // 表单流程绑定配置（管理员专用）
+      {
+        path: '/workflow/binding',
+        name: 'WorkflowBinding',
+        component: () => import('@/views/workflow/binding/index.vue'),
+        meta: { title: '表单流程绑定' }
+      },
+      // 我的表单（操作员填报入口）
+      {
+        path: '/workflow/myForm',
+        name: 'WorkflowMyForm',
+        component: () => import('@/views/workflow/myForm/index.vue'),
+        meta: { title: '我的表单' }
+      },
       // ===== 自定义表单 =====
       // 表单提交
       {
@@ -249,12 +297,67 @@ const routes = [
         name: 'FormDataList',
         component: () => import('@/views/form/dataList/index.vue'),
         meta: { title: '表单数据' }
-      },
+      },// 表单可视化设计器
       {
         path: '/form/designer',
         name: 'FormDesigner',
         component: () => import('@/views/form/designer/index.vue'),
         meta: { title: '表单可视化设计器' }
+      },
+      // ===== 三重一大 =====
+      {
+        path: '/sydyd/system',
+        name: 'SydydSystem',
+        component: () => import('@/views/sydyd/system/index.vue'),
+        meta: { title: '制度管理' }
+      },
+      {
+        path: '/sydyd/list',
+        name: 'SydydList',
+        component: () => import('@/views/sydyd/list/index.vue'),
+        meta: { title: '清单管理' }
+      },
+      {
+        path: '/sydyd/topic',
+        name: 'SydydTopic',
+        component: () => import('@/views/sydyd/topic/index.vue'),
+        meta: { title: '议题管理' }
+      },
+      {
+        path: '/sydyd/item',
+        name: 'SydydItem',
+        component: () => import('@/views/sydyd/item/index.vue'),
+        meta: { title: '三重一大-采购事项' }
+      },
+      {
+        path: '/sydyd/item/detail',
+        name: 'SydydItemDetail',
+        component: () => import('@/views/sydyd/item/ItemDetail.vue'),
+        meta: { title: '事项详情' }
+      },
+      {
+        path: '/sydyd/meeting',
+        name: 'SydydMeeting',
+        component: () => import('@/views/sydyd/meeting/index.vue'),
+        meta: { title: '三重一大-会议管理' }
+      },
+      {
+        path: '/sydyd/meeting/detail',
+        name: 'SydydMeetingDetail',
+        component: () => import('@/views/sydyd/meeting/MeetingDetail.vue'),
+        meta: { title: '会议详情' }
+      },
+      {
+        path: '/sydyd/execute',
+        name: 'SydydExecute',
+        component: () => import('@/views/sydyd/execute/index.vue'),
+        meta: { title: '三重一大-实施落地' }
+      },
+      {
+        path: '/sydyd/execute/detail',
+        name: 'SydydExecuteDetail',
+        component: () => import('@/views/sydyd/execute/ExecuteDetail.vue'),
+        meta: { title: '实施详情' }
       }
     ]
   }
@@ -271,9 +374,10 @@ router.beforeEach((to, from, next) => {
 
   // 白名单路由直接放行
   if (whiteList.includes(to.path)) {
-    // 已登录则跳转首页
-    if (hasToken && to.path === '/login') {
-      next('/home')
+    // 已登录访问登录页 → 跳转对应首页
+    if (hasToken && (to.path === '/login' || to.path === '/tenant-login')) {
+      const isMobile = window.innerWidth <= 768
+      next(isMobile ? '/mobile/home' : '/home')
     } else {
       next()
     }

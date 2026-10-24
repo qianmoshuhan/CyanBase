@@ -20,7 +20,10 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.List;
@@ -35,27 +38,10 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class GlobalExceptionHandler {
 
-    // ==================== 自定义业务异常处理 ====================
-
-    /**
-     * 处理基础全局异常
-     */
-    @ExceptionHandler(BaseException.class)
-    public R<?> handleBaseException(BaseException e) {
-        log.warn("业务异常: [{}] {}", e.getCode(), e.getMsg());
-        return R.fail(e.getCode(), e.getMsg());
-    }
-
-    /**
-     * 处理业务自定义异常
-     */
-    @ExceptionHandler(BusinessException.class)
-    public R<?> handleBusinessException(BusinessException e) {
-        log.warn("业务异常: [{}] {}", e.getCode(), e.getMsg());
-        return R.fail(e.getCode(), e.getMsg());
-    }
+    // ==================== 认证授权异常处理 ====================
 
     /**
      * 处理认证授权异常
@@ -65,6 +51,17 @@ public class GlobalExceptionHandler {
     public R<?> handleAuthException(AuthException e) {
         log.warn("认证异常: [{}] {}", e.getCode(), e.getMsg());
         return R.fail(e.getCode(), e.getMsg());
+    }
+
+    /**
+     * 处理权限拒绝异常（@RequiresPermission 切面抛出）
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public R<?> handleAccessDenied(AccessDeniedException e) {
+        log.warn("权限拒绝: {}", e.getMessage());
+        // PermissionAspect 抛出的消息已包含完整描述（如"无操作权限，需要：[system:role:add]"），直接透传
+        return R.fail(403, e.getMessage() != null ? e.getMessage() : "无操作权限");
     }
 
     /**

@@ -8,7 +8,7 @@
       </template>
 
       <!-- 搜索表单 -->
-      <el-form :inline="true" class="search-form">
+      <el-form :inline="!isMobile" class="search-form">
         <el-form-item label="流程名称">
           <el-input v-model="query.processName" placeholder="请输入流程名称" clearable />
         </el-form-item>
@@ -35,61 +35,62 @@
       </el-form>
 
       <!-- 数据表格 -->
+      <div class="table-scroll-wrapper">
       <el-table :data="list" border stripe highlight-current-row>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="processName" label="流程名称" min-width="180" />
-        <el-table-column prop="processInstanceId" label="流程实例ID" min-width="200" />
-        <el-table-column prop="applyUserName" label="申请人" width="120" />
-        <el-table-column prop="approveTime" label="审批时间" width="180" />
-        <el-table-column prop="status" label="审批状态" width="120">
+        <el-table-column type="index" label="序号" width="70" align="center" :index="indexMethod" />
+        <el-table-column prop="itemName" label="事项名称" min-width="200" show-overflow-tooltip>
           <template #default="{ row }">
-            <el-tag :type="row.status === 'APPROVED' ? 'success' : 'danger'">
-              {{ row.status === 'APPROVED' ? '已通过' : '已驳回' }}
+            <span v-if="row.itemName">{{ row.itemName }}</span>
+            <span v-else-if="row.processName">{{ row.processName }}</span>
+            <span v-else class="text-muted">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="processName" label="流程名称" min-width="150" />
+        <el-table-column prop="currentNodeName" label="最后审批节点" width="140" />
+        <el-table-column prop="initiatorName" label="发起人" width="120" />
+        <el-table-column prop="startTime" label="发起时间" width="180" />
+        <el-table-column prop="endTime" label="结束时间" width="180" />
+        <el-table-column prop="status" label="流程状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="getStatusColor(row.status)">
+              {{ getStatusName(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="150" fixed="right">
+        <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleView(row)">查看详情</el-button>
+            <el-button type="primary" link @click="handleView(row)">查看</el-button>
           </template>
         </el-table-column>
       </el-table>
+      </div>
 
       <!-- 分页 -->
       <el-pagination
         :total="total"
         :current-page="pageNum"
         :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
+        :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
         @size-change="fetchData"
         @current-change="fetchData"
       />
     </el-card>
 
     <!-- 详情弹窗 -->
-    <el-dialog v-model="detailVisible" title="流程详情" width="90%">
+    <el-dialog v-model="detailVisible" title="流程详情" width="70%">
       <div v-if="currentRow" class="detail-content">
-        <el-descriptions :column="2" border>
+        <el-descriptions :column="isMobile ? 1 : 2" border>
           <el-descriptions-item label="流程名称">{{ currentRow.processName }}</el-descriptions-item>
-          <el-descriptions-item label="流程实例ID">{{ currentRow.processInstanceId }}</el-descriptions-item>
-          <el-descriptions-item label="申请人">{{ currentRow.applyUserName }}</el-descriptions-item>
-          <el-descriptions-item label="申请时间">{{ currentRow.applyTime }}</el-descriptions-item>
-          <el-descriptions-item label="审批人">{{ currentRow.approveUserName }}</el-descriptions-item>
-          <el-descriptions-item label="审批时间">{{ currentRow.approveTime }}</el-descriptions-item>
-          <el-descriptions-item label="审批状态">
-            <el-tag :type="currentRow.status === 'APPROVED' ? 'success' : 'danger'">
-              {{ currentRow.status === 'APPROVED' ? '已通过' : '已驳回' }}
+          <el-descriptions-item label="流程ID">{{ currentRow.id }}</el-descriptions-item>
+          <el-descriptions-item label="发起人">{{ currentRow.initiatorName }}</el-descriptions-item>
+          <el-descriptions-item label="发起时间">{{ currentRow.startTime }}</el-descriptions-item>
+          <el-descriptions-item label="业务键">{{ currentRow.businessKey }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="getStatusColor(currentRow.status)">
+              {{ getStatusName(currentRow.status) }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="审批意见">{{ currentRow.approveRemark || '无' }}</el-descriptions-item>
         </el-descriptions>
-
-        <div class="form-data" style="margin-top: 20px;">
-          <h4>表单数据：</h4>
-          <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; max-height: 300px; overflow: auto;">
-{{ JSON.stringify(currentRow.formData, null, 2) }}
-          </pre>
-        </div>
       </div>
       <template #footer>
         <el-button @click="detailVisible = false">关闭</el-button>
@@ -99,10 +100,16 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 // 导入工作流API（已完成）
 import { getMyDoneList } from '@/api/wfDefinition'
+
+// ⭐ 响应式检测
+const isMobile = ref(window.innerWidth <= 768)
+const onResize = () => { isMobile.value = window.innerWidth <= 768 }
+onMounted(() => window.addEventListener('resize', onResize))
+onBeforeUnmount(() => window.removeEventListener('resize', onResize))
 
 // 查询条件
 const query = reactive({
@@ -125,27 +132,30 @@ const currentRow = ref(null)
 // 获取列表数据
 const fetchData = async () => {
   try {
-    // 处理时间范围参数
-    const params = {
+    const res = await getMyDoneList({
       pageNum: pageNum.value,
-      pageSize: pageSize.value,
-      processName: query.processName,
-      status: query.status,
-      startTime: query.dateRange[0] ? query.dateRange[0].format('YYYY-MM-DD') : '',
-      endTime: query.dateRange[1] ? query.dateRange[1].format('YYYY-MM-DD') : ''
-    }
-    const res = await getMyDoneList(params)
-    if (res.code === 200) {
-      list.value = res.data.list
-      total.value = res.data.total
-    } else {
-      ElMessage.error(res.msg || '获取数据失败')
-    }
+      pageSize: pageSize.value
+    })
+    list.value = res.data?.records || []
+    total.value = res.data?.total || 0
   } catch (error) {
-    ElMessage.error('网络异常，请稍后重试')
-    console.error('获取我的已办列表失败：', error)
+    ElMessage.error('获取数据失败')
   }
 }
+
+const getStatusName = (status) => ({
+  running: '审批中',
+  completed: '已完成',
+  rejected: '已驳回',
+  cancelled: '已撤销'
+}[status] || status)
+
+const getStatusColor = (status) => ({
+  running: 'warning',
+  completed: 'success',
+  rejected: 'danger',
+  cancelled: 'info'
+}[status] || '')
 
 // 查看详情
 const handleView = (row) => {
@@ -160,6 +170,11 @@ const handleReset = () => {
   query.dateRange = []
   pageNum.value = 1
   fetchData()
+}
+
+// 序号生成器：根据当前页码和每页大小计算全局序号
+const indexMethod = (index) => {
+  return (pageNum.value - 1) * pageSize.value + index + 1
 }
 
 // 初始化加载

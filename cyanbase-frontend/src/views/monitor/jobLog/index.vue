@@ -73,7 +73,7 @@
         <el-descriptions-item label="执行时间">{{ detailData.createTime }}</el-descriptions-item>
         <el-descriptions-item label="日志信息" :span="2">{{ detailData.jobMessage }}</el-descriptions-item>
         <el-descriptions-item label="异常信息" :span="2">
-          <pre v-if="detailData.exceptionInfo" style="color: #f56c6c; white-space: pre-wrap;">{{ detailData.exceptionInfo }}</pre>
+          <pre v-if="detailData.exceptionInfo" style="color: #f53f3f; white-space: pre-wrap;">{{ detailData.exceptionInfo }}</pre>
           <span v-else>无</span>
         </el-descriptions-item>
       </el-descriptions>

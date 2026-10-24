@@ -10,12 +10,13 @@ import lombok.EqualsAndHashCode;
 public class SysPost extends BaseEntity {
     @TableId(value = "post_id", type = IdType.AUTO)
     private Long postId;
-
+    private Long tenantId;
     private String postCode;
 
     private String postName;
 
-    private Integer postSort;
+    /** 排序，默认0 */
+    private Integer postSort = 0;
 
     private String status;
 }

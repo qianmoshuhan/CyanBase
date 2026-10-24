@@ -1,11 +1,22 @@
 import request from '@/utils/request'
+import storage from '@/utils/storage'
+
+/**
+ * 根据登录身份动态决定 API 前缀
+ * - admin（平台管理员） → /system/dept/*
+ * - tenant（租户用户）  → /tenant/dept/*
+ */
+function getUrl(path) {
+  const prefix = storage.getLoginType() === 'tenant' ? '/tenant' : '/system'
+  return prefix + path
+}
 
 /**
  * 获取部门列表
  */
 export function getDeptList(params) {
   return request({
-    url: '/system/dept/list',
+    url: getUrl('/dept/list'),
     method: 'get',
     params
   })
@@ -16,7 +27,7 @@ export function getDeptList(params) {
  */
 export function getDeptById(id) {
   return request({
-    url: `/system/dept/${id}`,
+    url: getUrl(`/dept/${id}`),
     method: 'get'
   })
 }
@@ -26,7 +37,7 @@ export function getDeptById(id) {
  */
 export function addDept(data) {
   return request({
-    url: '/system/dept',
+    url: getUrl('/dept'),
     method: 'post',
     data
   })
@@ -37,7 +48,7 @@ export function addDept(data) {
  */
 export function updateDept(data) {
   return request({
-    url: '/system/dept',
+    url: getUrl('/dept'),
     method: 'put',
     data
   })
@@ -48,7 +59,7 @@ export function updateDept(data) {
  */
 export function deleteDept(id) {
   return request({
-    url: `/system/dept/${id}`,
+    url: getUrl(`/dept/${id}`),
     method: 'delete'
   })
 }

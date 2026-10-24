@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.entity.SysApiMonitor;
+import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.service.SysApiMonitorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 @RestController
-@RequestMapping("/system/api/monitor")
+@RequestMapping("/monitor/apiMonitor")
 @RequiredArgsConstructor
 public class SysApiMonitorController {
     private final SysApiMonitorService sysApiMonitorService;
@@ -35,6 +36,7 @@ public class SysApiMonitorController {
     }
 
     @PostMapping
+    @RequiresPermission("monitor:api:add")
     public R<?> add(@RequestBody SysApiMonitor monitor) {
         sysApiMonitorService.save(monitor);
         return R.ok("新增成功");

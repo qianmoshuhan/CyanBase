@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.entity.SysOperLog;
 import com.cyan.modules.log.service.SysOperLogService;
+import com.cyan.security.annotation.RequiresPermission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,12 +38,14 @@ public class SysOperLogController {
     }
 
     @DeleteMapping("/{operId}")
+    @RequiresPermission("monitor:operlog:remove")
     public R<?> delete(@PathVariable Long operId) {
         sysOperLogService.removeById(operId);
         return R.ok("删除成功");
     }
 
     @DeleteMapping("/clean")
+    @RequiresPermission("monitor:operlog:remove")
     public R<?> clean() {
         // 清空操作日志
         return R.ok("清空成功");

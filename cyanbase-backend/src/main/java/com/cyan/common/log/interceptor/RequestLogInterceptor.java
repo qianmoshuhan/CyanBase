@@ -3,6 +3,7 @@ package com.cyan.common.log.interceptor;
 import com.cyan.common.log.util.LogDesensitizeUtil;
 import com.cyan.entity.SysOperLog;
 import com.cyan.modules.log.service.SysOperLogService;
+import com.cyan.service.SysApiMonitorService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -22,9 +23,12 @@ public class RequestLogInterceptor implements HandlerInterceptor {
 
     private static final String START_TIME_ATTR = "startTime";
     private final SysOperLogService sysOperLogService;
+    private final SysApiMonitorService sysApiMonitorService;
 
-    public RequestLogInterceptor(SysOperLogService sysOperLogService) {
+    public RequestLogInterceptor(SysOperLogService sysOperLogService,
+                                SysApiMonitorService sysApiMonitorService) {
         this.sysOperLogService = sysOperLogService;
+        this.sysApiMonitorService = sysApiMonitorService;
     }
 
     @Override
@@ -84,6 +88,11 @@ public class RequestLogInterceptor implements HandlerInterceptor {
 
             log.info("【请求日志】操作人:{} | IP:{} | 地址:{} | 方法:{} | URI:{} | 状态:{} | 耗时:{}ms",
                     operName, ip, address, method, uri, status, costTime);
+
+            // ====================== API 监控聚合（每个请求都记） ======================
+            boolean isError = status >= 400 || ex != null;
+            sysApiMonitorService.recordApiCall(uri, uri, costTime, isError);
+            // ======================================================================
 
             if (ex != null) {
                 log.error("【请求异常】URI: {} | 异常: {}", uri, ex.getMessage(), ex);

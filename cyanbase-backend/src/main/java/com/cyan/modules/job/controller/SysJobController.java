@@ -5,6 +5,7 @@ import com.cyan.common.R;
 import com.cyan.common.log.annotation.Log;
 import com.cyan.common.log.enums.BusinessType;
 import com.cyan.modules.job.entity.SysJob;
+import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.modules.job.entity.SysJobLog;
 import com.cyan.modules.job.service.SysJobService;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,9 @@ public class SysJobController {
      */
     @PostMapping
     @Log(title = "定时任务", businessType = BusinessType.INSERT)
+    @RequiresPermission("monitor:job:add")
     public R<Void> add(@Validated @RequestBody SysJob sysJob) {
+        sysJob.setId(null);
         return sysJobService.addJob(sysJob) ? R.ok() : R.fail("新增失败");
     }
 
@@ -56,6 +59,7 @@ public class SysJobController {
      */
     @PutMapping
     @Log(title = "定时任务", businessType = BusinessType.UPDATE)
+    @RequiresPermission("monitor:job:edit")
     public R<Void> update(@Validated @RequestBody SysJob sysJob) {
         return sysJobService.updateJob(sysJob) ? R.ok() : R.fail("修改失败");
     }
@@ -65,6 +69,7 @@ public class SysJobController {
      */
     @DeleteMapping("/{id}")
     @Log(title = "定时任务", businessType = BusinessType.DELETE)
+    @RequiresPermission("monitor:job:remove")
     public R<Void> delete(@PathVariable Long id) {
         return sysJobService.deleteJob(id) ? R.ok() : R.fail("删除失败");
     }
@@ -74,6 +79,7 @@ public class SysJobController {
      */
     @PutMapping("/pause/{id}")
     @Log(title = "定时任务", businessType = BusinessType.UPDATE)
+    @RequiresPermission("monitor:job:pause")
     public R<Void> pause(@PathVariable Long id) {
         return sysJobService.pauseJob(id) ? R.ok() : R.fail("暂停失败");
     }
@@ -83,6 +89,7 @@ public class SysJobController {
      */
     @PutMapping("/resume/{id}")
     @Log(title = "定时任务", businessType = BusinessType.UPDATE)
+    @RequiresPermission("monitor:job:start")
     public R<Void> resume(@PathVariable Long id) {
         return sysJobService.resumeJob(id) ? R.ok() : R.fail("恢复失败");
     }
@@ -92,6 +99,7 @@ public class SysJobController {
      */
     @PutMapping("/execute/{id}")
     @Log(title = "定时任务", businessType = BusinessType.OTHER)
+    @RequiresPermission("monitor:job:start")
     public R<Void> executeOnce(@PathVariable Long id) {
         return sysJobService.executeOnce(id) ? R.ok() : R.fail("执行失败");
     }

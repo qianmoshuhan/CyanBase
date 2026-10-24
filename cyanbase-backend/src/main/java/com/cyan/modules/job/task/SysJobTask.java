@@ -1,11 +1,14 @@
 package com.cyan.modules.job.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.cyan.common.redis.RedisUtil;
 import com.cyan.entity.SysLogLogin;
 import com.cyan.entity.SysLogOperation;
+import com.cyan.entity.SysTenant;
 import com.cyan.mapper.SysLogLoginMapper;
 import com.cyan.mapper.SysLogOperationMapper;
+import com.cyan.service.SysTenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,6 +28,7 @@ public class SysJobTask {
     private final SysLogOperationMapper sysLogOperationMapper;
     private final SysLogLoginMapper sysLogLoginMapper;
     private final RedisUtil redisUtil;
+    private final SysTenantService sysTenantService;
 
     /**
      * 清理7天前的操作日志
@@ -118,6 +122,39 @@ public class SysJobTask {
         // 3. 存储到统计表
         
         log.info("用户登录统计完成");
+    }
+
+    /**
+     * 租户到期自动过期
+     * <p>将 status=0(正常) 且 expire_date < NOW() 的租户批量置为 status=2(已过期)。</p>
+     * <p>由 sys_job 调度每日凌晨 2 点执行（invokeTarget=sysJobTask.expireTenantByDate）。</p>
+     */
+    public void expireTenantByDate() {
+        log.info("[定时任务] 开始执行租户到期自动过期...");
+
+        // 1. 先查一下要处理哪些租户（用于日志记录具体 ID）
+        LambdaQueryWrapper<SysTenant> qWrapper = new LambdaQueryWrapper<>();
+        qWrapper.eq(SysTenant::getStatus, 0)
+                 .isNotNull(SysTenant::getExpireDate)
+                 .lt(SysTenant::getExpireDate, LocalDateTime.now());
+        long pending = sysTenantService.count(qWrapper);
+        if (pending == 0) {
+            log.info("[定时任务] 无需过期的租户，跳过");
+            return;
+        }
+
+        // 2. 批量更新 status=2
+        LambdaUpdateWrapper<SysTenant> uWrapper = new LambdaUpdateWrapper<>();
+        uWrapper.eq(SysTenant::getStatus, 0)
+                .isNotNull(SysTenant::getExpireDate)
+                .lt(SysTenant::getExpireDate, LocalDateTime.now())
+                .set(SysTenant::getStatus, 2);
+        boolean ok = sysTenantService.update(uWrapper);
+        if (ok) {
+            log.info("[定时任务] 租户到期自动过期完成，共过期 {} 个租户", pending);
+        } else {
+            log.warn("[定时任务] 租户到期自动过期执行失败");
+        }
     }
 
     /**

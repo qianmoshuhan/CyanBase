@@ -1,6 +1,16 @@
 import request from '@/utils/request'
 
 /**
+ * 获取未读消息数量
+ */
+export function getUnreadCount() {
+  return request({
+    url: '/system/message/unread/count',
+    method: 'get'
+  })
+}
+
+/**
  * 获取我的消息列表
  */
 export function getMyMessageList(params) {

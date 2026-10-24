@@ -80,4 +80,11 @@ public class SysUser implements Serializable {
     /** 前端传入选中角色id集合，非数据库字段 */
     @TableField(exist = false)
     private List<Long> roleIds;
+
+    // 在 roleIds 后面加：
+
+    /** 所属租户名称（非数据库字段，list 查询时关联 sys_tenant 填充） */
+    @TableField(exist = false)
+    private String tenantName;
+
 }

@@ -1,0 +1,22 @@
+# Java
+target/
+*.class
+*.jar
+*.war
+*.log
+
+# Vue
+node_modules/
+dist/
+.env.local
+.env.production
+dev.log
+
+# 日志
+logs/
+*.log
+
+# 临时文件
+*.bak
+.DS_Store
+

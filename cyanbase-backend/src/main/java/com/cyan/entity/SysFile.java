@@ -8,7 +8,7 @@ import lombok.Data;
 public class SysFile {
     @TableId(value = "file_id", type = IdType.AUTO)
     private Long fileId;
-
+    private Long tenantId;
     private String fileName;
     private String fileOriginalName;
     private String fileSuffix;

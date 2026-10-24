@@ -76,6 +76,12 @@ public class FormField implements Serializable {
     private String options;
 
     /**
+     * 关联字典类型编码（当 fieldType 为 select/radio/checkbox 时，优先级高于 options）
+     */
+    @TableField("dict_type_code")
+    private String dictTypeCode;
+
+    /**
      * 排序号
      */
     private Integer sortOrder;

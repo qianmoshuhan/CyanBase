@@ -19,14 +19,76 @@ html, body {
   height: 100%;
 }
 
-/* Element Plus 主题色覆盖 - 深蓝色系 */
+/* =========================================================
+   CyanBase 主题色变量 —— 清爽商务蓝色系
+   对标 Ant Design 5.x / Arco Design 通用规范
+   主色 #1677FF 自动衍生全套 hover/active/disabled/浅背景梯度
+   ========================================================= */
 :root {
-  --el-color-primary: #1a1a2e;
-  --el-color-primary-light-3: #2a2a4a;
-  --el-color-primary-light-5: #3a3a5a;
-  --el-color-primary-light-7: #4a4a6a;
-  --el-color-primary-light-9: #5a5a7a;
-  --el-color-primary-dark-2: #0f0f1e;
+  /* ---- 主色：品牌蓝 #1677FF ---- */
+  --el-color-primary: #1677ff;
+  --el-color-primary-light-1: #4096ff;
+  --el-color-primary-light-2: #4096ff;
+  --el-color-primary-light-3: #69b1ff;
+  --el-color-primary-light-4: #69b1ff;
+  --el-color-primary-light-5: #91caff;
+  --el-color-primary-light-6: #91caff;
+  --el-color-primary-light-7: #bae0ff;
+  --el-color-primary-light-8: #bae0ff;
+  --el-color-primary-light-9: #e6f4ff;
+  --el-color-primary-dark-2: #0958d9;
+
+  /* ---- 语义色（严格固定，不再改） ---- */
+  /* 成功绿 */
+  --el-color-success: #00b42a;
+  --el-color-success-light-3: #34c759;
+  --el-color-success-light-5: #5dda7a;
+  --el-color-success-light-7: #a5e6b5;
+  --el-color-success-light-8: #a5e6b5;
+  --el-color-success-light-9: #e8f8eb;
+  --el-color-success-dark-2: #009a29;
+
+  /* 警告橙 */
+  --el-color-warning: #ff7d00;
+  --el-color-warning-light-3: #ff9a2e;
+  --el-color-warning-light-5: #ffb86b;
+  --el-color-warning-light-7: #ffd5a8;
+  --el-color-warning-light-8: #ffd5a8;
+  --el-color-warning-light-9: #fff7e8;
+  --el-color-warning-dark-2: #e67000;
+
+  /* 危险红 */
+  --el-color-danger: #f53f3f;
+  --el-color-danger-light-3: #f76560;
+  --el-color-danger-light-5: #f98985;
+  --el-color-danger-light-7: #fdb3b0;
+  --el-color-danger-light-8: #fdb3b0;
+  --el-color-danger-light-9: #ffece8;
+  --el-color-danger-dark-2: #d9363e;
+
+  /* 中性灰（保留 Element Plus 默认） */
+  --el-color-info: #909399;
+
+  /* ---- CyanBase 自定义语义变量（供布局/页面使用） ---- */
+  /* 清爽浅色侧边栏（对标飞书/阿里云控制台） */
+  --cyan-sidebar-bg: #ffffff;
+  --cyan-sidebar-text: #303133;
+  --cyan-sidebar-text-active: #1677ff;
+  --cyan-sidebar-hover-bg: #e6f4ff;
+  --cyan-sidebar-border: #f0f0f0;
+
+  --cyan-text-primary: rgba(0, 0, 0, 0.88);
+  --cyan-text-secondary: rgba(0, 0, 0, 0.65);
+  --cyan-text-tertiary: rgba(0, 0, 0, 0.45);
+  --cyan-text-quaternary: rgba(0, 0, 0, 0.25);
+  --cyan-border: #d9d9d9;
+  --cyan-border-light: #f0f0f0;
+  --cyan-bg-layout: #f5f7fa;
+  --cyan-bg-container: #ffffff;
+
+  /* ---- 断点（原响应式变量保留） ---- */
+  --bp-mobile: 768px;
+  --bp-small: 480px;
 }
 
 /* 表格样式优化 */
@@ -46,21 +108,50 @@ html, body {
   border: 1px solid #e4e7ed;
 }
 
-/* 按钮样式 */
-.el-button--primary {
-  background-color: #1a1a2e;
-  border-color: #1a1a2e;
+/* 按钮主色已由 CSS 变量 --el-color-primary 自动接管，无需额外覆盖 */
+.el-button--primary.is-plain {
+  background-color: var(--el-color-primary-light-9);
+  border-color: var(--el-color-primary-light-5);
+  color: var(--el-color-primary);
 }
 
-.el-button--primary:hover,
-.el-button--primary:focus {
-  background-color: #2a2a4a;
-  border-color: #2a2a4a;
+/* =========================================================
+   侧边栏菜单 hover/active 覆盖（直接类名 + !important）
+   :deep() 是 Vue scoped 专用，全局 CSS 里写了等于白写
+   ========================================================= */
+
+/* 所有菜单项 hover —— 极淡灰（几乎和白色一样） */
+.el-menu .el-menu-item:hover,
+.el-menu .el-sub-menu__title:hover {
+  background-color: #f2f3f5 !important;
+  color: #1677ff !important;
 }
 
-/* 菜单样式优化 */
-.el-menu {
-  border-right: none;
+/* 子菜单展开后，里面的子项 hover 也一样 */
+.el-menu .el-menu-item:hover {
+  background-color: #f2f3f5 !important;
+  color: #1677ff !important;
+}
+
+/* 当前激活项 —— 浅蓝底 + 主蓝字 */
+.el-menu .el-menu-item.is-active {
+  background-color: #e6f4ff !important;
+  color: #1677ff !important;
+  font-weight: 500;
+  border-right: 2px solid #1677ff;
+}
+
+/* 折叠菜单的 hover（Element Plus 折叠态类名不同） */
+.el-menu--collapse .el-menu-item:hover,
+.el-menu--collapse .el-sub-menu__title:hover {
+  background-color: #f2f3f5 !important;
+  color: #1677ff !important;
+}
+
+/* 折叠菜单激活项 */
+.el-menu--collapse .el-menu-item.is-active {
+  background-color: #e6f4ff !important;
+  color: #1677ff !important;
 }
 
 /* 分页样式 */
@@ -124,4 +215,132 @@ html, body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
+}
+
+/* =========================================================
+   响应式 H5 增强 — 追加区块，不影响 PC 端
+   断点：≤768px = 手机，≤480px = 小屏手机
+   ========================================================= */
+
+/* --- CSS 断点变量（供组件内 @media 使用） --- */
+:root {
+  --bp-mobile: 768px;
+  --bp-small: 480px;
+}
+
+/* --- 移动端基础触控优化 --- */
+html {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+body {
+  /* 防止 iOS Safari 弹性溢出导致横向白边 */
+  overflow-x: hidden;
+  /* 字体在手机上保持清爽 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 所有按钮最小点击区域 44px（Apple HIG 标准） */
+.el-button {
+  min-height: 32px;
+}
+@media (max-width: 768px) {
+  .el-button {
+    min-height: 40px;
+    padding: 8px 16px;
+  }
+  .el-button--small {
+    min-height: 36px;
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+
+/* --- 表格横向滚动容器 --- */
+.table-scroll-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.table-scroll-wrapper .el-table {
+  min-width: 768px; /* 保证手机上有东西可滑 */
+}
+
+/* --- 分页移动端裁剪 --- */
+@media (max-width: 768px) {
+  .el-pagination {
+    flex-wrap: wrap;
+    justify-content: center !important;
+    gap: 6px;
+  }
+  .el-pagination .el-pagination__total,
+  .el-pagination .el-pagination__sizes,
+  .el-pagination .el-pagination__jump {
+    display: none !important;
+  }
+}
+
+/* --- 搜索表单移动端自动换行 --- */
+@media (max-width: 768px) {
+  .el-form--inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+  }
+  .el-form--inline .el-form-item {
+    margin-right: 0;
+    margin-bottom: 8px;
+  }
+  .el-form--inline .el-form-item .el-input,
+  .el-form--inline .el-form-item .el-select {
+    width: 100% !important;
+  }
+}
+
+/* --- Dialog 弹窗移动端适配 --- */
+@media (max-width: 768px) {
+  .el-dialog {
+    width: 92% !important;
+    margin: 4vh auto !important;
+  }
+  .el-dialog__body {
+    padding: 16px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+/* --- Descriptions 描述列表移动端 --- */
+@media (max-width: 768px) {
+  .el-descriptions {
+    font-size: 13px;
+  }
+  .el-descriptions__label,
+  .el-descriptions__content {
+    padding: 8px 12px;
+  }
+}
+
+/* --- 工具类 --- */
+@media (max-width: 768px) {
+  .hide-on-mobile { display: none !important; }
+}
+@media (min-width: 769px) {
+  .show-on-mobile { display: none !important; }
+}
+
+/* --- 卡片移动端紧凑化 --- */
+@media (max-width: 768px) {
+  .el-card {
+    margin-bottom: 12px;
+  }
+  .el-card__body {
+    padding: 16px !important;
+  }
+  .el-card__header {
+    padding: 12px 16px;
+  }
 }

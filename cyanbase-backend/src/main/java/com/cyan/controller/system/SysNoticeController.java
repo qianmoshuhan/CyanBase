@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.entity.SysNotice;
+import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.service.SysNoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -35,18 +36,22 @@ public class SysNoticeController {
     }
 
     @PostMapping
+    @RequiresPermission("system:notice:add")
     public R<?> add(@RequestBody SysNotice notice) {
+        notice.setNoticeId(null);
         sysNoticeService.save(notice);
         return R.ok("新增成功");
     }
 
     @PutMapping
+    @RequiresPermission("system:notice:edit")
     public R<?> update(@RequestBody SysNotice notice) {
         sysNoticeService.updateById(notice);
         return R.ok("更新成功");
     }
 
     @DeleteMapping("/{noticeId}")
+    @RequiresPermission("system:notice:remove")
     public R<?> delete(@PathVariable Long noticeId) {
         sysNoticeService.removeById(noticeId);
         return R.ok("删除成功");

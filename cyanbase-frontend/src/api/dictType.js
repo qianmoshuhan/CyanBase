@@ -52,3 +52,10 @@ export function deleteDictType(id) {
     method: 'delete'
   })
 }
+
+export function getDictTypeAllActive() {
+  return request({
+    url: '/system/dict/type/all-active',
+    method: 'get'
+  })
+}

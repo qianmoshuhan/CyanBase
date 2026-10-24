@@ -5,6 +5,7 @@ import com.cyan.common.log.annotation.Log;
 import com.cyan.common.log.enums.BusinessType;
 import com.cyan.modules.form.entity.FormField;
 import com.cyan.modules.form.service.FormFieldService;
+import com.cyan.security.annotation.RequiresPermission;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class FormFieldController {
      * 根据表单定义ID查询字段列表
      */
     @GetMapping("/list/{definitionId}")
+    @RequiresPermission("system:form:query")
     public R<List<FormField>> list(@PathVariable Long definitionId) {
         return R.ok(formFieldService.listByDefinitionId(definitionId));
     }
@@ -32,6 +34,7 @@ public class FormFieldController {
      * 获取字段详情
      */
     @GetMapping("/{id}")
+    @RequiresPermission("system:form:query")
     public R<FormField> getInfo(@PathVariable Long id) {
         return R.ok(formFieldService.getById(id));
     }
@@ -41,6 +44,7 @@ public class FormFieldController {
      */
     @PostMapping
     @Log(title = "表单字段", businessType = BusinessType.INSERT)
+    @RequiresPermission("system:form:add")
     public R<Void> add(@RequestBody FormField field) {
         return formFieldService.save(field) ? R.ok() : R.fail("新增失败");
     }
@@ -50,6 +54,7 @@ public class FormFieldController {
      */
     @PutMapping
     @Log(title = "表单字段", businessType = BusinessType.UPDATE)
+    @RequiresPermission("system:form:edit")
     public R<Void> edit(@RequestBody FormField field) {
         return formFieldService.updateById(field) ? R.ok() : R.fail("修改失败");
     }
@@ -59,6 +64,7 @@ public class FormFieldController {
      */
     @DeleteMapping("/{id}")
     @Log(title = "表单字段", businessType = BusinessType.DELETE)
+    @RequiresPermission("system:form:remove")
     public R<Void> remove(@PathVariable Long id) {
         return formFieldService.removeById(id) ? R.ok() : R.fail("删除失败");
     }
@@ -68,6 +74,7 @@ public class FormFieldController {
      */
     @PostMapping("/batch/{definitionId}")
     @Log(title = "表单字段", businessType = BusinessType.INSERT)
+    @RequiresPermission("system:form:edit")
     public R<Void> batchSave(@PathVariable Long definitionId, @RequestBody List<FormField> fields) {
         return formFieldService.batchSaveFields(definitionId, fields) ? R.ok() : R.fail("批量保存失败");
     }

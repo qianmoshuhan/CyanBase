@@ -4,12 +4,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.entity.SysUserOnline;
+import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.service.SysUserOnlineService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/system/online")
+@RequestMapping("/monitor/online")
 @RequiredArgsConstructor
 public class SysUserOnlineController {
     private final SysUserOnlineService sysUserOnlineService;
@@ -29,6 +30,7 @@ public class SysUserOnlineController {
     }
 
     @DeleteMapping("/{sessionId}")
+    @RequiresPermission("monitor:online:kick")
     public R<?> delete(@PathVariable String sessionId) {
         sysUserOnlineService.removeById(sessionId);
         return R.ok("强制下线成功");

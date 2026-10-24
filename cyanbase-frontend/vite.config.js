@@ -16,8 +16,15 @@ export default defineConfig({
     fs: {
       strict: false
     },
+    // 关掉缓存，304 问题通杀
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    },
     proxy: {
       '/auth': { target: 'http://localhost:8090', changeOrigin: true },
+      '/tenant-auth': { target: 'http://localhost:8090', changeOrigin: true },
       '/system': {
         target: 'http://localhost:8090',
         changeOrigin: true,
@@ -27,6 +34,7 @@ export default defineConfig({
           }
         }
       },
+      '/tenant': { target: 'http://localhost:8090', changeOrigin: true },
       '/monitor': { target: 'http://localhost:8090', changeOrigin: true },
       '/form': { target: 'http://localhost:8090', changeOrigin: true },
       '/wf': { target: 'http://localhost:8090', changeOrigin: true },

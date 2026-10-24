@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.entity.SysLogininfor;
+import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.service.SysLogininforService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +31,14 @@ public class SysLogininforController {
     }
 
     @DeleteMapping("/{infoId}")
+    @RequiresPermission("monitor:logininfor:remove")
     public R<?> delete(@PathVariable Long infoId) {
         sysLogininforService.removeById(infoId);
         return R.ok("删除成功");
     }
 
     @DeleteMapping("/clean")
+    @RequiresPermission("monitor:logininfor:remove")
     public R<?> clean() {
         return R.ok("清空成功");
     }

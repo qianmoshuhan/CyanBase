@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.common.log.annotation.Log;
 import com.cyan.common.log.enums.BusinessType;
+import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.common.security.util.SecurityUtils;
 import com.cyan.modules.workflow.entity.WorkflowCopy;
 import com.cyan.modules.workflow.service.WorkflowCopyService;
@@ -28,6 +29,7 @@ public class WorkflowCopyController {
      */
     @PostMapping("/add")
     @Log(title = "流程抄送", businessType = BusinessType.INSERT)
+    @RequiresPermission("workflow:approve")
     public R<Void> add(@RequestBody AddCopyRequest request) {
         return workflowCopyService.addCopy(request.getInstanceId(), request.getUserIds()) ? R.ok() : R.fail("添加失败");
     }

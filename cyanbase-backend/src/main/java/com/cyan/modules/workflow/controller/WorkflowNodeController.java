@@ -3,6 +3,7 @@ package com.cyan.modules.workflow.controller;
 import com.cyan.common.R;
 import com.cyan.common.log.annotation.Log;
 import com.cyan.common.log.enums.BusinessType;
+import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.modules.workflow.entity.WorkflowNode;
 import com.cyan.modules.workflow.service.WorkflowNodeService;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,9 @@ public class WorkflowNodeController {
      */
     @PostMapping
     @Log(title = "流程节点", businessType = BusinessType.INSERT)
+    @RequiresPermission("system:wf:edit")
     public R<Void> add(@RequestBody WorkflowNode node) {
+        node.setId(null);
         return workflowNodeService.save(node) ? R.ok() : R.fail("新增失败");
     }
 
@@ -50,6 +53,7 @@ public class WorkflowNodeController {
      */
     @PutMapping
     @Log(title = "流程节点", businessType = BusinessType.UPDATE)
+    @RequiresPermission("system:wf:edit")
     public R<Void> edit(@RequestBody WorkflowNode node) {
         return workflowNodeService.updateById(node) ? R.ok() : R.fail("修改失败");
     }
@@ -59,6 +63,7 @@ public class WorkflowNodeController {
      */
     @DeleteMapping("/{id}")
     @Log(title = "流程节点", businessType = BusinessType.DELETE)
+    @RequiresPermission("system:wf:edit")
     public R<Void> remove(@PathVariable Long id) {
         return workflowNodeService.removeById(id) ? R.ok() : R.fail("删除失败");
     }
@@ -68,6 +73,7 @@ public class WorkflowNodeController {
      */
     @PostMapping("/batch/{definitionId}")
     @Log(title = "流程节点", businessType = BusinessType.INSERT)
+    @RequiresPermission("system:wf:edit")
     public R<Void> batchSave(@PathVariable Long definitionId, @RequestBody List<WorkflowNode> nodes) {
         return workflowNodeService.batchSaveNodes(definitionId, nodes) ? R.ok() : R.fail("批量保存失败");
     }

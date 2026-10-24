@@ -23,7 +23,8 @@ public class SysRole implements Serializable {
     @TableField("role_key")
     private String roleKey;
 
-    /** 数据权限 1全部 2本部门 3本部门及以下 */
+    /** 数据权限 详见 com.cyan.common.enums.DataScopeEnum:
+     *  1=全部, 2=本部门, 3=本部门及下属, 4=仅本人, 5=自定义 */
     @TableField("data_scope")
     private Integer dataScope;
 
@@ -57,4 +58,8 @@ public class SysRole implements Serializable {
 
     /** 备注 */
     private String remark;
+
+    /** 所属租户名称（非数据库字段，list 查询时关联 sys_tenant 填充） */
+    @TableField(exist = false)
+    private String tenantName;
 }

@@ -8,7 +8,7 @@ import lombok.Data;
 public class WfDefinition {
     @TableId(type = IdType.AUTO)
     private Long id;
-
+    private Long tenantId;
     private String flowName;
     private String flowKey;
     private String status;

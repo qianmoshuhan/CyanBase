@@ -68,6 +68,50 @@ const storage = {
    */
   removeToken() {
     this.remove('token')
+  },
+
+  /**
+   * 获取Refresh Token
+   */
+  getRefreshToken() {
+    return this.get('refresh_token')
+  },
+
+  /**
+   * 设置Refresh Token
+   */
+  setRefreshToken(refreshToken) {
+    this.set('refresh_token', refreshToken)
+  },
+
+  /**
+   * 删除Refresh Token
+   */
+  removeRefreshToken() {
+    this.remove('refresh_token')
+  },
+
+  /**
+   * 清空认证信息（Access + Refresh + loginType 一起清）
+   */
+  clearAuth() {
+    this.removeToken()
+    this.removeRefreshToken()
+    this.remove('loginType')
+  },
+
+  /**
+   * 获取登录身份：'admin' 或 'tenant'
+   */
+  getLoginType() {
+    return this.get('loginType')
+  },
+
+  /**
+   * 设置登录身份：'admin' 或 'tenant'
+   */
+  setLoginType(type) {
+    this.set('loginType', type)
   }
 }
 

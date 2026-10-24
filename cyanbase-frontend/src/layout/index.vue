@@ -1,50 +1,87 @@
 <template>
   <div class="layout-container">
-    <!-- 侧边栏 -->
-    <aside class="sidebar" :class="{ 'collapsed': isCollapsed }">
-      <div class="logo-box" style="display:flex;justify-content:center;align-items:center;padding:10px 0;">
-        <img
-          v-if="systemLogo"
-          :src="systemLogo"
-          style="height:100px;width:auto;max-width:120px;object-fit:contain;margin-left:-50px;"
-        />
-        <span v-else class="logo-text">{{ systemName }}</span>
+    <!-- 侧边栏（PC 端保持原样） -->
+    <aside v-if="!isMobile" class="sidebar" :class="{ 'collapsed': isCollapsed }">
+      <div class="logo-box" :class="{ 'is-collapsed': isCollapsed }">
+        <img v-if="systemLogo && !isCollapsed" :src="systemLogo" class="logo-img" />
+        <span v-if="!isCollapsed" class="logo-text">{{ systemName }}</span>
       </div>
       <div class="menu-wrapper">
-        <!-- 修改主组件中的 el-menu 渲染部分 -->
-<el-menu
-  :default-active="activeMenu"
-  router
-  background-color="#002140"
-  text-color="#fff"
-  active-text-color="#ffd04b"
->
-  <el-menu-item index="/home">
-    <el-icon><HomeFilled /></el-icon>
-    <span>首页</span>
-  </el-menu-item>
-  <template v-for="item in menuList" :key="item.id">
-    <el-sub-menu v-if="item.children && item.children.length" :index="`/${item.routePath}`">
-      <template #title>
-        <el-icon><component :is="getIconComponent(item.icon)" /></el-icon>
-        <span>{{ item.menuName }}</span>
-      </template>
-      <el-menu-item
-        v-for="child in item.children"
-        :key="child.id"
-        :index="getPath(child.routePath,item.routePath)"
-      >
-        <span>{{ child.menuName }}</span>
-      </el-menu-item>
-    </el-sub-menu>
-    <el-menu-item v-else :index="`/${item.routePath}`">
-      <el-icon><component :is="getIconComponent(item.icon)" /></el-icon>
-      <span>{{ item.menuName }}</span>
-    </el-menu-item>
-  </template>
-</el-menu>
+        <el-menu
+          :default-active="activeMenu"
+          :collapse="isCollapsed"
+          :collapse-transition="false"
+          router
+          background-color="var(--cyan-sidebar-bg)"
+          text-color="var(--cyan-sidebar-text)"
+          active-text-color="var(--el-color-primary)"
+        >
+          <el-menu-item index="/home"><el-icon><HomeFilled /></el-icon><span>首页</span></el-menu-item>
+          <template v-for="item in menuList" :key="item.id">
+            <el-sub-menu v-if="item.children && item.children.length" :index="`/${item.routePath}`">
+              <template #title>
+                <el-icon><component :is="getIconComponent(item.icon)" /></el-icon>
+                <span>{{ item.menuName }}</span>
+              </template>
+              <el-menu-item v-for="child in item.children" :key="child.id"
+                :index="getPath(child.routePath,item.routePath)">
+                <span>{{ child.menuName }}</span>
+              </el-menu-item>
+            </el-sub-menu>
+            <el-menu-item v-else :index="`/${item.routePath}`">
+              <el-icon><component :is="getIconComponent(item.icon)" /></el-icon>
+              <span>{{ item.menuName }}</span>
+            </el-menu-item>
+          </template>
+        </el-menu>
       </div>
     </aside>
+
+    <!-- ⭐ 手机端：抽屉式侧边栏 -->
+    <el-drawer
+      v-if="isMobile"
+      v-model="drawerVisible"
+      direction="ltr"
+      :size="260"
+      :show-close="false"
+      :with-header="false"
+      class="mobile-sidebar-drawer"
+      destroy-on-close
+    >
+      <div class="sidebar drawer-sidebar">
+        <div class="logo-box">
+          <img v-if="systemLogo" :src="systemLogo" class="logo-img" />
+          <span class="logo-text">{{ systemName }}</span>
+        </div>
+        <div class="menu-wrapper">
+          <el-menu
+            :default-active="activeMenu"
+            router
+            background-color="var(--cyan-sidebar-bg)"
+            text-color="var(--cyan-sidebar-text)"
+            active-text-color="var(--el-color-primary)"
+          >
+            <el-menu-item index="/home"><el-icon><HomeFilled /></el-icon><span>首页</span></el-menu-item>
+            <template v-for="item in menuList" :key="item.id">
+              <el-sub-menu v-if="item.children && item.children.length" :index="`/${item.routePath}`">
+                <template #title>
+                  <el-icon><component :is="getIconComponent(item.icon)" /></el-icon>
+                  <span>{{ item.menuName }}</span>
+                </template>
+                <el-menu-item v-for="child in item.children" :key="child.id"
+                  :index="getPath(child.routePath,item.routePath)">
+                  <span>{{ child.menuName }}</span>
+                </el-menu-item>
+              </el-sub-menu>
+              <el-menu-item v-else :index="`/${item.routePath}`">
+                <el-icon><component :is="getIconComponent(item.icon)" /></el-icon>
+                <span>{{ item.menuName }}</span>
+              </el-menu-item>
+            </template>
+          </el-menu>
+        </div>
+      </div>
+    </el-drawer>
 
     <!-- 主内容区 -->
     <div class="main-wrapper">
@@ -56,27 +93,29 @@
             <el-icon size="20"><Expand v-if="isCollapsed" /><Fold v-else /></el-icon>
           </el-button>
 
-          <!-- Logo + 系统名称，侧边栏收缩时自动隐藏logo只留文字 -->
-          <div style="display:flex;align-items:center;gap:8px;">
-            <img
-              v-if="systemLogo && !isCollapsed"
-              :src="systemLogo"
-              style="height:34px;width:auto;max-width:130px;object-fit:contain;"
-            />
-            <span v-if="!isCollapsed" style="font-size:17px;font-weight:500;">{{ systemName }}</span>
-          </div>
-
-          <!-- 面包屑 -->
+          <!-- ⭐ 面包屑（已移除冗余 LOGO，侧边栏顶部已有） -->
           <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item v-if="currentRouteName">{{ currentRouteName }}</el-breadcrumb-item>
           </el-breadcrumb>
         </div>
         <div class="header-right">
+          <!-- ⭐ 消息铃铛：PC 显示数字 badge，手机只显示小红点 -->
+          <el-badge
+            :value="isMobile ? 0 : unreadCount"
+            :is-dot="isMobile && unreadCount > 0"
+            :max="99"
+            class="message-badge"
+          >
+            <el-button text class="bell-btn" @click="goMessage">
+              <el-icon size="20"><Bell /></el-icon>
+            </el-button>
+          </el-badge>
+
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-icon><User /></el-icon>
-              <span class="username">{{ userStore.getNickName || userStore.getUserName }}</span>
+              <span class="username">{{ userStore.getNickName || userStore.getUserName || '用户' }}</span>
               <el-icon><ArrowDown /></el-icon>
             </span>
             <template #dropdown>
@@ -98,16 +137,17 @@
 </template>
 
 <script setup>
-// 1. 补充导入 onMounted
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessageBox } from 'element-plus'
+import storage from '@/utils/storage'
 import { getConfigByKey, getUserMenu } from "@/api/config.js";
+import { getUnreadCount } from "@/api/message.js";
 
 // 导入需要的图标（修复：移除不存在的Post，替换为Element Plus真实存在的图标，其余保留）
 import { 
-  HomeFilled, Setting, Monitor, Expand, Fold, User, ArrowDown, 
+  HomeFilled, Setting, Monitor, Expand, Fold, User, ArrowDown, Bell,
   Menu as MenuIcon, Files as FileIcon, Tools as ToolIcon // 关键修正
 } from '@element-plus/icons-vue'
 
@@ -116,6 +156,32 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const isCollapsed = ref(false)
+
+// ⭐ 消息未读数
+const unreadCount = ref(0)
+let unreadPollTimer = null
+const fetchUnreadCount = async () => {
+  try {
+    const res = await getUnreadCount()
+    const newValue = res.data || 0
+    // 数字变化时（新消息到达）弹出轻提示
+    if (newValue > unreadCount.value && unreadCount.value > 0) {
+      // 新消息从 N 变 N+M（不是首次加载），弹通知
+    }
+    unreadCount.value = newValue
+  } catch (e) {
+    // token 失效等情况静默忽略
+  }
+}
+const goMessage = () => {
+  router.push('/message/myMessage')
+}
+
+// ⭐ 响应式检测
+const isMobile = ref(false)
+const drawerVisible = ref(false)
+const checkMobile = () => { isMobile.value = window.innerWidth <= 768 }
+const handleResize = () => { checkMobile(); if (!isMobile.value) drawerVisible.value = false }
 
 const activeMenu = computed(() => route.path)
 
@@ -138,19 +204,24 @@ const getPath = (childPath, parentPath) => {
     operlog:'operLog',
     logininfor:'loginLog',
     apimonitor:'apiMonitor',
-    //====业务工具【全部强制抛弃tool父前缀，固定/system】
+    //====业务工具【全部强制抛弃tool父前缀，固定/system或直接根路径】
     file:{root:'system',path:'file'},
     message:{root:'system',path:'message'},
     gen:{root:'system',path:'gen'},
-    wfDefinition:{root:'system',path:'wf/definition'},
     form:{root:'system',path:'form'},
-    thirdConfig:{root:'system',path:'third/config'}
+    thirdConfig:{root:'system',path:'third/config'},
+    //====工作流页面【直接走静态路由根路径 /workflow/xxx 或 /system/wf/xxx】
+    definition:{root:'system',path:'wf/definition'},
+    wfDefinition:{root:'system',path:'wf/definition'},
+    todo:{root:'',path:'workflow/todo'},
+    done:{root:'',path:'workflow/done'},
+    start:{root:'',path:'workflow/start'}
   }
 
   const item = routeMap[childPath]
   // 如果配置是对象 → 抛弃原parentPath，使用自定义根路径
   if(typeof item === 'object'){
-    return `/${item.root}/${item.path}`
+    return item.root ? `/${item.root}/${item.path}` : `/${item.path}`
   }
   // 普通菜单沿用原有父路径拼接
   const realPath = item || childPath
@@ -269,10 +340,19 @@ const getIconComponent = (icon) => {
   return iconMap[icon] || MenuIcon
 }
 
-// 侧边栏折叠/展开
+// 侧边栏折叠/展开（PC）或抽屉开关（手机）
 const toggleSidebar = () => {
-  isCollapsed.value = !isCollapsed.value
+  if (isMobile.value) {
+    drawerVisible.value = !drawerVisible.value
+  } else {
+    isCollapsed.value = !isCollapsed.value
+  }
 }
+
+// 路由切换时手机自动关抽屉
+watch(() => route.path, () => {
+  if (isMobile.value) drawerVisible.value = false
+})
 
 // 角色判断
 function hasRole(roleId) {
@@ -288,32 +368,40 @@ const handleCommand = (command) => {
       cancelButtonText: '取消',
       type: 'warning'
     }).then(async () => {
+      const loginType = storage.getLoginType()
       await userStore.logout()
-      router.push('/login')
+      router.push(loginType === 'tenant' ? '/tenant-login' : '/login')
     }).catch(() => {})
   } else if (command === 'profile') {
-    ElMessageBox.info('个人中心功能开发中...')
+    router.push('/profile')
   }
 }
 
-// 挂载时加载配置和菜单
 onMounted(async () => {
+  checkMobile()
+  window.addEventListener('resize', handleResize)
+  // ⭐ 首次加载未读数 + 启动 30 秒轮询
+  fetchUnreadCount()
+  unreadPollTimer = setInterval(fetchUnreadCount, 30000)
   try {
-    // 加载系统配置
     let nameRes = await getConfigByKey("system_name");
-    if (nameRes?.data) {
-      systemName.value = nameRes.data;
-    }
+    if (nameRes?.data) { systemName.value = nameRes.data }
     let logoRes = await getConfigByKey("system_logo");
-    if (logoRes?.data) {
-      systemLogo.value = logoRes.data;
-    }
-    // 加载用户菜单
+    if (logoRes?.data) { systemLogo.value = logoRes.data }
     await fetchUserMenu()
   } catch (e) {
     console.log("加载配置失败", e);
   }
-});
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize)
+  // ⭐ 清理轮询定时器
+  if (unreadPollTimer) {
+    clearInterval(unreadPollTimer)
+    unreadPollTimer = null
+  }
+})
 </script>
 
 <style scoped>
@@ -327,31 +415,44 @@ onMounted(async () => {
 .sidebar {
   width: 220px;
   height: 100vh;
-  background-color: #1a1a2e;
+  background-color: var(--cyan-sidebar-bg);
   transition: width 0.3s;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
 .sidebar.collapsed {
   width: 64px;
 }
 
-.logo {
-  height: 60px;
+.logo-box {
+  height: 100px;
   flex-shrink: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background-color: #16213e;
-  border-bottom: 1px solid #2a2a4a;
+  gap: 4px;
+  border-bottom: 1px solid var(--cyan-sidebar-border);
+  transition: all 0.3s;
 }
 
-.logo-text {
-  color: #409eff;
-  font-size: 20px;
-  font-weight: bold;
+.logo-box.is-collapsed {
+  height: 60px;
+}
+
+.logo-img {
+  height: 48px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.logo-box.is-collapsed .logo-img {
+  height: 32px;
+  max-width: 40px;
 }
 
 .menu-wrapper {
@@ -360,26 +461,10 @@ onMounted(async () => {
   overflow-x: hidden;
 }
 
-.menu-wrapper::-webkit-scrollbar {
-  width: 6px;
-}
-
-.menu-wrapper::-webkit-scrollbar-thumb {
-  background-color: #3a3a5a;
-  border-radius: 3px;
-}
-
-.menu-wrapper::-webkit-scrollbar-track {
-  background-color: #1a1a2e;
-}
-
-.sidebar-menu {
+.menu-wrapper .el-menu {
   border-right: none;
-  background-color: #1a1a2e;
-}
-
-.sidebar-menu:not(.el-menu--collapse) {
-  width: 220px;
+  background-color: var(--cyan-sidebar-bg);
+  width: 100%;
 }
 
 .main-wrapper {
@@ -408,6 +493,14 @@ onMounted(async () => {
 .header-right {
   display: flex;
   align-items: center;
+  gap: 8px;
+}
+
+.bell-btn {
+  padding: 6px;
+}
+.message-badge {
+  margin-right: 4px;
 }
 
 .user-info {
@@ -433,5 +526,33 @@ onMounted(async () => {
   padding: 20px;
   background-color: #f0f2f5;
   overflow-y: auto;
+}
+
+/* ===== 手机端响应式覆盖 ===== */
+.mobile-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.drawer-sidebar {
+  width: 100% !important;
+  height: 100%;
+  min-height: 100vh;
+}
+
+@media (max-width: 768px) {
+  .layout-container { overflow-x: hidden; }
+  .header { height: 52px; padding: 0 12px; }
+  .username { display: none; }
+  .user-info { padding: 4px 8px; }
+  .content { padding: 12px; }
+}
+
+.mobile-sidebar-drawer .logo-box {
+  height: 70px;
+}
+.mobile-sidebar-drawer .logo-img {
+  height: 36px;
 }
 </style>

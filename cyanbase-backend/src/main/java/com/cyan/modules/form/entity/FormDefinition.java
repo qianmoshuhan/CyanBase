@@ -12,6 +12,9 @@ public class FormDefinition {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @TableField("tenant_id")
+    private Long tenantId;
+
     /**
      * 表单标识 - 由后端自动生成
      */

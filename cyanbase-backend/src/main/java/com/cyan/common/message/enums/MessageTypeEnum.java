@@ -13,7 +13,8 @@ public enum MessageTypeEnum {
     SYSTEM_NOTICE(1, "系统公告"),
     OPERATION_NOTIFY(2, "操作通知"),
     WARNING_ALERT(3, "预警提醒"),
-    WELCOME_MESSAGE(4, "欢迎消息");
+    WELCOME_MESSAGE(4, "欢迎消息"),
+    WORKFLOW_NOTIFY(5, "工作流通知");
 
     private final Integer code;
     private final String desc;

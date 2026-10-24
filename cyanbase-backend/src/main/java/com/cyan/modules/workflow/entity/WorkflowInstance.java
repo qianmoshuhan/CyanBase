@@ -1,99 +1,79 @@
 package com.cyan.modules.workflow.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.cyan.entity.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 流程实例实体
+ * <p>status: running/completed/rejected/cancelled</p>
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("wf_process_instance")
-public class WorkflowInstance implements Serializable {
+public class WorkflowInstance extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键ID
-     */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 流程定义ID
-     */
+    @TableField("tenant_id")
+    private Long tenantId;
+
+    @TableField("definition_id")
     private Long definitionId;
 
-    /**
-     * 流程标识
-     */
+    @TableField("process_key")
     private String processKey;
 
-    /**
-     * 流程名称
-     */
+    @TableField("process_name")
     private String processName;
 
-    /**
-     * 业务关联键
-     */
+    @TableField("business_key")
     private String businessKey;
 
-    /**
-     * 当前节点ID
-     */
+    @TableField("current_node_id")
     private Long currentNodeId;
 
-    /**
-     * 当前节点名称
-     */
+    @TableField("current_node_name")
     private String currentNodeName;
 
-    /**
-     * 状态：running-运行中 completed-已完成 cancelled-已取消 rejected-已驳回
-     */
+    /** 当前节点审批截止时间（用于超时催办） */
+    @TableField("current_node_deadline")
+    private LocalDateTime currentNodeDeadline;
+
+    /** running / completed / rejected / cancelled */
     private String status;
 
-    /**
-     * 发起人ID
-     */
+    @TableField("initiator_id")
     private Long initiatorId;
 
-    /**
-     * 发起人姓名
-     */
+    @TableField("initiator_name")
     private String initiatorName;
 
-    /**
-     * 开始时间
-     */
+    @TableField("start_time")
     private LocalDateTime startTime;
 
-    /**
-     * 结束时间
-     */
+    @TableField("end_time")
     private LocalDateTime endTime;
 
-    /**
-     * 耗时（毫秒）
-     */
+    @TableField("duration_ms")
     private Long durationMs;
 
-    /**
-     * 流程变量（JSON格式）
-     */
     private String variables;
 
     /**
-     * 创建时间
+     * 业务事项名称（非数据库字段，查询列表时根据 businessKey 关联业务表回填）
+     * 例：businessKey=threeBigItem:123 → 查 t_three_big_item.item_name
      */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    @TableField(exist = false)
+    private String itemName;
 
-    /**
-     * 更新时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
+    @TableLogic
+    private Integer delFlag;
 }

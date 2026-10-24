@@ -61,6 +61,8 @@ public class SecurityConfig {
                 // 业务接口暂时全部放行（后续可按需启用权限校验）
                 .requestMatchers("/system/**").permitAll()
                 .requestMatchers("/monitor/**").permitAll()
+                // 租户认证接口公开
+                .requestMatchers("/tenant-auth/**").permitAll()
                 .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

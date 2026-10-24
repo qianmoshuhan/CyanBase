@@ -1,6 +1,7 @@
 package com.cyan.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -31,8 +32,17 @@ public class SysTenant implements Serializable {
     /** 地址 */
     private String address;
 
-    /** 状态 0正常 1停用 */
+    /** 状态 0正常 1冻结 2已过期 */
     private Integer status;
+
+    /** 到期时间（NULL = 永不到期） */
+    @TableField("expire_date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime expireDate;
+
+    /** 最大用户数配额（NULL = 不限） */
+    @TableField("max_user_num")
+    private Integer maxUserNum;
 
     /** 创建者 */
     @TableField("create_by")
@@ -40,6 +50,7 @@ public class SysTenant implements Serializable {
 
     /** 创建时间 */
     @TableField("create_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createTime;
 
     /** 更新者 */
@@ -48,6 +59,7 @@ public class SysTenant implements Serializable {
 
     /** 更新时间 */
     @TableField("update_time")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updateTime;
 
     /** 删除标志 0正常 1删除 */

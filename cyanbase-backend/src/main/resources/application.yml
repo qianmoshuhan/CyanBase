@@ -39,7 +39,12 @@ mybatis-plus:
 # JWT配置
 jwt:
   secret: cyanbase2026secretkey666888999abcdefghijklmnopqrstuvwxyz123456
-  expire: 3600000
+  # Access Token 有效期 2 小时（毫秒）
+  accessExpire: 7200000
+  # Refresh Token 有效期 7 天（毫秒）
+  refreshExpire: 604800000
+  # 单设备在线（true=同一用户后登录会踢掉前一个）
+  singleDevice: true
   tokenHeader: Authorization
   tokenPrefix: Bearer
 

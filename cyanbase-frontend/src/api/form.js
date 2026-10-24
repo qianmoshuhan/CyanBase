@@ -86,3 +86,44 @@ export function getFormDataList(params) {
     params
   })
 }
+
+/**
+ * 获取所有启用的表单定义（下拉选用）
+ */
+export function getFormDefAllActive() {
+  return request({
+    url: '/form/definition/all-active',
+    method: 'get'
+  })
+}
+
+/**
+ * 获取指定表单定义下的字段列表
+ */
+export function getFormFieldList(definitionId) {
+  return request({
+    url: `/form/field/list/${definitionId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * ⭐ Phase 3.2 我的表单列表（当前租户已发布表单，含 hasBinding 标记）
+ */
+export function getMyFormList() {
+  return request({
+    url: '/form/definition/my-list',
+    method: 'get'
+  })
+}
+
+/**
+ * 批量保存表单字段（表单设计器保存时同步拆字段入库）
+ */
+export function batchSaveFormFields(definitionId, fields) {
+  return request({
+    url: `/form/field/batch/${definitionId}`,
+    method: 'post',
+    data: fields
+  })
+}

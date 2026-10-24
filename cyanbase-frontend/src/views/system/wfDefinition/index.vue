@@ -33,8 +33,17 @@
       <el-table-column prop="processName" label="流程名称" min-width="180" />
       <el-table-column prop="processKey" label="流程标识" width="200" />
       <el-table-column prop="category" label="分类" width="120" />
-      <el-table-column prop="version" label="版本" width="100" />
-      
+      <el-table-column prop="version" label="版本" width="80" />
+
+      <!-- ⭐ 新增：数据来源列 -->
+      <el-table-column label="来源" width="110">
+        <template #default="{ row }">
+          <el-tag v-if="row.source === 'OWN'" type="primary">本租户</el-tag>
+          <el-tag v-else-if="row.source === 'DISTRIBUTED'" type="warning">分发给我</el-tag>
+          <el-tag v-else type="info">未知</el-tag>
+        </template>
+      </el-table-column>
+
       <el-table-column label="状态" width="120">
         <template #default="{ row }">
           <el-tag :type="
@@ -54,9 +63,27 @@
       <el-table-column label="操作" width="380" fixed="right">
         <template #default="{ row }">
           <el-button type="success" link size="small" @click="handlePreview(row)">预览</el-button>
-          <el-button type="warning" link size="small" @click="handleOpenEdit(row)">编辑</el-button>
-          <el-button type="primary" link size="small" @click="handleDesign(row)">设计</el-button>
-          <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
+          <!-- ⭐ 分发给我且不允许编辑 → 置灰 -->
+          <el-tooltip v-if="isDistributedNoEdit(row)" content="分发给您的流程，仅可使用不可修改" placement="top">
+            <span>
+              <el-button type="warning" link size="small" disabled>编辑</el-button>
+            </span>
+          </el-tooltip>
+          <el-button v-else type="warning" link size="small" @click="handleOpenEdit(row)">编辑</el-button>
+
+          <el-tooltip v-if="isDistributedNoEdit(row)" content="分发给您的流程，仅可使用不可修改" placement="top">
+            <span>
+              <el-button type="primary" link size="small" disabled>设计</el-button>
+            </span>
+          </el-tooltip>
+          <el-button v-else type="primary" link size="small" @click="handleDesign(row)">设计</el-button>
+
+          <el-tooltip v-if="isDistributedNoEdit(row)" content="分发给您的流程，仅可使用不可修改" placement="top">
+            <span>
+              <el-button type="danger" link size="small" disabled>删除</el-button>
+            </span>
+          </el-tooltip>
+          <el-button v-else type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -127,6 +154,11 @@ const editForm = ref({
   status: 0,
   processXml: ''
 })
+
+// 判断：分发给我 且 不允许编辑 → 禁用编辑/设计/删除
+const isDistributedNoEdit = (row) => {
+  return row.source === 'DISTRIBUTED' && row.allowEdit !== true
+}
 
 // 获取列表
 const getList = async () => {

@@ -26,6 +26,13 @@
         <el-table-column prop="id" label="ID" width="80" />
         <el-table-column prop="userName" label="用户名" min-width="120" />
         <el-table-column prop="nickName" label="昵称" min-width="120" />
+        <el-table-column prop="tenantName" label="所属租户" min-width="120">
+          <template #default="{ row }">
+            <el-tag :type="row.tenantId && row.tenantId > 0 ? '' : 'info'" effect="plain">
+              {{ row.tenantName }}
+            </el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="deptId" label="部门ID" width="100" />
         <el-table-column prop="phone" label="手机号" width="130" />
         <el-table-column prop="email" label="邮箱" min-width="180" />
@@ -76,6 +83,23 @@
         <el-form-item label="密码" prop="password">
           <el-input v-model="formData.password" type="password" placeholder="请输入密码" show-password />
         </el-form-item>
+        <!-- 租户场景：所属租户禁用（已自动锁定当前租户）；admin：可下拉选 -->
+        <el-form-item label="所属租户" prop="tenantId">
+          <el-select
+            v-model="formData.tenantId"
+            :disabled="isTenantLogin"
+            placeholder="请选择租户"
+            style="width: 100%"
+          >
+            <el-option label="平台用户" :value="0" />
+            <el-option
+              v-for="item in tenantOptions"
+              :key="item.id"
+              :label="item.tenantName"
+              :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="部门ID" prop="deptId">
           <el-input-number v-model="formData.deptId" :min="0" />
         </el-form-item>
@@ -109,6 +133,11 @@
 import { ref, reactive, computed ,onMounted} from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getUserList, addUser, updateUser, deleteUser , getAllRole, getUserSelectedRoleIds} from '@/api/user'
+import { getAllTenant } from '@/api/tenant'
+import storage from '@/utils/storage'
+
+// 是否租户登录
+const isTenantLogin = computed(() => storage.getLoginType() === 'tenant')
 
 const searchForm = reactive({
   userName: ''
@@ -129,11 +158,11 @@ const isEdit = ref(false)
 const formRef = ref(null)
 const formData = reactive({
   id: null,
-  tenantId: 1,
+  tenantId: 0,
   userName: '',
   password: '',
   nickName: '',
-  deptId: 1,
+  deptId: 0,
   phone: '',
   email: '',
   sex: 0,
@@ -144,6 +173,8 @@ const formData = reactive({
 
 //定义角色下拉数据源
 const roleOptions = ref([])
+// 租户下拉数据源
+const tenantOptions = ref([])
 
 const formRules = {
   userName: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
@@ -151,8 +182,19 @@ const formRules = {
 }
 
 onMounted(async()=>{
+  // 角色下拉
   const res = await getAllRole()
   roleOptions.value = res.data
+
+  // 租户下拉 —— 仅 admin 需要（租户场景虽然也加载了但 disabled）
+  if (!isTenantLogin.value) {
+    try {
+      const tenantRes = await getAllTenant()
+      tenantOptions.value = tenantRes.data || []
+    } catch (e) {
+      console.error('加载租户列表失败', e)
+    }
+  }
 })
 
 const fetchData = async () => {
@@ -172,11 +214,11 @@ const handleAdd = () => {
   isEdit.value = false
   Object.assign(formData, {
     id: null,
-    tenantId: 1,
+    tenantId: isTenantLogin.value ? (storage.get('tenantId') || 6) : 0,
     userName: '',
     password: '',
     nickName: '',
-    deptId: 1,
+    deptId: 0,
     phone: '',
     email: '',
     sex: 0,

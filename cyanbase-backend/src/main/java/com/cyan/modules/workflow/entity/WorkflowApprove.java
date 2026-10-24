@@ -1,73 +1,68 @@
 package com.cyan.modules.workflow.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.cyan.entity.BaseEntity;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 流程审批记录实体
+ * 流程审批/待办记录表
+ * <p>action: null=待办未处理 / approve=通过 / reject=驳回 / transfer=转办</p>
  */
 @Data
+@EqualsAndHashCode(callSuper = true)
 @TableName("wf_process_approve")
-public class WorkflowApprove implements Serializable {
+public class WorkflowApprove extends BaseEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 主键ID
-     */
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 流程实例ID
-     */
+    @TableField("tenant_id")
+    private Long tenantId;
+
+    @TableField("instance_id")
     private Long instanceId;
 
-    /**
-     * 节点ID
-     */
+    @TableField("node_id")
     private Long nodeId;
 
-    /**
-     * 节点名称
-     */
+    @TableField("node_name")
     private String nodeName;
 
-    /**
-     * 审批人ID
-     */
+    @TableField("approver_id")
     private Long approverId;
 
-    /**
-     * 审批人姓名
-     */
+    @TableField("approver_name")
     private String approverName;
 
-    /**
-     * 操作：approve-通过 reject-驳回 transfer-转办
-     */
+    /** null=待办 / approve / reject / transfer / skip */
     private String action;
 
-    /**
-     * 审批意见
-     */
+    /** 审批类型：NORMAL=正常审批 ADD=加签 */
+    @TableField("sign_type")
+    private String signType;
+
+    /** 加签的来源审批人ID（从谁那里加出来的） */
+    @TableField("parent_approve_id")
+    private Long parentApproveId;
+
+    /** 该条审批的截止时间（用于超时催办） */
+    @TableField("deadline")
+    private LocalDateTime deadline;
+
     private String comment;
 
-    /**
-     * 审批时间
-     */
+    @TableField("approval_time")
     private LocalDateTime approvalTime;
 
-    /**
-     * 审批耗时（毫秒）
-     */
+    @TableField("duration_ms")
     private Long durationMs;
 
-    /**
-     * 创建时间
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
+    @TableLogic
+    private Integer delFlag;
 }
