@@ -43,12 +43,11 @@ public class ThreeBigItemServiceImpl
     @Override
     public IPage<ThreeBigItem> queryPage(Integer pageNum, Integer pageSize,
                                           Integer itemStatus, Integer itemType,
-                                          Long systemId, String itemName,
-                                          Long userDeptId, boolean isAdmin) {
+                                          Long systemId, String itemName) {
 
         LambdaQueryWrapper<ThreeBigItem> wrapper = new LambdaQueryWrapper<>();
 
-        // === 筛选条件 ===
+        // === 业务筛选条件（纯业务，不含权限逻辑） ===
         if (itemStatus != null)  wrapper.eq(ThreeBigItem::getItemStatus, itemStatus);
         if (itemType != null)    wrapper.eq(ThreeBigItem::getItemType, itemType);
         if (systemId != null)    wrapper.eq(ThreeBigItem::getSystemId, systemId);
@@ -56,16 +55,13 @@ public class ThreeBigItemServiceImpl
             wrapper.like(ThreeBigItem::getItemName, itemName);
         }
 
-        // === 权限过滤 ===
-        if (!isAdmin && userDeptId != null) {
-            // 填报员/部门领导：只能看本部门提交的事项
-            wrapper.eq(ThreeBigItem::getSubmitDeptId, userDeptId);
-        }
-        // 管理员：不加过滤，MP 自动隔离 + 租户隔离后全量可见
-
         wrapper.orderByDesc(ThreeBigItem::getCreateTime);
 
         Page<ThreeBigItem> page = new Page<>(pageNum, pageSize);
+        // ⭐ 数据权限由 L2 DataScope Handler 自动管控：
+        //    Handler 识别到 t_three_big_item 表 → 通过 DEPT_COLUMN_MAP 映射到 submit_dept_id 列
+        //    → 按当前用户角色 dataScope 配置（ALL/DEPT/DEPT_AND_CHILD/SELF/CUSTOM）自动追加 WHERE 条件
+        //    → Service 层不再手动写部门过滤，避免与 Handler 双重追加
         return page(page, wrapper);
     }
 

@@ -1,4 +1,4 @@
-<template>
+﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
@@ -46,8 +46,8 @@
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -82,6 +82,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'GenTable' })
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getGenTableList, addGenTable, updateGenTable, deleteGenTable } from '@/api/gen'
@@ -127,7 +128,22 @@ const handleSubmit = async () => {
   })
 }
 const handleDialogClose = () => formRef.value?.resetFields()
-const handleReset = () => { Object.assign(searchForm, { tableName: '', tableComment: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { tableName: '', tableComment: '' })
+  pagination.current = 1
+  fetchData()
+}
 
 fetchData()
 </script>

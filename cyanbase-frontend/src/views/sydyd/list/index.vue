@@ -1,4 +1,4 @@
-<template>
+﻿﻿<template>
   <div class="list-page">
     <el-card class="search-card" shadow="never">
       <el-form :inline="!isMobile" :model="query">
@@ -67,8 +67,8 @@
         :total="total"
         :page-sizes="[10, 20, 50]"
         :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
-        @size-change="loadList"
-        @current-change="loadList"
+        @current-change="handlePageChange"
+        @size-change="handleSizeChange"
         class="pagination"
       />
     </el-card>
@@ -105,6 +105,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'SydydList' })
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getListPage, createList, updateList, deleteList, getAllSystems } from '@/api/sydyd'
@@ -153,6 +154,17 @@ const loadSystems = async () => {
     systemOptions.value.forEach(s => { systemMap[s.id] = s.systemName })
   } catch (e) { /* 忽略 */ }
 }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  query.pageNum = page
+  loadList()
+}
+const handleSizeChange = (size) => {
+  query.pageSize = size
+  query.pageNum = 1
+  loadList()
+}
+
 const loadList = async () => {
   loading.value = true
   try {

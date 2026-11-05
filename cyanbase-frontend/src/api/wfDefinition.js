@@ -228,3 +228,47 @@ export function revokeTenantDistribution(data) {
     data
   })
 }
+
+// ==================== 流程版本 API ====================
+
+/** 查询某流程定义的全部版本列表 */
+export function getVersionList(definitionId) {
+  return request({
+    url: `/workflow/definition/${definitionId}/versions`,
+    method: 'get'
+  })
+}
+
+/** 查询某版本详情(反序列化后返回 definition + nodes) */
+export function getVersionDetail(versionId) {
+  return request({
+    url: `/workflow/definition/version/${versionId}`,
+    method: 'get'
+  })
+}
+
+/** 从指定版本创建新版本 */
+export function createVersionFrom(sourceVersionId, versionName) {
+  return request({
+    url: `/workflow/definition/version/${sourceVersionId}/create-from`,
+    method: 'post',
+    data: { versionName }
+  })
+}
+
+/** 保存版本快照(version-edit 模式用) */
+export function saveVersionSnapshot(versionId, flowJson) {
+  return request({
+    url: `/workflow/definition/version/${versionId}/save-snapshot`,
+    method: 'post',
+    data: { flowJson }
+  })
+}
+
+/** ⭐ 从版本快照实时生成 BPMN XML（版本模式专用预览） */
+export function getVersionBpmn(versionId) {
+  return request({
+    url: `/workflow/definition/version/${versionId}/bpmn`,
+    method: 'get'
+  })
+}

@@ -1,10 +1,10 @@
-<template>
+﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span>文件管理</span>
-          <el-upload :show-upload-list="false" :on-success="handleUploadSuccess" :action="uploadUrl">
+          <el-upload :show-upload-list="false" :on-success="handleUploadSuccess" :action="uploadUrl" v-hasPermi="['system:file:add']">
             <el-button type="primary"><el-icon><Upload /></el-icon> 上传文件</el-button>
           </el-upload>
         </div>
@@ -31,7 +31,7 @@
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleDownload(row)">下载</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['system:file:delete']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -43,8 +43,8 @@
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -52,6 +52,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'File' })
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getFileList, deleteFile } from '@/api/file'
@@ -77,7 +78,22 @@ const handleDelete = (row) => {
   ElMessageBox.confirm('确定要删除该文件吗？', '提示', { type: 'warning' })
     .then(async () => { await deleteFile(row.fileId); ElMessage.success('删除成功'); fetchData() }).catch(() => {})
 }
-const handleReset = () => { Object.assign(searchForm, { fileName: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { fileName: '' })
+  pagination.current = 1
+  fetchData()
+}
 
 fetchData()
 </script>

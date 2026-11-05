@@ -1,8 +1,10 @@
 package com.cyan.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
+import com.cyan.common.security.util.SecurityUtils;
 import com.cyan.entity.SysTenant;
 import com.cyan.entity.SysTenantMenu;
 import com.cyan.mapper.SysTenantMenuMapper;
@@ -16,6 +18,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -66,13 +70,33 @@ public class SysTenantController {
         if (tenantCode != null && !tenantCode.isEmpty()) {
             wrapper.eq(SysTenant::getTenantCode, tenantCode);
         }
+        LocalDateTime now = LocalDateTime.now();
         if (status != null) {
-            wrapper.eq(SysTenant::getStatus, status);
+            if (status == 2) {
+                // ⭐ "已过期" = 数据库已标过期(2) OR 正常(0)但到期时间已过
+                wrapper.and(w -> w.eq(SysTenant::getStatus, 2)
+                                .or()
+                                .eq(SysTenant::getStatus, 0)
+                                .isNotNull(SysTenant::getExpireDate)
+                                .lt(SysTenant::getExpireDate, now));
+            } else {
+                wrapper.eq(SysTenant::getStatus, status);
+            }
         }
         wrapper.orderByDesc(SysTenant::getCreateTime);
 
         Page<SysTenant> page = new Page<>(pageNum, pageSize);
         sysTenantService.page(page, wrapper);
+
+        // ⭐ 二次修正：数据库里 status 可能还是 0（新建默认），但 expireDate 已过期的，
+        // 返回给前端时强制改成 2，保证列表显示正确的过期状态
+        for (SysTenant t : page.getRecords()) {
+            if (t.getStatus() != null && t.getStatus() == 0
+                    && t.getExpireDate() != null
+                    && t.getExpireDate().isBefore(now)) {
+                t.setStatus(2);
+            }
+        }
         return R.ok(page);
     }
 
@@ -118,17 +142,34 @@ public class SysTenantController {
         // 写操作：完整三层（tenantId=null 跳过 L1 归属比对）
         permissionGuard.check(ResourceScope.of(null, null, exist.getCreateBy()),
                               "system:tenant:edit");
-        return sysTenantService.updateById(sysTenant) ? R.ok() : R.fail("更新失败");
+
+        // ⭐ 不能用 updateById：默认 NOT_NULL 策略会跳过 null 字段，
+        // 导致用户清空 expireDate（设为永不过期）时无法落库。
+        // 改用 LambdaUpdateWrapper 手动 set 所有传入字段，包括 null 值。
+        LambdaUpdateWrapper<SysTenant> wrapper = new LambdaUpdateWrapper<>();
+        wrapper.eq(SysTenant::getId, sysTenant.getId());
+        wrapper.set(sysTenant.getTenantName() != null, SysTenant::getTenantName, sysTenant.getTenantName());
+        wrapper.set(sysTenant.getTenantCode() != null, SysTenant::getTenantCode, sysTenant.getTenantCode());
+        wrapper.set(sysTenant.getContactUser() != null, SysTenant::getContactUser, sysTenant.getContactUser());
+        wrapper.set(sysTenant.getContactPhone() != null, SysTenant::getContactPhone, sysTenant.getContactPhone());
+        wrapper.set(sysTenant.getAddress() != null, SysTenant::getAddress, sysTenant.getAddress());
+        wrapper.set(sysTenant.getStatus() != null, SysTenant::getStatus, sysTenant.getStatus());
+        wrapper.set(SysTenant::getExpireDate, sysTenant.getExpireDate());    // null 也要写入
+        wrapper.set(sysTenant.getMaxUserNum() != null, SysTenant::getMaxUserNum, sysTenant.getMaxUserNum());
+        wrapper.set(sysTenant.getRemark() != null, SysTenant::getRemark, sysTenant.getRemark());
+        wrapper.set(SysTenant::getUpdateBy, SecurityUtils.getUsername());
+        wrapper.set(SysTenant::getUpdateTime, LocalDateTime.now());
+        return sysTenantService.update(wrapper) ? R.ok() : R.fail("更新失败");
     }
 
     @DeleteMapping("/{id}")
-    @RequiresPermission("system:tenant:remove")
+    @RequiresPermission("system:tenant:delete")
     public R<Void> delete(@PathVariable Long id) {
         SysTenant exist = sysTenantService.getById(id);
         if (exist == null) return R.fail("租户不存在");
         // 写操作：完整三层
         permissionGuard.check(ResourceScope.of(null, null, exist.getCreateBy()),
-                              "system:tenant:remove");
+                              "system:tenant:delete");
         return sysTenantService.removeById(id) ? R.ok() : R.fail("删除失败");
     }
 

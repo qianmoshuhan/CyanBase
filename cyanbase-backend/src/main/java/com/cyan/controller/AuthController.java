@@ -9,13 +9,14 @@ import com.cyan.entity.SysLogininfor;
 import com.cyan.entity.SysDept;
 import com.cyan.entity.SysTenant;
 import com.cyan.security.domain.LoginUser;
-import com.cyan.security.util.JwtUtil;
+    import com.cyan.security.util.JwtUtil;
 import com.cyan.service.SysDeptService;
 import com.cyan.service.SysTenantService;
 import com.cyan.service.SysUserService;
 import com.cyan.service.SysUserOnlineService;
 import com.cyan.service.SysLogLoginService;
 import com.cyan.service.SysLogininforService;
+import com.cyan.security.captcha.service.LoginCaptchaService;
 import com.cyan.security.dto.LoginResponse;
 import com.cyan.security.service.PermissionService;
 import com.cyan.security.service.RefreshTokenService;
@@ -44,6 +45,7 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final SysTenantService sysTenantService;
     private final PermissionService permissionService;
+    private final LoginCaptchaService loginCaptchaService;
 
     private static String sessionId(Long userId) {
         return "u_" + userId;
@@ -58,6 +60,12 @@ public class AuthController {
         String browser = getBrowser(request);
         String os = getOS(request);
         String userAgent = browser + " / " + os;
+
+        // ====== 第一道防护：滑块验证码凭证校验（先于账号密码 / DB 查询） ======
+        // 一次性消费：无论凭证是否存在都删除，防止重放攻击；不合法直接拦截
+        if (!loginCaptchaService.consumeCredential(loginRequest.getCredentialKey())) {
+            return R.fail("请先完成滑块验证");
+        }
 
         try {
             // 查询用户
@@ -85,11 +93,17 @@ public class AuthController {
             String roleStr = roleIdList == null || roleIdList.isEmpty() ? ""
                     : roleIdList.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
 
-            // 生成 Access Token（claims 中不带 tenantId → 超管）
+            // 生成 Access Token
+            // ⭐⭐⭐ 必须带上 tenantId！否则 JwtAuthenticationFilter 解析出来为 null
+            //  → SysMenuController.getUserMenu 的 filterByTenant 被跳过
+            //  → PermissionService.getPermsByUserId 的 filterByTenantMenuPool 也拿不到租户边界
+            // ✅ L2 DataScope: 必须带上 deptId，否则 CyanDataPermissionHandler 检测 sysUser=null 直接跳过数据权限
             Map<String, Object> claims = new HashMap<>();
             claims.put("userId", sysUser.getId());
             claims.put("userName", sysUser.getUserName());
             claims.put("roles", roleStr);
+            jwtUtil.putTenantId(claims, sysUser.getTenantId());  // ✅ L1 租户隔离
+            jwtUtil.putDeptId(claims, sysUser.getDeptId());       // ✅ L2 DataScope
             String accessToken = jwtUtil.createToken(claims);
 
             // 生成 Refresh Token（UUID 存 Redis）
@@ -101,7 +115,6 @@ public class AuthController {
             // ====== 写在线用户记录 ======
             long accessExpireMs = jwtUtil.getAccessExpireMs();
             saveOnlineUser(sysUser, request, accessExpireMs);
-
             long expiresIn = accessExpireMs / 1000;
             return R.ok(new LoginResponse(accessToken, refreshToken, expiresIn));
         } catch (Exception e) {
@@ -268,11 +281,13 @@ public class AuthController {
         String roleStr = roleIdList == null || roleIdList.isEmpty() ? ""
                 : roleIdList.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(","));
 
-        // 生成新 Access Token
+        // 生成新 Access Token（✅ 补 tenantId + deptId，与 login 入口对齐）
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", userId);
         claims.put("userName", sysUser.getUserName());
         claims.put("roles", roleStr);
+        jwtUtil.putTenantId(claims, sysUser.getTenantId());   // ✅ L1 租户隔离
+        jwtUtil.putDeptId(claims, sysUser.getDeptId());        // ✅ L2 DataScope
         String accessToken = jwtUtil.createToken(claims);
 
         // 轮换：旧 Refresh 立即作废 + 生成新 Refresh
@@ -390,5 +405,8 @@ public class AuthController {
     public static class SysUserLoginRequest {
         private String userName;
         private String password;
+
+        /** 滑块验证通过后发放的一次性短时效凭证 key */
+        private String credentialKey;
     }
 }

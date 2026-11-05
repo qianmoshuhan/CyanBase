@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cyan.modules.workflow.entity.WorkflowNode;
 import com.cyan.modules.workflow.mapper.WorkflowNodeMapper;
 import com.cyan.modules.workflow.service.WorkflowNodeService;
+import com.cyan.config.CustomTenantHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,15 +25,22 @@ public class WorkflowNodeServiceImpl extends ServiceImpl<WorkflowNodeMapper, Wor
 
     @Override
     public List<WorkflowNode> listByDefinitionId(Long definitionId) {
-        LambdaQueryWrapper<WorkflowNode> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(WorkflowNode::getDefinitionId, definitionId);
-        wrapper.orderByAsc(WorkflowNode::getSortOrder);
-        return this.list(wrapper);
+        CustomTenantHandler.skip();
+        try {
+            LambdaQueryWrapper<WorkflowNode> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(WorkflowNode::getDefinitionId, definitionId);
+            wrapper.orderByAsc(WorkflowNode::getSortOrder);
+            return this.list(wrapper);
+        } finally {
+            CustomTenantHandler.reset();
+        }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean batchSaveNodes(Long definitionId, List<WorkflowNode> nodes) {
+        CustomTenantHandler.skip();
+        try {
         // ⭐ DEBUG: 打印收到的原始节点数据，方便排查前端→后端字段是否丢失
         if (nodes != null) {
             for (WorkflowNode n : nodes) {
@@ -43,16 +51,19 @@ public class WorkflowNodeServiceImpl extends ServiceImpl<WorkflowNodeMapper, Wor
 
         // 1. 物理删除（绕开 @TableLogic 的软删，不然软删记录占着主键 id 会导致下一次插入冲突）
         baseMapper.deleteByDefinitionIdPhysical(definitionId);
-        
+
         if (nodes == null || nodes.isEmpty()) return true;
 
         // 2. 批量保存新节点：**强制把 id 置 null**，让数据库自增分配
         //    同时建 idMap: 前端传过来的旧 id → 数据库新分配的自增 id
+        // ⭐⭐ sortOrder 兜底：按遍历顺序重新编号，不再信任前端传来的值
         Map<Long, Long> idMap = new HashMap<>();
-        for (WorkflowNode node : nodes) {
+        for (int i = 0; i < nodes.size(); i++) {
+            WorkflowNode node = nodes.get(i);
             Long oldId = node.getId();
             node.setId(null);              // ⭐ 清掉前端临时 id
             node.setDefinitionId(definitionId);
+            node.setSortOrder(i + 1);      // ⭐⭐ 兜底重新编 sortOrder，按保存顺序
             this.save(node);               // save 后 MP 自动回填数据库生成的自增 id
             if (oldId != null) {
                 idMap.put(oldId, node.getId());  // 记录：旧 id → 新自增 id
@@ -84,13 +95,21 @@ public class WorkflowNodeServiceImpl extends ServiceImpl<WorkflowNodeMapper, Wor
         }
 
         return true;
+        } finally {
+            CustomTenantHandler.reset();
+        }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteByDefinitionId(Long definitionId) {
-        LambdaQueryWrapper<WorkflowNode> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(WorkflowNode::getDefinitionId, definitionId);
-        return this.remove(wrapper);
+        CustomTenantHandler.skip();
+        try {
+            LambdaQueryWrapper<WorkflowNode> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(WorkflowNode::getDefinitionId, definitionId);
+            return this.remove(wrapper);
+        } finally {
+            CustomTenantHandler.reset();
+        }
     }
 }

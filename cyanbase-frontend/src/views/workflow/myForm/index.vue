@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="myform-container">
     <!-- ════════ 卡片列表 ════════ -->
     <el-card shadow="hover">
@@ -112,6 +112,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'WorkflowMyForm' })
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Document, Refresh, Loading, WarningFilled } from '@element-plus/icons-vue'

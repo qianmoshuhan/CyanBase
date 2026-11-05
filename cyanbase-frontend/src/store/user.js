@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { login, logout, getUserInfo } from '@/api/auth'
 import storage from '@/utils/storage'
+import { useTagsViewStore } from './tagsView'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -11,8 +12,8 @@ export const useUserStore = defineStore('user', {
   }),
   getters: {
     isLoggedIn: state => !!state.token,
-    getUserName: state => state.userInfo?.userName || '',
-    getNickName: state => state.userInfo?.sysUser?.nickName || state.userInfo?.userName || '',
+    getUserName: state => state.userInfo?.userName || state.userInfo?.sysUser?.userName || '',
+    getNickName: state => state.userInfo?.sysUser?.nickName || state.userInfo?.nickName || state.userInfo?.userName || '',
     getTenantId: state => state.userInfo?.sysUser?.tenantId || state.userInfo?.tenantId || null,
     // 从 sysUser 对象里取到所属租户名（后端 getUserInfo 没直接塞，个人中心接口 profile 才给）
     // 首页/banner 的 tenantName 从 tenant store 或 profile 接口拿最准，这里保底用 tenantId 区分平台/租户
@@ -33,8 +34,8 @@ export const useUserStore = defineStore('user', {
     }
   },
   actions: {
-    async login(userName, password) {
-      const res = await login({ userName, password })
+    async login(userName, password, credentialKey) {
+      const res = await login({ userName, password, credentialKey })
       // 新返回体：{ accessToken, refreshToken, expiresIn }
       this.token = res.data.accessToken
       this.userInfo = null // getUserInfo() 会自己拉
@@ -71,6 +72,8 @@ export const useUserStore = defineStore('user', {
       this.roles = []
       this.permissions = []
       storage.clearAuth() // Access + Refresh 一起清
+      // ⭐ 同步清理标签页和 KeepAlive 缓存（退出登录 → 新身份不能继承旧标签）
+      try { useTagsViewStore().reset() } catch (e) { /* store 可能还没注册，忽略 */ }
     }
   }
 })

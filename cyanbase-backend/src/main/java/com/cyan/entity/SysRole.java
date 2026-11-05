@@ -15,6 +15,10 @@ public class SysRole implements Serializable {
     /** 租户ID */
     private Long tenantId;
 
+    /** 部门私有角色归属部门（NULL=全局角色，全租户可见；非NULL=仅本部门+子部门可见） */
+    @TableField("dept_id")
+    private Long deptId;
+
     /** 角色名称 */
     @TableField("role_name")
     private String roleName;
@@ -62,4 +66,8 @@ public class SysRole implements Serializable {
     /** 所属租户名称（非数据库字段，list 查询时关联 sys_tenant 填充） */
     @TableField(exist = false)
     private String tenantName;
+
+    /** 该角色下关联的用户名列表字符串（非数据库字段，list 查询时批量填充，多个逗号拼接） */
+    @TableField(exist = false)
+    private String userNames;
 }

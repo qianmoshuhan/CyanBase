@@ -1,4 +1,4 @@
-<template>
+﻿﻿﻿﻿﻿<template>
   <div class="workflow-start-container">
     <el-card shadow="hover">
       <el-tabs v-model="activeTab" @tab-change="onTabChange">
@@ -15,8 +15,8 @@
               </el-form-item>
             </el-form>
             <el-table :data="filteredProcessList" border stripe highlight-current-row style="margin-bottom:20px" empty-text="暂无已发布的流程">
-              <el-table-column prop="id" label="ID" width="80" />
-              <el-table-column prop="processName" label="流程名称" min-width="200" />
+              <el-table-column type="index" label="序号" width="70" align="center" />
+              <el-table-column prop="processName" label="流程名称" min-width="180" />
               <el-table-column prop="processKey" label="流程标识" min-width="200" />
               <el-table-column prop="category" label="分类" min-width="120" />
               <el-table-column prop="version" label="版本" width="70" />
@@ -64,7 +64,7 @@
             </el-form>
             <div class="submit-btn" style="margin-top:20px;text-align:right;">
               <el-button @click="handleCancelSelect">取消选择</el-button>
-              <el-button type="primary" :loading="submitting" @click="handleSubmit">发起流程</el-button>
+              <el-button type="primary" :loading="submitting" @click="handleSubmit" v-hasPermi="['workflow:start']">发起流程</el-button>
             </div>
           </div>
         </el-tab-pane>
@@ -94,7 +94,7 @@
             </el-form-item>
           </el-form>
           <el-table :data="myInstanceList" border stripe>
-            <el-table-column type="index" label="序号" width="70"
+            <el-table-column type="index" label="序号" width="70" align="center"
                              :index="(i) => (myQuery.pageNum - 1) * myQuery.pageSize + i + 1" />
             <el-table-column prop="processName" label="流程名称" min-width="180" />
             <el-table-column prop="itemName" label="业务事项" min-width="160" show-overflow-tooltip />
@@ -109,9 +109,9 @@
             <el-table-column label="操作" width="200" fixed="right">
               <template #default="{ row }">
                 <el-button link type="primary" @click="openTrailDialog(row)">查看轨迹</el-button>
-                <el-button v-if="row.status==='running'" link type="danger" @click="handleCancel(row)">取消</el-button>
+                <el-button v-if="row.status==='running'" link type="danger" @click="handleCancel(row)" v-hasPermi="['workflow:start']">取消</el-button>
                 <el-button v-if="row.status==='cancelled' || row.status==='rejected'"
-                           link type="danger" @click="handleDelete(row)">删除</el-button>
+                           link type="danger" @click="handleDelete(row)" v-hasPermi="['workflow:start']">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -241,6 +241,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'WorkflowStart' })
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'

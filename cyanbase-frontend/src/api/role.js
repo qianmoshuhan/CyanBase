@@ -60,15 +60,19 @@ export function deleteRole(id) {
 }
 
 /**
- * 获取菜单树 — 根据身份走不同接口
- * - admin → /system/menu/all（全局菜单）
- * - tenant → /tenant/role/availableMenus（只有平台分配给本租户的菜单）
+ * 获取菜单树 — admin 按 tenantId 动态裁剪，租户自动走本租户 availableMenus
+ * @param {number} tenantId 所属租户ID（admin 传，租户侧忽略）
  */
-export function getMenuList() {
+export function getMenuList(tenantId) {
   const isTenant = storage.getLoginType() === 'tenant'
+  if (isTenant) {
+    return request({ url: '/tenant/role/availableMenus', method: 'GET' })
+  }
+  // admin：按 tenantId 加载（0 或 null 表示平台级角色 → 全量菜单）
   return request({
-    url: isTenant ? '/tenant/role/availableMenus' : '/system/menu/all',
-    method: 'GET'
+    url: '/system/role/availableMenus',
+    method: 'GET',
+    params: { tenantId: tenantId ?? 0 }
   })
 }
 

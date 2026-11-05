@@ -22,6 +22,7 @@ public class ThreeBigExecuteController {
 
     /** 分页列表 */
     @GetMapping("/list")
+    @RequiresPermission("sydyd:execute:list")
     public R<IPage<ThreeBigExecute>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,

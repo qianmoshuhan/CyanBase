@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="xss-container">
     <el-card shadow="hover">
       <template #header>
@@ -89,6 +89,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'XssConfig' })
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'

@@ -1,4 +1,4 @@
-<template>
+﻿﻿<template>
   <div class="menu-container">
     <el-card shadow="hover">
       <template #header>
@@ -19,7 +19,7 @@
               <el-button @click="expandAll">全部展开</el-button>
               <el-button @click="collapseAll">全部收起</el-button>
             </el-button-group>
-            <el-button type="primary" @click="handleAdd" style="margin-left: 12px;">
+            <el-button type="primary" @click="handleAdd" style="margin-left: 12px;" v-hasPermi="['system:menu:add']">
               <el-icon><Plus /></el-icon> 新增菜单
             </el-button>
           </div>
@@ -28,10 +28,10 @@
 
       <!-- 树形表格 -->
       <el-table
+        ref="tableRef"
         :data="filteredData"
         row-key="id"
         :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
-        :default-expand-all="true"
         border
         stripe
         height="calc(100vh - 280px)"
@@ -64,9 +64,9 @@
         </el-table-column>
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleAddChild(row)">新增子菜单</el-button>
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleAddChild(row)" v-hasPermi="['system:menu:add']">新增子菜单</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-hasPermi="['system:menu:edit']">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['system:menu:delete']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -127,6 +127,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'Menu' })
 import { ref, reactive, computed, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Search, Plus, Folder, Document, Key } from '@element-plus/icons-vue'
@@ -227,6 +228,8 @@ const fetchData = async () => {
     // 后端 /system/menu/list 返回的是扁平 records，前端自己建树
     const flatList = res.data.records || []
     treeData.value = buildTree(flatList)
+    // 默认全部展开（替代 :default-expand-all，因为 expand-row-keys 优先级更高）
+    nextTick(expandAll)
   } catch (error) {
     console.error('获取菜单列表失败', error)
   }
@@ -258,17 +261,32 @@ const buildTree = (flatList) => {
 const handleSearch = () => { /* computed 自动响应，这里保留入口 */ }
 
 const expandAll = () => {
-  nextTick(() => {
-    // el-table 的树形展开：手动触发所有行展开
-    const rows = tableRef.value?.store?.watcher?.getter?.value
-    if (Array.isArray(rows)) rows.forEach((_, i) => tableRef.value.toggleRowExpansion(tableRef.value.store.getCellsByRow(rows[i])?.[0]?.row, true))
-  })
+  const table = tableRef.value
+  if (!table) return
+  // 递归展开：对每个有 children 的行调用官方 API toggleRowExpansion(row, true)
+  const walk = (list) => {
+    for (const node of list) {
+      if (node.children?.length) {
+        table.toggleRowExpansion(node, true)
+        walk(node.children)
+      }
+    }
+  }
+  nextTick(() => walk(filteredData.value))
 }
 
 const collapseAll = () => {
-  nextTick(() => {
-    // el-table 没有 collapseAll 原生方法，手动 toggle
-  })
+  const table = tableRef.value
+  if (!table) return
+  const walk = (list) => {
+    for (const node of list) {
+      if (node.children?.length) {
+        walk(node.children)  // 先递归子级（从内向外收）
+        table.toggleRowExpansion(node, false)
+      }
+    }
+  }
+  nextTick(() => walk(filteredData.value))
 }
 
 const resetForm = () => { Object.assign(formData, defaultForm()) }

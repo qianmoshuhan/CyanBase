@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class SysOperLogController {
     private final SysOperLogService sysOperLogService;
 
+    @RequiresPermission("monitor:operlog:list")
     @GetMapping("/list")
     public R<?> list(
             @RequestParam(defaultValue = "1") Integer current,
@@ -38,16 +39,17 @@ public class SysOperLogController {
     }
 
     @DeleteMapping("/{operId}")
-    @RequiresPermission("monitor:operlog:remove")
+    @RequiresPermission("monitor:operlog:delete")
     public R<?> delete(@PathVariable Long operId) {
         sysOperLogService.removeById(operId);
         return R.ok("删除成功");
     }
 
+    // ========== 需求1：新增操作日志清空按钮独立权限 ==========
     @DeleteMapping("/clean")
-    @RequiresPermission("monitor:operlog:remove")
+    @RequiresPermission("monitor:operlog:clean")
     public R<?> clean() {
-        // 清空操作日志
+        sysOperLogService.remove(new LambdaQueryWrapper<>());
         return R.ok("清空成功");
     }
 }

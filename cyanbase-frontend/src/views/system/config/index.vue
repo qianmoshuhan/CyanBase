@@ -1,10 +1,10 @@
-<template>
+﻿﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span>参数配置</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-hasPermi="['system:config:add']">
             <el-icon><Plus /></el-icon> 新增配置
           </el-button>
         </div>
@@ -22,7 +22,7 @@
         </el-form-item>
       </el-form>
       <el-table :data="tableData" border stripe>
-        <el-table-column prop="configId" label="参数ID" width="100" />
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (pagination.current - 1) * pagination.size + i + 1" />
         <el-table-column prop="configName" label="参数名称" min-width="150" />
         <el-table-column prop="configKey" label="参数键名" min-width="150" />
         <el-table-column prop="configValue" label="参数键值" min-width="200" show-overflow-tooltip />
@@ -36,9 +36,8 @@
         <el-table-column prop="createTime" label="创建时间" min-width="160" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <!--改这里：record→row-->
-            <el-button @click="openEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button @click="openEdit(row)" v-hasPermi="['system:config:edit']">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['system:config:delete']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -49,8 +48,8 @@
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -98,6 +97,7 @@
   </div>
 </template>
 <script setup>
+defineOptions({ name: 'Config' })
 import { ref, reactive, computed ,nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getConfigList, addConfig, updateConfig, deleteConfig ,getConfigByKey} from '@/api/config'
@@ -162,7 +162,22 @@ const handleSubmit = async () => {
   })
 }
 const handleDialogClose = () => formRef.value?.resetFields()
-const handleReset = () => { Object.assign(searchForm, { configName: '', configKey: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { configName: '', configKey: '' })
+  pagination.current = 1
+  fetchData()
+}
 const logoUrl = ref('')
 fetchData()
 </script>

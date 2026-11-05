@@ -19,3 +19,7 @@ export function updatePost(data) {
 export function deletePost(id) {
   return request({ url: `/system/post/${id}`, method: 'delete' })
 }
+
+export function getAllPost() {
+  return request({ url: '/system/post/all', method: 'get' })
+}

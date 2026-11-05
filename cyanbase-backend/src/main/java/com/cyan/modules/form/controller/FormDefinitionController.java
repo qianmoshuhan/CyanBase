@@ -5,9 +5,14 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.config.CustomTenantHandler;
 import com.cyan.modules.form.entity.FormDefinition;
+import com.cyan.modules.form.entity.FormDefVersion;
+import com.cyan.modules.form.service.FormDefVersionService;
 import com.cyan.modules.form.service.FormDefinitionService;
 import com.cyan.modules.workflow.service.FormProcessBindingService;
 import com.cyan.security.annotation.RequiresPermission;
+import com.cyan.security.aspect.PermissionGuard;
+import com.cyan.security.datascope.ResourceScope;
+import com.cyan.common.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,28 +26,58 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FormDefinitionController {
     private final FormDefinitionService formDefinitionService;
+    private final FormDefVersionService formDefVersionService;
     private final CustomTenantHandler customTenantHandler;
+    private final PermissionGuard permissionGuard;
 
     @GetMapping("/list")
+    @RequiresPermission("form:definition:list")
     public R<?> list(
-            @RequestParam(defaultValue = "1") Integer current,
-            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String formName,
             @RequestParam(required = false) String status) {
-        LambdaQueryWrapper<FormDefinition> wrapper = new LambdaQueryWrapper<>();
-        if (formName != null && !formName.isEmpty()) wrapper.like(FormDefinition::getFormName, formName);
-        if (status != null && !status.isEmpty()) wrapper.eq(FormDefinition::getStatus, status);
-        wrapper.orderByDesc(FormDefinition::getId);
-        return R.ok(formDefinitionService.page(new Page<>(current, size), wrapper));
+        // 读操作：L1 租户隔离 + L2 DataScope，无按钮注解则 L3 跳过
+        permissionGuard.check(ResourceScope.of(null, null, null));
+
+        // ⭐ 跳过 TenantLine 拦截器，手动按 tenantId 过滤
+        // 原因：MP 拦截器链对 page() 的 count SQL 和 records SQL 条件可能不对称（导致 total≠records），
+        //      跳过拦截器后手动构造完整 wrapper，count 和 records 用同一份 WHERE，天然一致
+        // ⚠️ DataScope 不用 skip：form_definition 已加入 IGNORED_TABLES，Handler 自动跳过
+        CustomTenantHandler.skip();
+        try {
+            LambdaQueryWrapper<FormDefinition> wrapper = new LambdaQueryWrapper<>();
+
+            // 手动租户隔离：平台 admin(tenantId=0) 看全部，租户用户只看本租户
+            Long currentTenantId = SecurityUtils.getTenantId();
+            if (currentTenantId != null && currentTenantId != 0L) {
+                wrapper.eq(FormDefinition::getTenantId, currentTenantId);
+            }
+
+            if (formName != null && !formName.isEmpty()) wrapper.like(FormDefinition::getFormName, formName);
+            if (status != null && !status.isEmpty()) wrapper.eq(FormDefinition::getStatus, status);
+            wrapper.orderByDesc(FormDefinition::getId);
+
+            return R.ok(formDefinitionService.page(new Page<>(pageNum, pageSize), wrapper));
+        } finally {
+            CustomTenantHandler.reset();
+        }
     }
 
     @GetMapping("/{id}")
+    @RequiresPermission("form:definition:query")
     public R<?> getById(@PathVariable Long id) {
-        return R.ok(formDefinitionService.getById(id));
+        FormDefinition form = formDefinitionService.getById(id);
+        if (form == null) return R.fail("表单不存在");
+        // 读操作：L1 + L2 资源归属校验
+        permissionGuard.check(ResourceScope.of(form.getTenantId(), null, form.getCreateBy()));
+        return R.ok(form);
     }
 
     @PostMapping
+    @RequiresPermission("form:definition:save")
     public R<?> add(@RequestBody FormDefinition form) {
+        form.setId(null); // 防御主键重复
         System.out.println("Received form data: " + form); // 调试日志
         System.out.println("Layout config: " + form.getLayoutConfig()); // 调试日志
         formDefinitionService.save(form);
@@ -51,7 +86,12 @@ public class FormDefinitionController {
     }
 
     @PutMapping
+    @RequiresPermission("form:definition:save")
     public R<?> update(@RequestBody FormDefinition form) {
+        FormDefinition exist = formDefinitionService.getById(form.getId());
+        if (exist == null) return R.fail("表单不存在");
+        // 写操作：完整三层 L1 + L2 + L3
+        permissionGuard.check(ResourceScope.of(exist.getTenantId(), null, exist.getCreateBy()));
         System.out.println("Received update data: " + form); // 调试日志
         System.out.println("Layout config: " + form.getLayoutConfig()); // 调试日志
         formDefinitionService.updateById(form);
@@ -59,7 +99,12 @@ public class FormDefinitionController {
     }
 
     @DeleteMapping("/{id}")
+    @RequiresPermission("form:definition:delete")
     public R<?> delete(@PathVariable Long id) {
+        FormDefinition exist = formDefinitionService.getById(id);
+        if (exist == null) return R.fail("表单不存在");
+        // 写操作：完整三层校验
+        permissionGuard.check(ResourceScope.of(exist.getTenantId(), null, exist.getCreateBy()));
         formDefinitionService.removeById(id);
         return R.ok("删除成功");
     }
@@ -68,7 +113,7 @@ public class FormDefinitionController {
      * 获取所有启用的表单定义（给 Workflow Designer 下拉选用）
      */
     @GetMapping("/all-active")
-    @RequiresPermission("system:form:query")
+    @RequiresPermission("form:definition:query")
     public R<?> allActive() {
         LambdaQueryWrapper<FormDefinition> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(FormDefinition::getStatus, 1)
@@ -127,5 +172,56 @@ public class FormDefinitionController {
         }).collect(Collectors.toList());
 
         return R.ok(result);
+    }
+
+    // ==================== 表单版本接口 ====================
+
+    /**
+     * 查询某表单定义的全部版本列表(含懒初始化：没有版本时从主表自动补 V1)
+     */
+    @GetMapping("/{definitionId}/versions")
+    @RequiresPermission("form:definition:query")
+    public R<List<FormDefVersion>> listVersions(@PathVariable Long definitionId) {
+        formDefVersionService.ensureInitVersion(definitionId);
+        return R.ok(formDefVersionService.listByDefinitionId(definitionId));
+    }
+
+    /**
+     * 查询某版本详情(返回 form_schema 用于设计器加载)
+     */
+    @GetMapping("/version/{versionId}")
+    @RequiresPermission("form:definition:query")
+    public R<FormDefVersion> getVersionDetail(@PathVariable Long versionId) {
+        FormDefVersion ver = formDefVersionService.getById(versionId);
+        if (ver == null) return R.fail("版本不存在");
+        return R.ok(ver);
+    }
+
+    /**
+     * 从指定版本创建新版本（复制 form_schema，自动切换 is_latest）
+     */
+    @PostMapping("/version/{sourceVersionId}/create-from")
+    @RequiresPermission("form:definition:save")
+    public R<Long> createVersionFrom(@PathVariable Long sourceVersionId,
+                                      @RequestBody Map<String, Object> body) {
+        String versionName = (body != null && body.get("versionName") != null)
+                ? body.get("versionName").toString() : null;
+        return R.ok(formDefVersionService.createNewVersionFrom(sourceVersionId, versionName));
+    }
+
+    /**
+     * 保存版本快照（设计器保存时调用，只写 form_schema，不改变 is_latest）
+     */
+    @PostMapping("/version/{versionId}/save-snapshot")
+    @RequiresPermission("form:definition:save")
+    public R<Void> saveVersionSnapshot(@PathVariable Long versionId,
+                                        @RequestBody Map<String, Object> body) {
+        String formSchema = (body != null && body.get("formSchema") != null)
+                ? body.get("formSchema").toString() : null;
+        if (formSchema == null) {
+            return R.fail("表单Schema不能为空");
+        }
+        formDefVersionService.saveVersionSnapshot(versionId, formSchema);
+        return R.ok(null);
     }
 }

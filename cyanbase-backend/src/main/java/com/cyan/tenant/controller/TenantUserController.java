@@ -8,16 +8,22 @@ import com.cyan.entity.SysRole;
 import com.cyan.entity.SysTenant;
 import com.cyan.entity.SysUser;
 import com.cyan.entity.SysUserRole;
+import com.cyan.entity.SysPost;
 import com.cyan.mapper.SysTenantMapper;
 import com.cyan.mapper.SysUserRoleMapper;
 import com.cyan.service.SysRoleService;
+import com.cyan.service.SysDeptService;
+import com.cyan.service.SysPostService;
 import com.cyan.service.SysUserRoleService;
 import com.cyan.service.SysUserService;
 import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.security.aspect.PermissionGuard;
 import com.cyan.security.datascope.ResourceScope;
+import com.cyan.security.service.PermissionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -45,19 +51,27 @@ public class TenantUserController {
     private final SysRoleService sysRoleService;
     private final SysUserRoleMapper sysUserRoleMapper;
     private final PermissionGuard permissionGuard;
+    private final PermissionService permissionService;
+    private final StringRedisTemplate stringRedisTemplate;
     private final SysUserRoleService sysUserRoleService;
     private final SysTenantMapper sysTenantMapper;
+    private final SysDeptService sysDeptService;
+    private final SysPostService sysPostService;
 
     /**
      * 分页列表（MP 自动追加 tenant_id 隔离）
      */
+    @RequiresPermission("system:user:list")
     @GetMapping("/list")
     public R<Page<SysUser>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String userName,
             @RequestParam(required = false) String nickName,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Long roleId,
+            @RequestParam(required = false) Long deptId,
+            @RequestParam(required = false) Long postId) {
 
         LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
         if (userName != null && !userName.isEmpty()) {
@@ -69,13 +83,113 @@ public class TenantUserController {
         if (status != null) {
             wrapper.eq(SysUser::getStatus, status);
         }
+        if (deptId != null) {
+            wrapper.eq(SysUser::getDeptId, deptId);
+        }
+        if (postId != null) {
+            wrapper.eq(SysUser::getPostId, postId);
+        }
+        if (roleId != null) {
+            // ⭐ 角色筛选：先查 sys_user_role 拿到该角色下的所有 userId，再 IN 过滤
+            // sys_user_role 在 TenantLine 忽略表里（无 tenant_id 字段），查询不受租户拦截
+            List<Long> userIdsWithRole = sysUserRoleMapper.selectList(
+                    new LambdaQueryWrapper<SysUserRole>().eq(SysUserRole::getRoleId, roleId))
+                    .stream().map(SysUserRole::getUserId).collect(Collectors.toList());
+            if (userIdsWithRole.isEmpty()) {
+                Page<SysUser> emptyPage = new Page<>(pageNum, pageSize);
+                emptyPage.setRecords(List.of());
+                emptyPage.setTotal(0);
+                return R.ok(emptyPage);
+            }
+            wrapper.in(SysUser::getId, userIdsWithRole);
+        }
         wrapper.orderByDesc(SysUser::getCreateTime);
 
         Page<SysUser> page = new Page<>(pageNum, pageSize);
         sysUserService.page(page, wrapper);
         // 返回前清理敏感字段（密码清空）
         page.getRecords().forEach(u -> u.setPassword(null));
+        // 批量填充 roleNames
+        fillRoleNames(page.getRecords());
+        // 批量填充 deptName（租户侧同租户，sysDeptService.listByIds 不会被拦截）
+        fillDeptName(page.getRecords());
+        // 批量填充 postName（同部门，同租户）
+        fillPostName(page.getRecords());
         return R.ok(page);
+    }
+
+    /**
+     * 批量填充用户的角色名（逗号拼接）
+     */
+    private void fillRoleNames(List<SysUser> users) {
+        if (users == null || users.isEmpty()) return;
+        Set<Long> userIds = users.stream().map(SysUser::getId).collect(Collectors.toSet());
+        // 查所有 user_role 关联
+        List<SysUserRole> userRoles = sysUserRoleMapper.selectList(
+                new LambdaQueryWrapper<SysUserRole>().in(SysUserRole::getUserId, userIds));
+        if (userRoles.isEmpty()) return;
+        // 查关联的角色
+        Set<Long> roleIds = userRoles.stream().map(SysUserRole::getRoleId).collect(Collectors.toSet());
+        Map<Long, String> roleMap = sysRoleService.listByIds(roleIds).stream()
+                .collect(Collectors.toMap(SysRole::getId, SysRole::getRoleName));
+        // 按用户分组拼接
+        Map<Long, List<Long>> urGrouped = userRoles.stream()
+                .collect(Collectors.groupingBy(SysUserRole::getUserId,
+                        Collectors.mapping(SysUserRole::getRoleId, Collectors.toList())));
+        for (SysUser u : users) {
+            List<Long> rids = urGrouped.get(u.getId());
+            if (rids != null && !rids.isEmpty()) {
+                String names = rids.stream()
+                        .map(rid -> roleMap.getOrDefault(rid, ""))
+                        .filter(n -> !n.isEmpty())
+                        .collect(Collectors.joining(", "));
+                u.setRoleNames(names.isEmpty() ? "未分配" : names);
+            } else {
+                u.setRoleNames("未分配");
+            }
+        }
+    }
+
+    /**
+     * 批量填充部门名称（租户侧同租户，TenantLineInterceptor 自动按当前租户隔离，listByIds 正常返回）
+     */
+    private void fillDeptName(List<SysUser> users) {
+        if (users == null || users.isEmpty()) return;
+        Set<Long> deptIds = users.stream()
+                .map(SysUser::getDeptId)
+                .filter(id -> id != null && id > 0)
+                .collect(Collectors.toSet());
+        Map<Long, String> deptMap = deptIds.isEmpty() ? Map.of()
+                : sysDeptService.listByIds(deptIds).stream()
+                        .collect(Collectors.toMap(com.cyan.entity.SysDept::getId, com.cyan.entity.SysDept::getDeptName));
+        for (SysUser u : users) {
+            if (u.getDeptId() != null && u.getDeptId() > 0) {
+                u.setDeptName(deptMap.getOrDefault(u.getDeptId(), "未知部门"));
+            } else {
+                u.setDeptName("未分配");
+            }
+        }
+    }
+
+    /**
+     * 批量填充岗位名称（租户侧同租户，TenantLineInterceptor 自动按当前租户隔离）
+     */
+    private void fillPostName(List<SysUser> users) {
+        if (users == null || users.isEmpty()) return;
+        Set<Long> postIds = users.stream()
+                .map(SysUser::getPostId)
+                .filter(id -> id != null && id > 0)
+                .collect(Collectors.toSet());
+        Map<Long, String> postMap = postIds.isEmpty() ? Map.of()
+                : sysPostService.listByIds(postIds).stream()
+                        .collect(Collectors.toMap(SysPost::getPostId, SysPost::getPostName));
+        for (SysUser u : users) {
+            if (u.getPostId() != null && u.getPostId() > 0) {
+                u.setPostName(postMap.getOrDefault(u.getPostId(), "未知岗位"));
+            } else {
+                u.setPostName("未分配");
+            }
+        }
     }
 
     /**
@@ -100,6 +214,16 @@ public class TenantUserController {
     public R<Void> add(@RequestBody SysUser sysUser) {
         sysUser.setId(null);
         Long tenantId = SecurityUtils.getTenantId();
+
+        // ===== 手机号租户内唯一性校验 =====
+        if (sysUser.getPhone() != null && !sysUser.getPhone().isEmpty()) {
+            long phoneCount = sysUserService.count(new LambdaQueryWrapper<SysUser>()
+                    .eq(SysUser::getTenantId, tenantId)
+                    .eq(SysUser::getPhone, sysUser.getPhone()));
+            if (phoneCount > 0) {
+                return R.fail("该手机号已在当前租户使用");
+            }
+        }
 
         // ===== 租户用户配额校验 =====
         SysTenant tenant = sysTenantMapper.selectById(tenantId);
@@ -132,21 +256,50 @@ public class TenantUserController {
         // 三层原子校验 —— L1 租户归属 + L2 DataScope + L3 system:user:edit
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), exist.getDeptId(), exist.getCreateBy()),
                               "system:user:edit");
-        sysUser.setTenantId(SecurityUtils.getTenantId());
+        Long tenantId = SecurityUtils.getTenantId();
+        sysUser.setTenantId(tenantId);
+
+        // ===== 手机号租户内唯一性校验（排除自己） =====
+        if (sysUser.getPhone() != null && !sysUser.getPhone().isEmpty()) {
+            long phoneCount = sysUserService.count(new LambdaQueryWrapper<SysUser>()
+                    .eq(SysUser::getTenantId, tenantId)
+                    .eq(SysUser::getPhone, sysUser.getPhone())
+                    .ne(SysUser::getId, sysUser.getId()));
+            if (phoneCount > 0) {
+                return R.fail("该手机号已在当前租户使用");
+            }
+        }
+
         return sysUserService.updateUserAndRole(sysUser) ? R.ok() : R.fail("更新失败");
+    }
+
+    /**
+     * 前端表单实时校验：手机号在当前租户是否唯一
+     * <p>租户侧自动按 token 里的 tenantId 隔离，不串租户</p>
+     */
+    @GetMapping("/checkPhone")
+    public R<Boolean> checkPhone(@RequestParam String phone,
+                                 @RequestParam(required = false) Long excludeId) {
+        if (phone == null || phone.isEmpty()) return R.ok(true);
+        Long tenantId = SecurityUtils.getTenantId();
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<SysUser>()
+                .eq(SysUser::getTenantId, tenantId)
+                .eq(SysUser::getPhone, phone);
+        if (excludeId != null) wrapper.ne(SysUser::getId, excludeId);
+        return R.ok(sysUserService.count(wrapper) == 0);
     }
 
     /**
      * 删除用户
      */
     @DeleteMapping("/{id}")
-    @RequiresPermission("system:user:remove")
+    @RequiresPermission("system:user:delete")
     public R<Void> delete(@PathVariable Long id) {
         SysUser exist = sysUserService.getById(id);
         if (exist == null) return R.fail("用户不存在");
         // 三层原子校验
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), exist.getDeptId(), exist.getCreateBy()),
-                              "system:user:remove");
+                              "system:user:delete");
         boolean removed = sysUserService.removeById(id);
         if (removed) {
             // 清理角色关联
@@ -200,7 +353,7 @@ public class TenantUserController {
         SysUser user = sysUserService.getById(userId);
         if (user == null) return R.fail("用户不存在");
         permissionGuard.check(ResourceScope.of(user.getTenantId(), user.getDeptId(), user.getCreateBy()),
-                              "system:user:edit");
+                              "system:user:resetPassword");
 
         // === 校验 2：roleIds 必须属于当前租户（独立资源管控，不在三层内） ===
         // 查出当前租户所有角色 ID（MP 自动隔离，不会串租户）
@@ -274,5 +427,53 @@ public class TenantUserController {
         String err = sysUserService.changePassword(userId, oldPwd, newPwd);
         if (err != null) return R.fail(err);
         return R.ok();
+    }
+
+    /**
+     * ⭐ 租户管理员重置用户密码
+     * <p>规则：随机生成 10 位初始密码（大小写+数字+特殊字符），BCrypt 加密存回，把明文密码返回给前端弹窗展示</p>
+     */
+    @PostMapping("/resetPwd/{userId}")
+    @RequiresPermission("system:user:resetPassword")
+    public R<Map<String, String>> resetPassword(@PathVariable Long userId) {
+        // 三层校验
+        SysUser user = sysUserService.getById(userId);
+        if (user == null) return R.fail("用户不存在");
+        permissionGuard.check(ResourceScope.of(user.getTenantId(), user.getDeptId(), user.getCreateBy()),
+                              "system:user:resetPassword");
+        // 生成初始密码
+        String plain = generatePassword();
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        user.setPassword(encoder.encode(plain));
+        sysUserService.updateById(user);
+        log.info("[重置密码] tenantId={}, userId={}, userName={}", user.getTenantId(), userId, user.getUserName());
+        Map<String, String> result = new HashMap<>();
+        result.put("password", plain);
+        return R.ok(result);
+    }
+
+    /**
+     * 生成 12 位随机密码：大写 + 小写 + 数字 + 特殊字符
+     */
+    private static String generatePassword() {
+        String upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+        String lower = "abcdefghijkmnopqrstuvwxyz";
+        String digits = "23456789";
+        String special = "@#$%&";
+        String all = upper + lower + digits + special;
+        java.util.Random r = new java.util.Random();
+        // 确保四类各至少 1 位，共 12 位
+        char[] pwd = new char[12];
+        pwd[0] = upper.charAt(r.nextInt(upper.length()));
+        pwd[1] = lower.charAt(r.nextInt(lower.length()));
+        pwd[2] = digits.charAt(r.nextInt(digits.length()));
+        pwd[3] = special.charAt(r.nextInt(special.length()));
+        for (int i = 4; i < 12; i++) pwd[i] = all.charAt(r.nextInt(all.length()));
+        // 打乱
+        for (int i = 11; i > 0; i--) {
+            int j = r.nextInt(i + 1);
+            char t = pwd[i]; pwd[i] = pwd[j]; pwd[j] = t;
+        }
+        return new String(pwd);
     }
 }

@@ -30,6 +30,7 @@ public class ThreeBigListController {
 
     /** 分页列表 */
     @GetMapping("/list")
+    @RequiresPermission("sydyd:list:list")
     public R<Page<ThreeBigList>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,

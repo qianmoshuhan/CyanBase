@@ -78,3 +78,27 @@ export function getUserSelectedRoleIds(uid) {
     method: 'get'
   })
 }
+
+/**
+ * 重置用户密码 —— 返回新生成的随机明文密码
+ */
+export function resetUserPwd(userId) {
+  return request({
+    url: getUrl(`/user/resetPwd/${userId}`),
+    method: 'post'
+  })
+}
+
+/**
+ * 校验手机号在当前（或指定）租户内是否唯一
+ * @param {string} phone 手机号
+ * @param {object} params { tenantId?: number, excludeId?: number } 平台侧需传 tenantId，编辑场景传 excludeId
+ * @returns {Promise<boolean>} true=可用，false=已存在
+ */
+export function checkUserPhone(phone, params = {}) {
+  return request({
+    url: getUrl('/user/checkPhone'),
+    method: 'get',
+    params: { phone, ...params }
+  })
+}

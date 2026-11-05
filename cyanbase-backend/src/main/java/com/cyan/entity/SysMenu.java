@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @TableName("sys_menu")
-public class SysMenu implements Serializable, TreeUtil {
+public class SysMenu implements Serializable, TreeUtil<SysMenu> {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,17 +32,7 @@ public class SysMenu implements Serializable, TreeUtil {
     private Integer delFlag;
     private String remark;
 
-    // 树形子节点
+    // 树形子节点 —— 后端建树用虚拟字段，Lombok @Data 自动生成 getter/setter
     @TableField(exist = false)
     private List<SysMenu> children;
-
-    @Override
-    public List<? extends TreeUtil> getChildren() {
-        return this.children;
-    }
-
-    @Override
-    public void setChildren(List<? extends TreeUtil> children) {
-        this.children = (List<SysMenu>) children;
-    }
 }

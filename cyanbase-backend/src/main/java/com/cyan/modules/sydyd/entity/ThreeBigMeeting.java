@@ -26,6 +26,10 @@ public class ThreeBigMeeting extends BaseEntity implements Serializable {
     @TableField("tenant_id")
     private Long tenantId;
 
+    /** 主办部门ID（L2 DataScope 管控列） */
+    @TableField("dept_id")
+    private Long deptId;
+
     /** 会议名称 */
     @TableField("meeting_name")
     private String meetingName;

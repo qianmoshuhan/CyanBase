@@ -50,4 +50,9 @@ public class SysDictData extends BaseEntity {
      */
     @TableField("remark")
     private String remark;
+
+    /** 删除标志 0正常 1删除 —— 逻辑删除 */
+    @TableLogic
+    @TableField("del_flag")
+    private Integer delFlag;
 }

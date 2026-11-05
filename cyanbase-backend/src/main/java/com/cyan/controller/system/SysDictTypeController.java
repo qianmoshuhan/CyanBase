@@ -21,6 +21,7 @@ public class SysDictTypeController {
     private final SysDictDataService sysDictDataService;
     private final PermissionGuard permissionGuard;
 
+    @RequiresPermission("system:dict:list")
     @GetMapping("/list")
     public R<?> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -81,13 +82,13 @@ public class SysDictTypeController {
     }
 
     @DeleteMapping("/{dictId}")
-    @RequiresPermission("system:dict:remove")
+    @RequiresPermission("system:dict:delete")
     public R<?> delete(@PathVariable Long dictId) {
         SysDictType exist = sysDictTypeService.getById(dictId);
         if (exist == null) return R.fail("字典类型不存在");
         // 写操作：完整三层校验
         permissionGuard.check(ResourceScope.of(null, null, exist.getCreateBy()),
-                              "system:dict:remove");
+                              "system:dict:delete");
         long childCount = sysDictDataService.count(new LambdaQueryWrapper<SysDictData>()
                 .eq(SysDictData::getDictTypeCode, exist.getDictTypeCode()));
         if (childCount > 0) {

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import storage from '@/utils/storage'
+import { useUserStore } from '@/store/user'
 
 
 // 路由白名单（免登录直接访问）
@@ -34,12 +35,19 @@ const routes = [
     component: () => import('@/layout/index.vue'),
     redirect: '/home',
     children: [
-      // 首页
+      // 首页（affix 固定标签，不可关闭）
       {
         path: '/home',
         name: 'Home',
         component: () => import('@/views/home/index.vue'),
-        meta: { title: '首页' }
+        meta: { title: '首页', affix: true }
+      },
+      // 刷新标签中转路由
+      {
+        path: '/redirect/:path(.*)',
+        name: 'Redirect',
+        component: () => import('@/views/redirect/index.vue'),
+        meta: { title: '刷新', noCache: true }
       },
       // 个人中心（所有身份共用）
       {
@@ -369,7 +377,7 @@ const router = createRouter({
 })
 
 // 路由守卫
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const hasToken = !!storage.getToken()
 
   // 白名单路由直接放行
@@ -386,6 +394,21 @@ router.beforeEach((to, from, next) => {
 
   // 需要认证的路由
   if (hasToken) {
+    // ⭐ 关键修复：硬刷新后 Pinia store 会重新初始化，userInfo 丢失为 null
+    // 必须在这里恢复用户信息（拉取 getUserInfo → 填充 userInfo + permissions）
+    // 否则：右上角用户名显示兜底的「用户」、v-hasPermi 指令判定无权限 → 按钮全部隐藏
+    const userStore = useUserStore()
+    if (!userStore.userInfo) {
+      try {
+        await userStore.fetchUserInfo()
+      } catch (e) {
+        // 拉取失败（比如 Refresh Token 也过期）→ 清 token 跳登录
+        console.error('[路由守卫] fetchUserInfo 失败，强制登出', e)
+        userStore.clearAuth()
+        next(`/login?redirect=${to.path}`)
+        return
+      }
+    }
     next()
   } else {
     next(`/login?redirect=${to.path}`)

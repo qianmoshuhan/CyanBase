@@ -1,4 +1,4 @@
-<template>
+﻿﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
@@ -24,7 +24,7 @@
       </el-form>
 
       <el-table :data="tableData" border stripe>
-        <el-table-column prop="sessionId" label="会话ID" min-width="200" show-overflow-tooltip />
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (pagination.current - 1) * pagination.size + i + 1" />
         <el-table-column prop="loginName" label="登录账号" min-width="120" />
         <el-table-column prop="deptName" label="部门名称" min-width="120" />
         <el-table-column prop="ipaddr" label="登录IP" min-width="140" />
@@ -34,7 +34,7 @@
         <el-table-column prop="loginTime" label="登录时间" min-width="160" />
         <el-table-column label="操作" width="120" fixed="right">
           <template #default="{ row }">
-            <el-button type="danger" link @click="handleForceOffline(row)">强制下线</el-button>
+            <el-button type="danger" link @click="handleForceOffline(row)" v-hasPermi="['monitor:online:kick']">强制下线</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -46,8 +46,8 @@
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -55,6 +55,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'Online' })
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getOnlineList, forceOffline } from '@/api/online'
@@ -77,7 +78,22 @@ const handleForceOffline = (row) => {
 }
 
 const handleRefresh = () => fetchData()
-const handleReset = () => { Object.assign(searchForm, { loginName: '', ipaddr: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { loginName: '', ipaddr: '' })
+  pagination.current = 1
+  fetchData()
+}
 
 fetchData()
 </script>

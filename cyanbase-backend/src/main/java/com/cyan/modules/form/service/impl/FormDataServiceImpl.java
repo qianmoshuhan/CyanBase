@@ -2,6 +2,7 @@ package com.cyan.modules.form.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.cyan.common.security.util.SecurityUtils;
 import com.cyan.modules.form.entity.FormData;
 import com.cyan.modules.form.mapper.FormDataMapper;
 import com.cyan.modules.form.service.FormDataService;
@@ -66,14 +67,16 @@ public class FormDataServiceImpl extends ServiceImpl<FormDataMapper, FormData> i
      */
     @Override
     public Long submitForm(Long formDefinitionId, String title, Map<String, Object> formData) {
-        // 实现表单提交逻辑
         FormData data = new FormData();
-        // 根据实际FormData实体类的字段设置值
-        
-        // 保存数据
+        data.setDefinitionId(formDefinitionId);
+        data.setStatus("submitted");
+        data.setSubmitterId(SecurityUtils.getUserId());
+        data.setSubmitterName(SecurityUtils.getUsername());
+        // ⭐ 自动填充填报部门（L2 DataScope 管控列）
+        data.setDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId());
+
+        // TODO: 完善 formKey / formName / variables 的填充（从 formDefinition 查）
         this.save(data);
-        
-        // 返回保存后的ID
-        return data.getId(); // 假设保存后可以获得ID
+        return data.getId();
     }
 }

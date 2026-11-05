@@ -1,11 +1,11 @@
-<template>
+﻿﻿<template>
   <div class="workflow-approve-container">
     <!-- 顶部操作栏 -->
     <div class="top-bar">
       <el-button @click="goBack"><el-icon><ArrowLeft /></el-icon>返回待办</el-button>
       <div class="top-bar-right" v-if="instance.status === 'running'">
         <el-button @click="addSignerVisible = true"><el-icon><User /></el-icon>加签</el-button>
-        <el-button @click="transferVisible = true"><el-icon><Share /></el-icon>转办</el-button>
+        <el-button @click="transferVisible = true" v-hasPermi="['workflow:transfer']"><el-icon><Share /></el-icon>转办</el-button>
       </div>
     </div>
 
@@ -76,8 +76,8 @@
             </el-form-item>
           </el-form>
           <div style="display:flex; gap:10px; justify-content:flex-end;">
-            <el-button type="danger" @click="handleSubmit('reject')">驳回</el-button>
-            <el-button type="success" @click="handleSubmit('approve')">通过</el-button>
+            <el-button type="danger" @click="handleSubmit('reject')" v-hasPermi="['workflow:approve']">驳回</el-button>
+            <el-button type="success" @click="handleSubmit('approve')" v-hasPermi="['workflow:approve']">通过</el-button>
           </div>
         </el-card>
       </el-col>
@@ -126,6 +126,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'WorkflowApprove' })
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick, markRaw, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'

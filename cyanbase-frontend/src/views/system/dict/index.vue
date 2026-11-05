@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="dict-container">
     <el-card shadow="hover">
       <el-tabs v-model="activeTab" @tab-change="onTabChange">
@@ -17,6 +17,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'DictType' })
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
 import DictType from './type/index.vue'

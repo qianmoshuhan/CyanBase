@@ -60,6 +60,13 @@ public class JwtUtil {
         }
     }
 
+    // ✅ L2 DataScope 依赖：安全写入 deptId，与 putTenantId 范式对齐
+    public void putDeptId(Map<String, Object> claims, Long deptId) {
+        if (deptId != null) {
+            claims.put("deptId", deptId);
+        }
+    }
+
     // 👉本次新增：从Claims中读取tenantId，取不到返回null（代表超级管理员）
     public Long getTenantId(Claims claims) {
         Object tenantId = claims.get("tenantId");
@@ -158,6 +165,26 @@ public class JwtUtil {
                 return null;
             }
             return Long.valueOf(tenantId.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * ✅ L2 DataScope 依赖：从令牌获取用户部门ID。
+     * <p>
+     * token 中没有 deptId claim 时返回 null —— 旧格式 token 或平台超管无部门。
+     * 与 getTenantIdFromToken 范式完全对齐：解析失败安全返回 null，不抛异常。
+     * </p>
+     */
+    public Long getDeptIdFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            Object deptId = claims.get("deptId");
+            if (deptId == null) {
+                return null;
+            }
+            return Long.valueOf(deptId.toString());
         } catch (Exception e) {
             return null;
         }

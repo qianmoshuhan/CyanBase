@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="form-submit">
     <el-card shadow="hover">
       <template #header>
@@ -41,6 +41,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'FormSubmit' })
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { getFormDefinitionList, submitFormData } from '@/api/form'

@@ -18,4 +18,9 @@ public class SysDictType extends BaseEntity {
     private String dictTypeCode;
 
     private String status;
+
+    /** 删除标志 0正常 1删除 —— 逻辑删除 */
+    @TableLogic
+    @TableField("del_flag")
+    private Integer delFlag;
 }

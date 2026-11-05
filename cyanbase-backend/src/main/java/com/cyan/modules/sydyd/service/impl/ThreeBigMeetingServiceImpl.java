@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cyan.common.exception.BusinessException;
+import com.cyan.common.security.util.SecurityUtils;
 import com.cyan.modules.sydyd.entity.*;
 import com.cyan.modules.sydyd.mapper.*;
 import com.cyan.modules.sydyd.service.ThreeBigExecuteService;
@@ -44,9 +45,18 @@ public class ThreeBigMeetingServiceImpl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createMeeting(ThreeBigMeeting meeting) {
+        // ⭐ 自动填充主办部门（L2 DataScope 管控列）
+        if (meeting.getDeptId() == null) {
+            meeting.setDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId());
+        }
         meeting.setMeetingStatus(1); // 待召开
         if (meeting.getMeetingType() == null) {
             meeting.setMeetingType(1);
+        }
+        // ⚠️ 业务必填兜底：前端未传会议时间时默认当前时间，避免 MySQL NOT NULL 报错
+        if (meeting.getMeetingTime() == null) {
+            meeting.setMeetingTime(java.time.LocalDateTime.now());
+            log.warn("[三重一大] 新建会议 meetingTime 未传，已默认当前时间 meetingName={}", meeting.getMeetingName());
         }
         save(meeting);
 

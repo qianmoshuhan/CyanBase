@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="profile-container">
     <!-- 数据加载前显示空状态 -->
     <div v-if="!profile" class="profile-loading">
@@ -103,6 +103,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'Profile' })
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'

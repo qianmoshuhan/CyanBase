@@ -27,6 +27,10 @@ public class ThreeBigTopic extends BaseEntity implements Serializable {
     @TableField("tenant_id")
     private Long tenantId;
 
+    /** 归属部门ID（冗余自 t_three_big_item.submit_dept_id，L2 DataScope 管控列） */
+    @TableField("dept_id")
+    private Long deptId;
+
     /** 关联业务事项ID */
     @TableField("item_id")
     private Long itemId;

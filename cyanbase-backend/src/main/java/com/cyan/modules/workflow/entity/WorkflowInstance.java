@@ -25,6 +25,10 @@ public class WorkflowInstance extends BaseEntity implements Serializable {
     @TableField("tenant_id")
     private Long tenantId;
 
+    /** 发起部门ID（L2 DataScope 管控列） */
+    @TableField("dept_id")
+    private Long deptId;
+
     @TableField("definition_id")
     private Long definitionId;
 

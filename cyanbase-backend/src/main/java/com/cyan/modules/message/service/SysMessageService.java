@@ -14,7 +14,7 @@ public interface SysMessageService extends IService<SysMessage> {
     /**
      * 查询我的消息列表
      */
-    Page<SysMessage> queryMyMessageList(Integer pageNum, Integer pageSize, Long userId, Integer messageType);
+    Page<SysMessage> queryMyMessageList(Integer pageNum, Integer pageSize, Long userId, Integer messageType, Integer isRead, String title, String senderName);
 
     /**
      * 发送全员消息

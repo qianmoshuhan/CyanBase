@@ -15,4 +15,9 @@ public class SysConfig extends BaseEntity {
     private String configKey;
     private String configValue;
     private Integer configType;
+
+    /** 删除标志 0正常 1删除 —— 逻辑删除 */
+    @TableLogic
+    @TableField("del_flag")
+    private Integer delFlag;
 }

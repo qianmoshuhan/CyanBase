@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="server-monitor-container">
     <el-row :gutter="20">
       <!-- 服务健康状态 -->
@@ -83,6 +83,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'ServerMonitor' })
 import { ref, reactive, onMounted } from 'vue'
 import { getServerHealth, getServerMetrics, getServerInfo } from '@/api/monitor'
 

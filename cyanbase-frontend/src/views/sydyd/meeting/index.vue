@@ -1,4 +1,4 @@
-<template>
+﻿﻿<template>
   <div class="sydyd-meeting-container">
     <el-card shadow="hover">
       <template #header>
@@ -81,8 +81,8 @@
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -128,6 +128,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'SydydMeeting' })
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -224,6 +225,17 @@ const handleDelete = (row) => {
       ElMessage.success('删除成功')
       fetchData()
     }).catch(() => {})
+}
+
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
 }
 
 const handleReset = () => {

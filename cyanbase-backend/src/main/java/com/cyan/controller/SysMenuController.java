@@ -14,7 +14,10 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.cyan.common.R;
 import com.cyan.entity.SysMenu;
 import com.cyan.entity.SysTenantMenu;
+import com.cyan.entity.SysUser;
 import com.cyan.mapper.SysTenantMenuMapper;
+import com.cyan.mapper.SysUserMapper;
+import com.cyan.security.service.PermissionService;
 import com.cyan.service.SysMenuService;
 import com.cyan.common.security.util.SecurityUtils;
 import com.cyan.common.util.TreeBuildUtil;
@@ -41,8 +44,15 @@ public class SysMenuController {
     @Autowired
     private SysTenantMenuMapper tenantMenuMapper;
 
+    @Autowired
+    private SysUserMapper sysUserMapper;
+
+    @Autowired
+    private PermissionService permissionService;
+
     private static final String MENU_CACHE_KEY = "user:menu:";
 
+    @RequiresPermission("system:menu:list")
     @GetMapping("/list")
     public R<Page<SysMenu>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -117,8 +127,9 @@ public R<List<SysMenu>> all(
 public R<Void> add(@RequestBody SysMenu sysMenu) {
     sysMenu.setId(null);
     boolean save = sysMenuService.save(sysMenu);
-    //清空全部菜单缓存
+    //清空全部菜单缓存 + 权限缓存（菜单 perms 变更 → 用户权限必须同步失效）
     stringRedisTemplate.delete(stringRedisTemplate.keys("rbac:menu:flat:*"));
+    permissionService.evictAllPermCache();
     return save ? R.ok() : R.fail("新增失败");
 }
 
@@ -126,17 +137,19 @@ public R<Void> add(@RequestBody SysMenu sysMenu) {
 @RequiresPermission("system:menu:edit")
 public R<Void> update(@RequestBody SysMenu sysMenu) {
     boolean update = sysMenuService.updateById(sysMenu);
-    //清空全部菜单缓存
+    //清空全部菜单缓存 + 权限缓存
     stringRedisTemplate.delete(stringRedisTemplate.keys("rbac:menu:flat:*"));
+    permissionService.evictAllPermCache();
     return update ? R.ok() : R.fail("更新失败");
 }
 
 @DeleteMapping("/{id}")
-@RequiresPermission("system:menu:remove")
+@RequiresPermission("system:menu:delete")
 public R<Void> delete(@PathVariable Long id) {
     boolean remove = sysMenuService.removeById(id);
-    //清空全部菜单缓存
+    //清空全部菜单缓存 + 权限缓存
     stringRedisTemplate.delete(stringRedisTemplate.keys("rbac:menu:flat:*"));
+    permissionService.evictAllPermCache();
     return remove ? R.ok() : R.fail("删除失败");
 }
 
@@ -144,6 +157,21 @@ public R<Void> delete(@PathVariable Long id) {
     public R<List<SysMenu>> getUserMenu() {
         Long userId = SecurityUtils.getUserId();
         Long tenantId = SecurityUtils.getTenantId();
+
+        // ⭐ 双重保险：如果 JWT 里 tenantId 为 null（旧 token / 登录时没放），
+        // 从 userId 反查 SysUser 拿 tenantId，防止 filterByTenant 被跳过导致越权
+        if (tenantId == null) {
+            try {
+                SysUser user = sysUserMapper.selectById(userId);
+                if (user != null) {
+                    tenantId = user.getTenantId();
+                    log.warn("[getUserMenu] JWT 中 tenantId 为空，从 DB 反查得到 tenantId={}, 请检查登录逻辑", tenantId);
+                }
+            } catch (Exception e) {
+                log.warn("[getUserMenu] 反查 tenantId 失败: {}", e.getMessage());
+            }
+        }
+
         log.info("[getUserMenu] userId={}, tenantId={}", userId, tenantId);
 
         // 缓存key带上tenantId，避免不同租户串菜单
@@ -167,9 +195,11 @@ public R<Void> delete(@PathVariable Long id) {
             menus = sysMenuService.selectMenuByUserId(userId);
             log.info("[getUserMenu] 角色菜单数={}", menus != null ? menus.size() : 0);
 
-            // 2b. 租户用户还要二次过滤：角色菜单 ∩ 租户分配菜单
-            if (tenantId != null) {
+            // 2b. 租户用户（tenantId > 0）必须二次过滤：角色菜单 ∩ 租户菜单池（硬边界）
+            if (tenantId != null && tenantId > 0) {
                 menus = filterByTenant(menus, tenantId);
+            } else {
+                log.info("[getUserMenu] 跳过租户过滤（tenantId={}, 视为平台侧）", tenantId);
             }
             log.info("[getUserMenu] 最终菜单数={}", menus != null ? menus.size() : 0);
 

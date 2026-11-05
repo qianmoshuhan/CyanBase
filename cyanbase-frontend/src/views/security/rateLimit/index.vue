@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="rate-limit-container">
 
       <!-- 搜索表单 -->
@@ -51,6 +51,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'RateLimit' })
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'

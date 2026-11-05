@@ -19,6 +19,9 @@ public class SysUser implements Serializable {
     /** 部门ID */
     private Long deptId;
 
+    /** 岗位ID */
+    private Long postId;
+
     /** 用户名 */
     @TableField("user_name")
     private String userName;
@@ -87,4 +90,15 @@ public class SysUser implements Serializable {
     @TableField(exist = false)
     private String tenantName;
 
+    /** 用户所属角色名称列表字符串（非数据库字段，list 查询时批量填充，多个逗号拼接） */
+    @TableField(exist = false)
+    private String roleNames;
+
+    /** 用户所属部门名称（非数据库字段，list 查询时关联 sys_dept 填充） */
+    @TableField(exist = false)
+    private String deptName;
+
+    /** 用户所属岗位名称（非数据库字段，list 查询时关联 sys_post 填充） */
+    @TableField(exist = false)
+    private String postName;
 }

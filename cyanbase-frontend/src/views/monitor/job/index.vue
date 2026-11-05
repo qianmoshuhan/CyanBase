@@ -1,10 +1,10 @@
-<template>
+﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span>定时任务</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-hasPermi="['monitor:job:add']">
             <el-icon><Plus /></el-icon> 新增任务
           </el-button>
         </div>
@@ -30,27 +30,27 @@
       </el-form>
 
       <el-table :data="tableData" border stripe>
-        <el-table-column prop="jobId" label="任务ID" width="80" />
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (pagination.current - 1) * pagination.size + i + 1" />
         <el-table-column prop="jobName" label="任务名称" min-width="150" />
         <el-table-column prop="jobGroup" label="任务分组" min-width="120" />
         <el-table-column prop="invokeTarget" label="调用目标" min-width="200" show-overflow-tooltip />
         <el-table-column prop="cronExpression" label="Cron" min-width="120" />
         <el-table-column prop="status" label="状态" width="100">
           <template #default="{ row }">
-            <el-switch v-model="row.status" :active-value="'0'" :inactive-value="'1'"  @change="(val) => handleStatusChange(row, val)"/>
+            <el-switch v-model="row.status" :active-value="0" :inactive-value="1"  @change="(val) => handleStatusChange(row, val)" v-hasPermi="['monitor:job:pause']"/>
           </template>
         </el-table-column>
         <el-table-column prop="concurrent" label="并发" width="80">
           <template #default="{ row }">
-            <el-tag :type="row.concurrent === '0' ? 'success' : 'danger'">
-              {{ row.concurrent === '0' ? '允许' : '禁止' }}
+            <el-tag :type="row.concurrent === 0 ? 'success' : 'danger'">
+              {{ row.concurrent === 0 ? '允许' : '禁止' }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-hasPermi="['monitor:job:edit']">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['monitor:job:delete']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -62,8 +62,8 @@
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -84,21 +84,21 @@
         </el-form-item>
         <el-form-item label="执行策略">
           <el-select v-model="formData.misfirePolicy" placeholder="请选择执行策略">
-            <el-option label="立即执行" value="1" />
-            <el-option label="执行一次" value="2" />
-            <el-option label="放弃执行" value="3" />
+            <el-option label="立即执行" :value="1" />
+            <el-option label="执行一次" :value="2" />
+            <el-option label="放弃执行" :value="3" />
           </el-select>
         </el-form-item>
         <el-form-item label="是否并发">
           <el-radio-group v-model="formData.concurrent">
-            <el-radio label="0">允许</el-radio>
-            <el-radio label="1">禁止</el-radio>
+            <el-radio :label="0">允许</el-radio>
+            <el-radio :label="1">禁止</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="状态">
           <el-radio-group v-model="formData.status">
-            <el-radio label="0">正常</el-radio>
-            <el-radio label="1">暂停</el-radio>
+            <el-radio :label="0">正常</el-radio>
+            <el-radio :label="1">暂停</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -111,6 +111,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'Job' })
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getJobList, addJob, updateJob, deleteJob, pauseJob, resumeJob } from '@/api/job'
@@ -119,11 +120,11 @@ const searchForm = reactive({ jobName: '', jobGroup: '', status: '' })
 const tableData = ref([])
 const pagination = reactive({ current: 1, size: 10, total: 0 })
 const dialogVisible = ref(false)
-const dialogTitle = computed(() => formData.jobId ? '编辑任务' : '新增任务')
+const dialogTitle = computed(() => formData.id ? '编辑任务' : '新增任务')
 const isEdit = ref(false)
 const formRef = ref(null)
 
-const formData = reactive({ jobId: null, jobName: '', jobGroup: 'DEFAULT', invokeTarget: '', cronExpression: '', misfirePolicy: '3', concurrent: '1', status: '0', remark: '' })
+const formData = reactive({ id: null, jobName: '', jobGroup: 'DEFAULT', invokeTarget: '', cronExpression: '', misfirePolicy: 3, concurrent: 1, status: 0, remark: '' })
 const formRules = {
   jobName: [{ required: true, message: '请输入任务名称', trigger: 'blur' }],
   invokeTarget: [{ required: true, message: '请输入调用目标', trigger: 'blur' }],
@@ -138,11 +139,11 @@ const fetchData = async () => {
   } catch (error) { console.error(error) }
 }
 
-const handleAdd = () => { isEdit.value = false; Object.assign(formData, { jobId: null, jobName: '', jobGroup: 'DEFAULT', invokeTarget: '', cronExpression: '', misfirePolicy: '3', concurrent: '1', status: '0', remark: '' }); dialogVisible.value = true }
+const handleAdd = () => { isEdit.value = false; Object.assign(formData, { id: null, jobName: '', jobGroup: 'DEFAULT', invokeTarget: '', cronExpression: '', misfirePolicy: 3, concurrent: 1, status: 0, remark: '' }); dialogVisible.value = true }
 const handleEdit = (row) => { isEdit.value = true; Object.assign(formData, row); dialogVisible.value = true }
 const handleDelete = (row) => {
   ElMessageBox.confirm('确定要删除该任务吗？', '提示', { type: 'warning' })
-    .then(async () => { await deleteJob(row.jobId); ElMessage.success('删除成功'); fetchData() }).catch(() => {})
+    .then(async () => { await deleteJob(row.id); ElMessage.success('删除成功'); fetchData() }).catch(() => {})
 }
 const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
@@ -155,23 +156,38 @@ const handleSubmit = async () => {
   })
 }
 const handleDialogClose = () => {}
-const handleReset = () => { Object.assign(searchForm, { jobName: '', jobGroup: '', status: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { jobName: '', jobGroup: '', status: '' })
+  pagination.current = 1
+  fetchData()
+}
 
 fetchData()
 const handleStatusChange = async (row, newStatus) => {
   try {
-    if (!row.jobId) return
-    if (newStatus === '0') {
-      await resumeJob(row.jobId)
+    if (!row.id) return
+    if (newStatus === 0) {
+      await resumeJob(row.id)
       ElMessage.success('任务已恢复')
     } else {
-      await pauseJob(row.jobId)
+      await pauseJob(row.id)
       ElMessage.success('任务已暂停')
     }
   } catch (e) {
     ElMessage.error('操作失败')
     // 失败后回显
-    row.status = newStatus === '0' ? '1' : '0'
+    row.status = newStatus === 0 ? 1 : 0
   }
 }
 </script>

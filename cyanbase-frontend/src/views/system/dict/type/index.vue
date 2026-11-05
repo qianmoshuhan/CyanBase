@@ -4,7 +4,7 @@
       <template #header>
         <div class="card-header">
           <span>字典类型管理</span>
-          <el-button type="success" @click="handleAdd">
+          <el-button type="success" @click="handleAdd" v-hasPermi="['system:dict:add']">
             <el-icon><Plus /></el-icon> 新增字典类型
           </el-button>
         </div>
@@ -26,7 +26,7 @@
 
       <!-- 数据表格 -->
       <el-table :data="list" border stripe highlight-current-row>
-        <el-table-column prop="id" label="ID" width="80" />
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (pageNum - 1) * pageSize + i + 1" />
         <el-table-column prop="dictName" label="字典名称" min-width="150" />
         <el-table-column prop="dictTypeCode" label="字典类型编码" min-width="150" />
         <el-table-column prop="status" label="状态" width="100">
@@ -40,8 +40,8 @@
         <el-table-column prop="createTime" label="创建时间" width="180" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button type="warning" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="warning" link @click="handleEdit(row)" v-hasPermi="['system:dict:edit']">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['system:dict:delete']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -52,8 +52,8 @@
         :current-page="pageNum"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="fetchData"
-        @current-change="fetchData"
+        @current-change="handlePageChange"
+          @size-change="handleSizeChange"
       />
     </el-card>
 
@@ -181,6 +181,17 @@ const handleSubmit = async () => {
       console.error('保存失败', error)
     }
   })
+}
+
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pageNum.value = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  pageNum.value = 1
+  fetchData()
 }
 
 const handleReset = () => {

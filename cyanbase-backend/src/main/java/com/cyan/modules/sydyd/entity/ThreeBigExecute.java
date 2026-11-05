@@ -50,7 +50,11 @@ public class ThreeBigExecute extends BaseEntity implements Serializable {
     @TableField("item_name")
     private String itemName;
 
-    /** 执行部门 */
+    /** 执行部门ID（L2 DataScope 管控列，Handler 通过 DEPT_COLUMN_MAP 识别） */
+    @TableField("execute_dept_id")
+    private Long executeDeptId;
+
+    /** 执行部门名称（冗余显示用，不参与 DataScope 过滤） */
     @TableField("execute_dept")
     private String executeDept;
 

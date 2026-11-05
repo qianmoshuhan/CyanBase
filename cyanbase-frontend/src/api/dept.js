@@ -12,11 +12,24 @@ function getUrl(path) {
 }
 
 /**
- * 获取部门列表
+ * 获取部门列表（分页）
  */
 export function getDeptList(params) {
   return request({
     url: getUrl('/dept/list'),
+    method: 'get',
+    params
+  })
+}
+
+/**
+ * 获取全量部门（扁平列表，前端 buildTree 成 children 嵌套）
+ * 树形表格展示需要全量数据
+ * @param {Object} params 可选过滤条件：{ deptName, status, tenantId }
+ */
+export function getAllDept(params) {
+  return request({
+    url: getUrl('/dept/all'),
     method: 'get',
     params
   })

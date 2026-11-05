@@ -4,16 +4,22 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.common.security.util.SecurityUtils;
+import com.cyan.config.CustomTenantHandler;
+import com.cyan.common.util.TreeBuildUtil;
+import com.cyan.entity.SysMenu;
 import com.cyan.entity.SysRole;
 import com.cyan.entity.SysRoleDept;
 import com.cyan.entity.SysRoleMenu;
 import com.cyan.entity.SysTenant;
 import com.cyan.entity.SysTenantMenu;
-import com.cyan.entity.SysTenantMenu;
+import com.cyan.entity.SysUser;
+import com.cyan.entity.SysUserRole;
+import com.cyan.mapper.SysUserRoleMapper;
 import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.security.aspect.PermissionGuard;
 import com.cyan.security.datascope.ResourceScope;
 import com.cyan.security.service.PermissionService;
+import com.cyan.service.SysMenuService;
 import com.cyan.service.SysRoleDeptService;
 import com.cyan.service.SysRoleService;
 import com.cyan.service.SequenceService;
@@ -21,11 +27,13 @@ import com.cyan.service.SysRoleMenuService;
 import com.cyan.service.SysTenantMenuService;
 import com.cyan.service.SysTenantService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequestMapping("/system/role")
 @RequiredArgsConstructor
@@ -37,56 +45,128 @@ public class SysRoleController {
     private final SysTenantMenuService sysTenantMenuService;
     private final SysRoleDeptService sysRoleDeptService;
     private final SysTenantService sysTenantService;
+    private final SysUserRoleMapper sysUserRoleMapper;
+    private final com.cyan.service.SysUserService sysUserService;
+    private final SysMenuService sysMenuService;
     private final StringRedisTemplate stringRedisTemplate;
     private final PermissionService permissionService;
     private final PermissionGuard permissionGuard;
 
     @GetMapping("/list")
+    @RequiresPermission("system:role:list")
     public R<Page<SysRole>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String roleName,
             @RequestParam(required = false) String roleKey,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Long tenantId,
+            @RequestParam(required = false) String userName) {
 
-        LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
-        if (roleName != null && !roleName.isEmpty()) {
-            wrapper.like(SysRole::getRoleName, roleName);
-        }
-        if (roleKey != null && !roleKey.isEmpty()) {
-            wrapper.eq(SysRole::getRoleKey, roleKey);
-        }
-        if (status != null) {
-            wrapper.eq(SysRole::getStatus, status);
-        }
-        wrapper.orderByAsc(SysRole::getSortNum);
-
-        Page<SysRole> page = new Page<>(pageNum, pageSize);
-        sysRoleService.page(page, wrapper);
-
-        // === 新增：批量填充 tenantName ===
-        List<SysRole> records = page.getRecords();
-        if (!records.isEmpty()) {
-            Set<Long> tenantIds = records.stream()
-                    .map(SysRole::getTenantId)
-                    .filter(id -> id != null && id > 0)
-                    .collect(Collectors.toSet());
-            if (!tenantIds.isEmpty()) {
-                Map<Long, String> tenantMap = sysTenantService.listByIds(tenantIds).stream()
-                        .collect(Collectors.toMap(SysTenant::getId, SysTenant::getTenantName));
-                for (SysRole r : records) {
-                    if (r.getTenantId() != null && r.getTenantId() > 0) {
-                        r.setTenantName(tenantMap.getOrDefault(r.getTenantId(), "未知租户"));
-                    } else {
-                        r.setTenantName("平台角色");
-                    }
+        // ⭐ skip TenantLine：admin tenantId=0，TenantLine 自动隔离只能查平台角色
+        // skip 后手动按 tenantId 参数过滤（不传就是查全部）
+        CustomTenantHandler.skip();
+        try {
+            LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
+            if (roleName != null && !roleName.isEmpty()) {
+                wrapper.like(SysRole::getRoleName, roleName);
+            }
+            if (roleKey != null && !roleKey.isEmpty()) {
+                wrapper.eq(SysRole::getRoleKey, roleKey);
+            }
+            if (status != null) {
+                wrapper.eq(SysRole::getStatus, status);
+            }
+            if (tenantId != null) {
+                wrapper.eq(SysRole::getTenantId, tenantId);
+            }
+            // ⭐ 按用户名反查角色：先查 sys_user → 再查 sys_user_role → 最后 IN 过滤
+            if (userName != null && !userName.isEmpty()) {
+                Set<Long> userIds = sysUserService.list(
+                        new LambdaQueryWrapper<SysUser>().like(SysUser::getUserName, userName))
+                        .stream().map(SysUser::getId).collect(Collectors.toSet());
+                if (userIds.isEmpty()) {
+                    Page<SysRole> empty = new Page<>(pageNum, pageSize);
+                    empty.setRecords(Collections.emptyList());
+                    empty.setTotal(0);
+                    return R.ok(empty);
                 }
+                Set<Long> roleIds = sysUserRoleMapper.selectList(
+                        new LambdaQueryWrapper<SysUserRole>().in(SysUserRole::getUserId, userIds))
+                        .stream().map(SysUserRole::getRoleId).collect(Collectors.toSet());
+                if (roleIds.isEmpty()) {
+                    Page<SysRole> empty = new Page<>(pageNum, pageSize);
+                    empty.setRecords(Collections.emptyList());
+                    empty.setTotal(0);
+                    return R.ok(empty);
+                }
+                wrapper.in(SysRole::getId, roleIds);
+            }
+            wrapper.orderByAsc(SysRole::getSortNum);
+
+            Page<SysRole> page = new Page<>(pageNum, pageSize);
+            sysRoleService.page(page, wrapper);
+
+            // 批量填充 tenantName + userNames
+            List<SysRole> records = page.getRecords();
+            if (!records.isEmpty()) {
+                Set<Long> tenantIds = records.stream()
+                        .map(SysRole::getTenantId)
+                        .filter(id -> id != null && id > 0)
+                        .collect(Collectors.toSet());
+                if (!tenantIds.isEmpty()) {
+                    Map<Long, String> tenantMap = sysTenantService.listByIds(tenantIds).stream()
+                            .collect(Collectors.toMap(SysTenant::getId, SysTenant::getTenantName));
+                    for (SysRole r : records) {
+                        if (r.getTenantId() != null && r.getTenantId() > 0) {
+                            r.setTenantName(tenantMap.getOrDefault(r.getTenantId(), "未知租户"));
+                        } else {
+                            r.setTenantName("平台角色");
+                        }
+                    }
+                } else {
+                    records.forEach(r -> r.setTenantName("平台角色"));
+                }
+                fillUserNames(records);
+            }
+
+            return R.ok(page);
+        } finally {
+            CustomTenantHandler.reset();
+        }
+    }
+
+    /**
+     * 批量填充角色下关联的用户名（逗号拼接，最多显示 5 个）
+     */
+    private void fillUserNames(List<SysRole> roles) {
+        Set<Long> roleIds = roles.stream().map(SysRole::getId).collect(Collectors.toSet());
+        List<SysUserRole> urs = sysUserRoleMapper.selectList(
+                new LambdaQueryWrapper<SysUserRole>().in(SysUserRole::getRoleId, roleIds));
+        if (urs.isEmpty()) {
+            roles.forEach(r -> r.setUserNames("未分配"));
+            return;
+        }
+        Set<Long> userIds = urs.stream().map(SysUserRole::getUserId).collect(Collectors.toSet());
+        Map<Long, String> userMap = sysUserService.listByIds(userIds).stream()
+                .collect(Collectors.toMap(SysUser::getId, SysUser::getUserName));
+        Map<Long, List<Long>> grouped = urs.stream()
+                .collect(Collectors.groupingBy(SysUserRole::getRoleId,
+                        Collectors.mapping(SysUserRole::getUserId, Collectors.toList())));
+        for (SysRole r : roles) {
+            List<Long> uids = grouped.get(r.getId());
+            if (uids != null && !uids.isEmpty()) {
+                List<Long> distinct = uids.stream().distinct().collect(Collectors.toList());
+                List<String> names = distinct.stream()
+                        .map(uid -> userMap.getOrDefault(uid, ""))
+                        .filter(n -> !n.isEmpty())
+                        .limit(5).collect(Collectors.toList());
+                String extra = distinct.size() > 5 ? " 等" + distinct.size() + "人" : "";
+                r.setUserNames(String.join(", ", names) + extra);
             } else {
-                records.forEach(r -> r.setTenantName("平台角色"));
+                r.setUserNames("未分配");
             }
         }
-
-        return R.ok(page);
     }
 
     @GetMapping("/{id}")
@@ -105,6 +185,17 @@ public class SysRoleController {
         // 场景：前端从编辑页复制表单 POST 过来，id 字段可能残留
         sysRole.setId(null);
         sysRole.setRoleKey(sequenceService.generateRoleKey());
+        // ⭐ 部门私有角色：前端不传 deptId 时自动填充
+        //   超管 (deptId=null) → role.deptId=null → 全局角色，全租户可见
+        //   部门管理员 (deptId=25) → role.deptId=25 → 部门私有角色，仅本部门+子部门可见
+        if (sysRole.getDeptId() == null) {
+            try {
+                Long currentDeptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+                if (currentDeptId != null) {
+                    sysRole.setDeptId(currentDeptId);
+                }
+            } catch (Exception ignored) {}
+        }
         if (sysRoleService.save(sysRole)) {
             // MP save 后自增 id 会自动回填到 sysRole.getId()
             return R.ok(sysRole.getId());
@@ -124,18 +215,18 @@ public class SysRoleController {
     }
 
     @DeleteMapping("/{id}")
-    @RequiresPermission("system:role:remove")
+    @RequiresPermission("system:role:delete")
     public R<Void> delete(@PathVariable Long id) {
         SysRole exist = sysRoleService.getById(id);
         if (exist == null) return R.fail("角色不存在");
         // 写操作：完整三层校验
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), null, exist.getCreateBy()),
-                              "system:role:remove");
+                              "system:role:delete");
         return sysRoleService.removeById(id) ? R.ok() : R.fail("删除失败");
     }
 
     /**
-     * 根据角色ID获取已勾选菜单id数组
+     * 根据角色ID获取已勾选菜单id数组（防御：租户角色回显时按菜单池过滤脏数据）
      */
     @GetMapping("/getMenuIds/{roleId}")
     public R<?> getCheckedMenuId(@PathVariable Long roleId){
@@ -144,22 +235,95 @@ public class SysRoleController {
         // 读操作：L1 租户归属 + L2 DataScope
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), null, exist.getCreateBy()));
         LambdaQueryWrapper<SysRoleMenu> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysRoleMenu::getRoleId,roleId);
-        List<Long> menuIds = sysRoleMenuService.list(wrapper).stream().map(SysRoleMenu::getMenuId).collect(Collectors.toList());
-        return R.ok(menuIds);
+        wrapper.eq(SysRoleMenu::getRoleId, roleId);
+        List<Long> rawIds = sysRoleMenuService.list(wrapper).stream()
+                .map(SysRoleMenu::getMenuId).collect(Collectors.toList());
+
+        // 租户角色：按菜单池过滤越权菜单（历史脏数据防御）
+        Long roleTenantId = exist.getTenantId() != null ? exist.getTenantId() : 0L;
+        if (roleTenantId > 0) {
+            Set<Long> poolMenuIds = sysTenantMenuService.list(
+                    new LambdaQueryWrapper<SysTenantMenu>().eq(SysTenantMenu::getTenantId, roleTenantId)
+            ).stream().map(SysTenantMenu::getMenuId).collect(Collectors.toSet());
+            List<Long> safeIds = rawIds.stream().filter(poolMenuIds::contains).collect(Collectors.toList());
+            long filtered = rawIds.size() - safeIds.size();
+            if (filtered > 0) {
+                log.warn("[getMenuIds] roleId={} (tenantId={}) 回显时有 {} 个越权菜单已自动过滤", roleId, roleTenantId, filtered);
+            }
+            return R.ok(safeIds);
+        }
+        return R.ok(rawIds);
     }
 
     /**
-     * ⭐ 三层漏斗原子化保存角色菜单权限
+     * ⭐ 平台侧角色编辑弹窗：按租户加载可分配菜单池
      * <p>
-     * 后端一次性搞定 admin 前端手动漏的两层：
+     * - tenantId=0 或不传 → 返回全量菜单（平台级角色用）
+     * - tenantId>0 → 返回该租户 sys_tenant_menu 内的菜单池 + 补齐父节点 + 构树
+     * 前端：所属租户 change 时调用此接口刷新菜单树
+     * </p>
+     */
+    @GetMapping("/availableMenus")
+    public R<List<SysMenu>> availableMenus(
+            @RequestParam(required = false) Long tenantId) {
+        // tenantId=0 或 null → 全量菜单（平台级角色）
+        if (tenantId == null || tenantId <= 0) {
+            List<SysMenu> all = sysMenuService.list(
+                    new LambdaQueryWrapper<SysMenu>()
+                            .eq(SysMenu::getStatus, 0)
+                            .eq(SysMenu::getDelFlag, 0)
+                            .orderByAsc(SysMenu::getSortNum));
+            return R.ok(TreeBuildUtil.build(all, 0L));
+        }
+
+        // tenantId>0 → 从 sys_tenant_menu 取该租户菜单池
+        List<Long> poolMenuIds = sysTenantMenuService.list(
+                new LambdaQueryWrapper<SysTenantMenu>().eq(SysTenantMenu::getTenantId, tenantId)
+        ).stream().map(SysTenantMenu::getMenuId).collect(Collectors.toList());
+
+        if (poolMenuIds.isEmpty()) {
+            return R.ok(Collections.emptyList());
+        }
+
+        // 补齐父节点，保证 TreeBuildUtil 能构建出完整树
+        Set<Long> menuIdSet = new HashSet<>(poolMenuIds);
+        for (Long mid : poolMenuIds) {
+            collectParentIds(mid, menuIdSet);
+        }
+
+        List<SysMenu> menus = sysMenuService.list(
+                new LambdaQueryWrapper<SysMenu>()
+                        .in(SysMenu::getId, menuIdSet)
+                        .eq(SysMenu::getStatus, 0)
+                        .eq(SysMenu::getDelFlag, 0)
+                        .orderByAsc(SysMenu::getSortNum));
+
+        log.info("[availableMenus] tenantId={}, 菜单池数量={}, 返回节点={}", tenantId, poolMenuIds.size(), menus.size());
+        return R.ok(TreeBuildUtil.build(menus, 0L));
+    }
+
+    /**
+     * 递归补齐菜单父节点 ID（保证树构建完整）
+     */
+    private void collectParentIds(Long menuId, Set<Long> collector) {
+        SysMenu m = sysMenuService.getById(menuId);
+        if (m != null && m.getParentId() != null && m.getParentId() > 0 && collector.add(m.getParentId())) {
+            collectParentIds(m.getParentId(), collector);
+        }
+    }
+
+    /**
+     * ⭐ 保存角色菜单权限（带租户边界硬校验）
+     * <p>
+     * 正确的三层边界逻辑（由上到下，单向约束）：
      * <pre>
-     * Layer ①  sys_menu 定义     → 已有（菜单管理页面维护）
-     * Layer ②  sys_tenant_menu   → 自动补：rm 关联的每个 menuId，确保角色所属租户有白名单
-     * Layer ③  sys_role_menu     → 写入 + tenant_id 对齐角色自身 tenantId
+     * Layer ①  sys_menu          → 菜单定义表（全局，菜单管理页面维护）
+     * Layer ②  sys_tenant_menu   → 租户菜单池（平台侧给租户分配的硬上限，顶层边界）
+     * Layer ③  sys_role_menu     → 角色菜单（只能在 Layer ② 边界内选择，不能越界）
      * </pre>
-     * 这样 admin 前端「分配菜单」只勾选 Layer ③，另外两层后端自动兜住。
-     * 之前手动 SQL 模板（文档 08）的两条 INSERT，现在 saveMenuPerm 全包了。
+     * ❌ 绝对禁止反向：role_menu 的菜单不能反向同步进 tenant_menu，会撑爆顶层边界！
+     * ✅ 本方法做的校验：租户角色的 menuIdList 超出 tenant_menu 的部分自动截断。
+     * ✅ 本方法做的写入：sys_role_menu 插入，tenant_id 对齐角色自身 tenantId。
      * </p>
      */
     @PostMapping("/saveMenuPerm/{roleId}")
@@ -173,46 +337,45 @@ public class SysRoleController {
                               "system:role:edit");
         Long roleTenantId = role.getTenantId() != null ? role.getTenantId() : 0L;
 
-        // ⭐ Step 1：清旧 sys_role_menu（按 roleId 物理删）
+        // ⭐ Step 1：先校验 + 截断 —— 租户角色的菜单不能超出租户菜单池（硬边界）
+        //    🔒 顺序至关重要：先过滤再写入，绝对不能让越权数据进 DB！
+        //    🔒 sys_tenant_menu 是平台分配的顶层边界，sys_role_menu 只能在这个边界内选择
+        //    🔒 绝对禁止反向把 role_menu 同步进 sys_tenant_menu！
+        if (roleTenantId > 0 && menuIdList != null && !menuIdList.isEmpty()) {
+            LambdaQueryWrapper<SysTenantMenu> poolWrapper = new LambdaQueryWrapper<>();
+            poolWrapper.eq(SysTenantMenu::getTenantId, roleTenantId);
+            Set<Long> poolMenuIds = sysTenantMenuService.list(poolWrapper).stream()
+                    .map(SysTenantMenu::getMenuId).collect(Collectors.toSet());
+
+            if (poolMenuIds.isEmpty()) {
+                return R.fail("租户 (tenantId=" + roleTenantId + ") 尚未分配任何菜单池，请平台侧先到租户管理配置菜单权限");
+            }
+
+            // 截断：只保留在菜单池内的菜单
+            List<Long> allowedIds = menuIdList.stream().filter(poolMenuIds::contains).collect(Collectors.toList());
+            long overflowCount = menuIdList.size() - allowedIds.size();
+            if (overflowCount > 0) {
+                log.warn("[saveRoleMenu] roleId={} (tenantId={}) 有 {} 个菜单超出租户菜单池，已自动截断。原请求={}, 截断后={}",
+                        roleId, roleTenantId, overflowCount, menuIdList, allowedIds);
+                menuIdList = allowedIds;
+            }
+        }
+
+        // ⭐ Step 2：清旧 sys_role_menu（按 roleId 物理删）
         LambdaQueryWrapper<SysRoleMenu> delWrapper = new LambdaQueryWrapper<>();
         delWrapper.eq(SysRoleMenu::getRoleId, roleId);
         sysRoleMenuService.remove(delWrapper);
 
-        // ⭐ Step 2：批量新增 sys_role_menu —— tenant_id 对齐角色自身
+        // ⭐ Step 3：批量新增 sys_role_menu —— tenant_id 对齐角色自身
         List<SysRoleMenu> rmList = menuIdList.stream().map(mid -> {
             SysRoleMenu rm = new SysRoleMenu();
             rm.setRoleId(roleId);
             rm.setMenuId(mid);
-            rm.setTenantId(roleTenantId);   // ✅ 之前实体没这字段，现在补上
+            rm.setTenantId(roleTenantId);
             rm.setDelFlag(0);
             return rm;
         }).collect(Collectors.toList());
         sysRoleMenuService.saveBatch(rmList);
-
-        // ⭐ Step 3：自动补 sys_tenant_menu 白名单（Layer ② 漏斗层）
-        //    平台角色（roleTenantId=0）不属于任何租户，跳过 —— 租户白名单只服务具体租户
-        if (roleTenantId > 0 && menuIdList != null && !menuIdList.isEmpty()) {
-            // 去重：查当前租户已有的菜单白名单，只插缺失的（幂等）
-            LambdaQueryWrapper<SysTenantMenu> existingWrapper = new LambdaQueryWrapper<>();
-            existingWrapper.eq(SysTenantMenu::getTenantId, roleTenantId);
-            List<SysTenantMenu> existing = sysTenantMenuService.list(existingWrapper);
-            Set<Long> existingMenuIds = existing.stream()
-                    .map(SysTenantMenu::getMenuId).collect(Collectors.toSet());
-
-            List<SysTenantMenu> toInsert = menuIdList.stream()
-                    .filter(mid -> !existingMenuIds.contains(mid))
-                    .map(mid -> {
-                        SysTenantMenu stm = new SysTenantMenu();
-                        stm.setTenantId(roleTenantId);
-                        stm.setMenuId(mid);
-                        stm.setDelFlag(0);
-                        return stm;
-                    }).collect(Collectors.toList());
-
-            if (!toInsert.isEmpty()) {
-                sysTenantMenuService.saveBatch(toInsert);
-            }
-        }
 
         // ⭐ Step 4：清 Redis 缓存（菜单 + 权限）
         try {
@@ -221,7 +384,7 @@ public class SysRoleController {
         } catch (Exception ignored) {}
         permissionService.evictAllPermCache();
 
-        return R.ok("分配成功（已自动同步 sys_tenant_menu 白名单 + rm.tenant_id 对齐）");
+        return R.ok("分配成功");
     }
 
     /**

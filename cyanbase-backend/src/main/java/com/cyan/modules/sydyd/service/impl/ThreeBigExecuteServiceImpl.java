@@ -73,6 +73,9 @@ public class ThreeBigExecuteServiceImpl
             itemName = topic.getItemName();
         }
 
+        // ⭐ 查 item 取 submitDeptId 作为执行部门 ID（L2 DataScope 管控列）
+        ThreeBigItem item = m2t.getItemId() != null ? itemMapper.selectById(m2t.getItemId()) : null;
+
         // 4. 创建实施记录
         ThreeBigExecute execute = new ThreeBigExecute();
         execute.setMeetingTopicId(meetingTopicId);
@@ -82,6 +85,7 @@ public class ThreeBigExecuteServiceImpl
         execute.setItemName(itemName);
         execute.setMeetingName(meetingName);
         execute.setVoteResult(voteResult);
+        execute.setExecuteDeptId(item != null ? item.getSubmitDeptId() : null); // ⭐ DataScope 管控列
         execute.setExecuteStatus(1); // 待执行
         execute.setProgress(0);
         save(execute);

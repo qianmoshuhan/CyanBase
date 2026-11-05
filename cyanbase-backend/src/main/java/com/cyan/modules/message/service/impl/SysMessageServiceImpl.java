@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cyan.common.exception.BusinessException;
 import com.cyan.common.message.util.MessageUtils;
+import com.cyan.config.CustomTenantHandler;
 import com.cyan.entity.SysUser;
 import com.cyan.entity.SysUserRole;
 import com.cyan.mapper.SysUserMapper;
@@ -13,6 +14,7 @@ import com.cyan.modules.message.entity.SysMessage;
 import com.cyan.modules.message.entity.SysMessageUser;
 import com.cyan.modules.message.mapper.SysMessageMapper;
 import com.cyan.modules.message.mapper.SysMessageUserMapper;
+import com.cyan.modules.message.service.SseEmitterManager;
 import com.cyan.modules.message.service.SysMessageService;
 import com.cyan.service.SysUserService;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,13 +40,18 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
     private final SysUserService sysUserService;
     private final SysUserMapper sysUserMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
+    private final CustomTenantHandler customTenantHandler;
+    private final SseEmitterManager sseEmitterManager;
 
     @Override
-    public Page<SysMessage> queryMyMessageList(Integer pageNum, Integer pageSize, Long userId, Integer messageType) {
-        // 先查询用户关联的消息ID
+    public Page<SysMessage> queryMyMessageList(Integer pageNum, Integer pageSize, Long userId, Integer messageType, Integer isRead, String title, String senderName) {
+        // ⭐ 先查 sys_message_user 关联表 —— 这里顺便加 isRead 过滤（保证分页 total 正确）
         LambdaQueryWrapper<SysMessageUser> muWrapper = new LambdaQueryWrapper<>();
         muWrapper.eq(SysMessageUser::getUserId, userId);
         muWrapper.eq(SysMessageUser::getDelFlag, 0);
+        if (isRead != null) {
+            muWrapper.eq(SysMessageUser::getIsRead, isRead);
+        }
         List<SysMessageUser> messageUsers = sysMessageUserMapper.selectList(muWrapper);
 
         if (messageUsers.isEmpty()) {
@@ -54,16 +62,36 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
                 .map(SysMessageUser::getMessageId)
                 .collect(Collectors.toList());
 
-        // 查询消息详情
+        // 查询消息详情 —— skip 租户拦截
         LambdaQueryWrapper<SysMessage> mWrapper = new LambdaQueryWrapper<>();
         mWrapper.in(SysMessage::getId, messageIds);
         if (messageType != null) {
             mWrapper.eq(SysMessage::getMessageType, messageType);
         }
+        if (title != null && !title.isEmpty()) {
+            mWrapper.like(SysMessage::getTitle, title);
+        }
+        if (senderName != null && !senderName.isEmpty()) {
+            mWrapper.like(SysMessage::getSenderName, senderName);
+        }
         mWrapper.orderByDesc(SysMessage::getCreateTime);
 
-        Page<SysMessage> page = new Page<>(pageNum, pageSize);
-        return this.page(page, mWrapper);
+        customTenantHandler.skip();
+        Page<SysMessage> page;
+        try {
+            page = this.page(new Page<>(pageNum, pageSize), mWrapper);
+        } finally {
+            customTenantHandler.reset();
+        }
+
+        // 把 SysMessageUser 关联表的 isRead 填充到 SysMessage 虚拟字段
+        java.util.Map<Long, Integer> readMap = messageUsers.stream()
+                .collect(Collectors.toMap(SysMessageUser::getMessageId, SysMessageUser::getIsRead));
+        for (SysMessage msg : page.getRecords()) {
+            msg.setIsRead(readMap.getOrDefault(msg.getId(), 0));
+        }
+
+        return page;
     }
 
     @Override
@@ -74,7 +102,7 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
             throw new BusinessException("消息标题或内容不能为空");
         }
 
-        // 创建消息
+        // 创建消息（显式 tenantId=null —— 全员广播不属于任何租户，skip 拦截器后才生效）
         SysMessage message = new SysMessage();
         message.setTitle(title);
         message.setContent(content);
@@ -83,14 +111,28 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
         message.setSenderId(0L);
         message.setSenderName("系统");
         message.setStatus(0);
+        message.setTenantId(null); // 关键：广播不绑定租户
 
-        boolean result = this.save(message);
+        // save 也在 skip 里 —— 不然 TenantLineInnerInterceptor 会追加 tenant_id=0（admin身份）
+        customTenantHandler.skip();
+        boolean result;
+        try {
+            result = this.save(message);
+        } finally {
+            customTenantHandler.reset();
+        }
         if (!result) {
             return false;
         }
 
-        // 获取所有用户ID
-        List<SysUser> allUsers = sysUserService.list();
+        // 获取所有用户ID（跨租户：skip 租户拦截，不然 admin 只能查到 tenantId=0 自己）
+        customTenantHandler.skip();
+        List<SysUser> allUsers;
+        try {
+            allUsers = sysUserService.list();
+        } finally {
+            customTenantHandler.reset();
+        }
         List<Long> userIds = allUsers.stream()
                 .map(SysUser::getId)
                 .collect(Collectors.toList());
@@ -99,6 +141,8 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
         batchCreateMessageUsers(message.getId(), userIds);
 
         log.info("发送全员消息成功: messageId={}, title={}", message.getId(), title);
+        // ⭐ SSE 实时推送：全员广播 → 给所有在线用户推
+        sseEmitterManager.pushCountToAll(Set.copyOf(userIds));
         return true;
     }
 
@@ -114,7 +158,7 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
             throw new BusinessException("接收用户列表不能为空");
         }
 
-        // 创建消息
+        // 创建消息（显式 tenantId=null —— 指定用户不属于任何租户）
         SysMessage message = new SysMessage();
         message.setTitle(title);
         message.setContent(content);
@@ -123,8 +167,15 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
         message.setSenderId(0L);
         message.setSenderName("系统");
         message.setStatus(0);
+        message.setTenantId(null);
 
-        boolean result = this.save(message);
+        customTenantHandler.skip();
+        boolean result;
+        try {
+            result = this.save(message);
+        } finally {
+            customTenantHandler.reset();
+        }
         if (!result) {
             return false;
         }
@@ -133,6 +184,8 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
         batchCreateMessageUsers(message.getId(), userIds);
 
         log.info("发送指定用户消息成功: messageId={}, title={}, userCount={}", message.getId(), title, userIds.size());
+        // ⭐ SSE 实时推送
+        sseEmitterManager.pushCountToAll(Set.copyOf(userIds));
         return true;
     }
 
@@ -148,7 +201,7 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
             throw new BusinessException("接收角色列表不能为空");
         }
 
-        // 创建消息
+        // 创建消息（显式 tenantId=null —— 指定角色不属于任何租户）
         SysMessage message = new SysMessage();
         message.setTitle(title);
         message.setContent(content);
@@ -157,8 +210,15 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
         message.setSenderId(0L);
         message.setSenderName("系统");
         message.setStatus(0);
+        message.setTenantId(null);
 
-        boolean result = this.save(message);
+        customTenantHandler.skip();
+        boolean result;
+        try {
+            result = this.save(message);
+        } finally {
+            customTenantHandler.reset();
+        }
         if (!result) {
             return false;
         }
@@ -171,6 +231,8 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
 
         log.info("发送指定角色消息成功: messageId={}, title={}, roleCount={}, userCount={}", 
                 message.getId(), title, roleIds.size(), userIds.size());
+        // ⭐ SSE 实时推送
+        sseEmitterManager.pushCountToAll(Set.copyOf(userIds));
         return true;
     }
 
@@ -188,7 +250,10 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
 
         messageUser.setIsRead(1);
         messageUser.setReadTime(LocalDateTime.now());
-        return sysMessageUserMapper.updateById(messageUser) > 0;
+        boolean ok = sysMessageUserMapper.updateById(messageUser) > 0;
+        // ⭐ SSE 实时推送：自己标已读 → 自己的未读数变了
+        if (ok) sseEmitterManager.pushCount(userId);
+        return ok;
     }
 
     @Override
@@ -210,6 +275,8 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
         }
 
         log.info("用户全部标记已读成功: userId={}, count={}", userId, messageUsers.size());
+        // ⭐ SSE 实时推送
+        sseEmitterManager.pushCount(userId);
         return true;
     }
 
@@ -260,13 +327,20 @@ public class SysMessageServiceImpl extends ServiceImpl<SysMessageMapper, SysMess
     }
 
     /**
-     * 根据角色ID获取用户ID列表
+     * 根据角色ID获取用户ID列表（跨租户：skip 租户拦截，不然 roleId 关联查不全）
      */
     private List<Long> getUserIdsByRoles(List<Long> roleIds) {
         LambdaQueryWrapper<SysUserRole> wrapper = new LambdaQueryWrapper<>();
         wrapper.in(SysUserRole::getRoleId, roleIds);
 
-        List<SysUserRole> userRoles = sysUserRoleMapper.selectList(wrapper);
+        // sys_user_role 虽然在忽略表里，但后续若关联 sys_user 查询还是会受租户影响
+        customTenantHandler.skip();
+        List<SysUserRole> userRoles;
+        try {
+            userRoles = sysUserRoleMapper.selectList(wrapper);
+        } finally {
+            customTenantHandler.reset();
+        }
         return userRoles.stream()
                 .map(SysUserRole::getUserId)
                 .distinct()

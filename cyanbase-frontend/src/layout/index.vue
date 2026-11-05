@@ -128,9 +128,16 @@
         </div>
       </header>
 
-      <!-- 内容区 -->
+      <!-- ⭐ TagsView 标签栏 -->
+      <TagsView />
+
+      <!-- 内容区（KeepAlive 缓存） -->
       <main class="content">
-        <router-view />
+        <router-view v-slot="{ Component, route: r }">
+          <KeepAlive :include="tagsViewStore.cachedViews">
+            <component :is="Component" :key="r.fullPath" />
+          </KeepAlive>
+        </router-view>
       </main>
     </div>
   </div>
@@ -140,10 +147,12 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useTagsViewStore } from '@/store/tagsView'
 import { ElMessageBox } from 'element-plus'
 import storage from '@/utils/storage'
 import { getConfigByKey, getUserMenu } from "@/api/config.js";
-import { getUnreadCount } from "@/api/message.js";
+import { useMessageSse } from '@/composables/useMessageSse'
+import TagsView from '@/components/TagsView/index.vue'
 
 // 导入需要的图标（修复：移除不存在的Post，替换为Element Plus真实存在的图标，其余保留）
 import { 
@@ -154,25 +163,12 @@ import {
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const tagsViewStore = useTagsViewStore()
 
 const isCollapsed = ref(false)
 
-// ⭐ 消息未读数
-const unreadCount = ref(0)
-let unreadPollTimer = null
-const fetchUnreadCount = async () => {
-  try {
-    const res = await getUnreadCount()
-    const newValue = res.data || 0
-    // 数字变化时（新消息到达）弹出轻提示
-    if (newValue > unreadCount.value && unreadCount.value > 0) {
-      // 新消息从 N 变 N+M（不是首次加载），弹通知
-    }
-    unreadCount.value = newValue
-  } catch (e) {
-    // token 失效等情况静默忽略
-  }
-}
+// ⭐ 消息未读数 —— SSE 实时推送（内部自带 5s 超时降级 HTTP 轮询兜底）
+const { unreadCount, close: closeSse } = useMessageSse()
 const goMessage = () => {
   router.push('/message/myMessage')
 }
@@ -380,9 +376,7 @@ const handleCommand = (command) => {
 onMounted(async () => {
   checkMobile()
   window.addEventListener('resize', handleResize)
-  // ⭐ 首次加载未读数 + 启动 30 秒轮询
-  fetchUnreadCount()
-  unreadPollTimer = setInterval(fetchUnreadCount, 30000)
+  // ⭐ SSE 已在 composable 构造时自动 init，这里只做 UI 初始化
   try {
     let nameRes = await getConfigByKey("system_name");
     if (nameRes?.data) { systemName.value = nameRes.data }
@@ -396,11 +390,8 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
-  // ⭐ 清理轮询定时器
-  if (unreadPollTimer) {
-    clearInterval(unreadPollTimer)
-    unreadPollTimer = null
-  }
+  // ⭐ 关闭 SSE 连接（或降级时清理轮询定时器）
+  closeSse()
 })
 </script>
 

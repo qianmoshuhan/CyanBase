@@ -14,21 +14,23 @@ import com.cyan.modules.sydyd.entity.ThreeBigItem;
 public interface ThreeBigItemService extends IService<ThreeBigItem> {
 
     /**
-     * 分页查询（带部门权限过滤）
+     * 分页查询 — 业务筛选条件，数据权限由 L2 DataScope Handler 自动管控
+     * <p>
+     * Handler 通过 DEPT_COLUMN_MAP 识别 t_three_big_item 表的部门列是 submit_dept_id，
+     * 按当前用户角色的 dataScope 配置（ALL/DEPT/DEPT_AND_CHILD/SELF/CUSTOM）自动追加过滤条件。
+     * Service 层不再手动做部门过滤，避免与 Handler 双重追加。
+     * </p>
      *
-     * @param pageNum     页码
-     * @param pageSize    页大小
-     * @param itemStatus  事项状态筛选（可为 null）
-     * @param itemType    事项类型筛选（可为 null）
-     * @param systemId    所属制度筛选（可为 null）
-     * @param itemName    事项名称模糊搜索（可为 null）
-     * @param userDeptId  当前登录人所属部门ID —— 填报员只能看本部门；null 表示管理员全量
-     * @param isAdmin     是否管理员（管理员看全量，否则只看自己部门 + 自己填的）
+     * @param pageNum    页码
+     * @param pageSize   页大小
+     * @param itemStatus 事项状态筛选（可为 null）
+     * @param itemType   事项类型筛选（可为 null）
+     * @param systemId   所属制度筛选（可为 null）
+     * @param itemName   事项名称模糊搜索（可为 null）
      */
     IPage<ThreeBigItem> queryPage(Integer pageNum, Integer pageSize,
                                   Integer itemStatus, Integer itemType,
-                                  Long systemId, String itemName,
-                                  Long userDeptId, boolean isAdmin);
+                                  Long systemId, String itemName);
 
     /** 新增事项（草稿态） */
     Long createDraft(ThreeBigItem item);

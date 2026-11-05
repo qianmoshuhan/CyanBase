@@ -31,9 +31,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean saveUserAndRole(SysUser user) {
+        // ⭐ 空密码 → null：新增场景让数据库默认值生效（MP NOT_NULL 策略跳过 null 字段）
+        if (user.getPassword() != null && user.getPassword().isEmpty()) {
+            user.setPassword(null);
+        }
         // ⭐ 新增：对传入的密码做 BCrypt 加密（如果前端传了的话）
-        if (user.getPassword() != null && !user.getPassword().isEmpty()
-                && !user.getPassword().startsWith("$2a$")) {
+        if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         boolean save = save(user);
@@ -45,9 +48,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateUserAndRole(SysUser user) {
-        // ⭐ 新增：编辑用户时如果传了新密码也要加密
-        if (user.getPassword() != null && !user.getPassword().isEmpty()
-                && !user.getPassword().startsWith("$2a$")) {
+        // ⭐ 关键修复：空密码 → null，MP NOT_NULL 策略会跳过 password 字段不更新
+        // 如果没有这行，前端传来 password="" 会覆盖掉数据库里的 BCrypt 密码 → 用户登录炸了
+        if (user.getPassword() != null && user.getPassword().isEmpty()) {
+            user.setPassword(null);
+        }
+        // ⭐ 编辑用户时如果传了新密码也要加密
+        if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         boolean update = updateById(user);

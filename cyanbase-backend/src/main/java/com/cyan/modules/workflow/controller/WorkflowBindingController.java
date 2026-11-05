@@ -34,7 +34,7 @@ public class WorkflowBindingController {
      * 分页查询绑定列表
      */
     @GetMapping("/list")
-    @RequiresPermission("workflow:binding:query")
+    @RequiresPermission("workflow:binding:list")
     public R<Page<FormProcessBinding>> list(
             @RequestParam(defaultValue = "1")  Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,

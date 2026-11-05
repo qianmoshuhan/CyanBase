@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="home-container">
     <div class="welcome-card">
       <h2>欢迎使用 CyanBase 青渊数字底座</h2>
@@ -63,6 +63,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'Home' })
 import { OfficeBuilding } from '@element-plus/icons-vue'
 import { ref, reactive, onMounted } from 'vue'
 import { useUserStore } from '@/store/user'

@@ -25,6 +25,7 @@ public class SysJobController {
     /**
      * 查询任务列表
      */
+    @RequiresPermission("monitor:job:list")
     @GetMapping("/list")
     public R<Page<SysJob>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -69,7 +70,7 @@ public class SysJobController {
      */
     @DeleteMapping("/{id}")
     @Log(title = "定时任务", businessType = BusinessType.DELETE)
-    @RequiresPermission("monitor:job:remove")
+    @RequiresPermission("monitor:job:delete")
     public R<Void> delete(@PathVariable Long id) {
         return sysJobService.deleteJob(id) ? R.ok() : R.fail("删除失败");
     }

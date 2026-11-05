@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="meeting-detail-container">
     <el-card shadow="hover">
       <template #header>
@@ -193,6 +193,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'SydydMeetingDetail' })
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'

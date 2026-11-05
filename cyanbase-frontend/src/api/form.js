@@ -127,3 +127,39 @@ export function batchSaveFormFields(definitionId, fields) {
     data: fields
   })
 }
+
+// ==================== 表单版本 API ====================
+
+/** 查询某表单定义的全部版本列表 */
+export function getFormVersionList(definitionId) {
+  return request({
+    url: `/form/definition/${definitionId}/versions`,
+    method: 'get'
+  })
+}
+
+/** 查询某版本详情（返回 form_schema） */
+export function getFormVersionDetail(versionId) {
+  return request({
+    url: `/form/definition/version/${versionId}`,
+    method: 'get'
+  })
+}
+
+/** 从指定版本创建新版本 */
+export function createFormVersionFrom(sourceVersionId, versionName) {
+  return request({
+    url: `/form/definition/version/${sourceVersionId}/create-from`,
+    method: 'post',
+    data: { versionName }
+  })
+}
+
+/** 保存表单版本快照（设计器版本模式保存） */
+export function saveFormVersionSnapshot(versionId, formSchema) {
+  return request({
+    url: `/form/definition/version/${versionId}/save-snapshot`,
+    method: 'post',
+    data: { formSchema }
+  })
+}

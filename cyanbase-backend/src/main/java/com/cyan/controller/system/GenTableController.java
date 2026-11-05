@@ -8,11 +8,22 @@ import com.cyan.service.GenTableService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 【暂未完成权限改造，禁止调用，后续迭代补齐】
+ * <p>
+ * 2026-10-25 标记废弃：本期不做代码脚手架生成业务，本期不做权限改造。
+ * 所有接口请求一律返回 "禁止调用"。
+ */
 @RestController
 @RequestMapping("/system/gen")
 @RequiredArgsConstructor
+@Deprecated
 public class GenTableController {
     private final GenTableService genTableService;
+
+    private R<?> blocked() {
+        return R.fail("该接口暂未完成权限改造，禁止调用");
+    }
 
     @GetMapping("/list")
     public R<?> list(
@@ -20,33 +31,26 @@ public class GenTableController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String tableName,
             @RequestParam(required = false) String tableComment) {
-        LambdaQueryWrapper<GenTable> wrapper = new LambdaQueryWrapper<>();
-        if (tableName != null && !tableName.isEmpty()) wrapper.like(GenTable::getTableName, tableName);
-        if (tableComment != null && !tableComment.isEmpty()) wrapper.like(GenTable::getTableComment, tableComment);
-        wrapper.orderByDesc(GenTable::getTableId);
-        return R.ok(genTableService.page(new Page<>(current, size), wrapper));
+        return blocked();
     }
 
     @GetMapping("/{tableId}")
     public R<?> getById(@PathVariable Long tableId) {
-        return R.ok(genTableService.getById(tableId));
+        return blocked();
     }
 
     @PostMapping
     public R<?> add(@RequestBody GenTable table) {
-        genTableService.save(table);
-        return R.ok("新增成功");
+        return blocked();
     }
 
     @PutMapping
     public R<?> update(@RequestBody GenTable table) {
-        genTableService.updateById(table);
-        return R.ok("更新成功");
+        return blocked();
     }
 
     @DeleteMapping("/{tableId}")
     public R<?> delete(@PathVariable Long tableId) {
-        genTableService.removeById(tableId);
-        return R.ok("删除成功");
+        return blocked();
     }
 }

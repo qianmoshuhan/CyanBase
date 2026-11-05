@@ -12,6 +12,7 @@ import com.cyan.modules.workflow.entity.WorkflowNode;
 import com.cyan.modules.workflow.entity.WfNodeRuntime;
 import com.cyan.modules.workflow.mapper.WorkflowApproveMapper;
 import com.cyan.modules.workflow.service.*;
+import com.cyan.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class WorkflowApproveServiceImpl extends ServiceImpl<WorkflowApproveMappe
     private final WorkflowNodeService workflowNodeService;
     private final WorkflowDefinitionService workflowDefinitionService;
     private final WfNodeRuntimeService wfNodeRuntimeService;
+    private final SysUserService sysUserService;
     /** ⭐ @Lazy 破循环依赖 */
     @Lazy
     @Autowired
@@ -320,6 +322,18 @@ public class WorkflowApproveServiceImpl extends ServiceImpl<WorkflowApproveMappe
         }
     }
 
+    /** 查询提交人所属部门ID（TenantHandler.skip 保证跨租户安全） */
+    private Long querySubmitterDeptId(Long initiatorId) {
+        if (initiatorId == null) return null;
+        CustomTenantHandler.skip();
+        try {
+            com.cyan.entity.SysUser u = sysUserService.getById(initiatorId);
+            return u != null ? u.getDeptId() : null;
+        } finally {
+            CustomTenantHandler.reset();
+        }
+    }
+
     /**
      * 解析 Gateway 的下一个可达节点（处理 exclusive/parallel 分支条件）
      * <p>SpEL 表达式用 instance.variables（JSON Map）作为上下文变量
@@ -375,6 +389,10 @@ public class WorkflowApproveServiceImpl extends ServiceImpl<WorkflowApproveMappe
             ctx.setVariable("variables", vars);
             ctx.setVariable("initiatorId", instance.getInitiatorId());
             ctx.setVariable("processKey", instance.getProcessKey());
+            // ⭐ 内置流程变量：submitterDeptId —— 提交人所属部门ID
+            Long submitterDeptId = querySubmitterDeptId(instance.getInitiatorId());
+            vars.put("submitterDeptId", submitterDeptId);
+            ctx.setVariable("submitterDeptId", submitterDeptId);
 
             WorkflowNode picked = null;
             WorkflowNode defaultNode = null;

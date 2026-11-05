@@ -19,6 +19,7 @@ import com.cyan.modules.workflow.mapper.WorkflowInstanceMapper;
 import com.cyan.modules.workflow.service.WfDefinitionTenantService;
 import com.cyan.modules.message.service.MessagePushService;
 import com.cyan.modules.workflow.service.*;
+import com.cyan.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,19 @@ public class WorkflowInstanceServiceImpl extends ServiceImpl<WorkflowInstanceMap
     private final ThreeBigItemMapper threeBigItemMapper;
     private final WfNodeRuntimeService wfNodeRuntimeService;
     private final WfDefinitionTenantService wfDefinitionTenantService;
+    private final SysUserService sysUserService;
+    /** 查询提交人所属部门ID（TenantHandler.skip 保证跨租户安全） */
+    private Long querySubmitterDeptId(Long initiatorId) {
+        if (initiatorId == null) return null;
+        CustomTenantHandler.skip();
+        try {
+            com.cyan.entity.SysUser u = sysUserService.getById(initiatorId);
+            return u != null ? u.getDeptId() : null;
+        } finally {
+            CustomTenantHandler.reset();
+        }
+    }
+
     /** 辅助：从节点列表按 ID 查 */
     private WorkflowNode findNodeById(List<WorkflowNode> nodes, Long id) {
         return nodes.stream().filter(n -> n.getId().equals(id)).findFirst().orElse(null);
@@ -98,6 +112,10 @@ public class WorkflowInstanceServiceImpl extends ServiceImpl<WorkflowInstanceMap
         ctx.setVariable("variables", vars);
         ctx.setVariable("initiatorId", instance.getInitiatorId());
         ctx.setVariable("processKey", instance.getProcessKey());
+        // ⭐ 内置流程变量：submitterDeptId —— 提交人所属部门ID
+        Long submitterDeptId = querySubmitterDeptId(instance.getInitiatorId());
+        vars.put("submitterDeptId", submitterDeptId);
+        ctx.setVariable("submitterDeptId", submitterDeptId);
 
         // 需要查目标节点的 conditionExpr — 用 skip 跨租户查（definition 可能是 admin 分发给当前租户的）
         CustomTenantHandler.skip();
@@ -213,14 +231,24 @@ public class WorkflowInstanceServiceImpl extends ServiceImpl<WorkflowInstanceMap
         Long userId = SecurityUtils.getUserId();
         String userName = SecurityUtils.getUsername();
 
-        // ⭐ 跨租户查节点：同样要 skip，因为节点和 definition 同属一个 tenant_id
+        // ⭐ 跨租户查节点：skip 绕开租户拦截，因为节点的 tenant_id 可能是 0（admin 创建分发给当前租户的）
+        // ⚠️ 约束 #34：CustomTenantHandler 用 ThreadLocal 单变量，不能嵌套 skip/reset！
+        //    所以这里不调 listByDefinitionId（它内部有自己的 skip/reset），
+        //    而是在同一个 skip 块里直接 list(wrapper)，startNode 也从已查出的 nodes 里 filter。
         CustomTenantHandler.skip();
         List<WorkflowNode> nodes;
         WorkflowNode startNode;
         try {
-            nodes = workflowNodeService.listByDefinitionId(definitionId);
+            LambdaQueryWrapper<WorkflowNode> nodeWrapper = new LambdaQueryWrapper<>();
+            nodeWrapper.eq(WorkflowNode::getDefinitionId, definitionId)
+                       .orderByAsc(WorkflowNode::getSortOrder);
+            nodes = workflowNodeService.list(nodeWrapper);
+
             if (definition.getStartNodeId() != null) {
-                startNode = workflowNodeService.getById(definition.getStartNodeId());
+                startNode = nodes.stream()
+                        .filter(n -> n.getId().equals(definition.getStartNodeId()))
+                        .findFirst()
+                        .orElse(null);
             } else {
                 startNode = nodes.stream()
                         .filter(node -> "start".equals(node.getNodeType()))
@@ -246,6 +274,7 @@ public class WorkflowInstanceServiceImpl extends ServiceImpl<WorkflowInstanceMap
         instance.setStatus("running");
         instance.setInitiatorId(userId);
         instance.setInitiatorName(userName);
+        instance.setDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId()); // ⭐ 发起部门（L2 DataScope 管控列）
         instance.setStartTime(LocalDateTime.now());
         instance.setVariables(variables);
         

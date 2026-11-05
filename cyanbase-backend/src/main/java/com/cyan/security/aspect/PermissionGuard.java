@@ -8,6 +8,7 @@ import com.cyan.entity.SysDept;
 import com.cyan.entity.SysRole;
 import com.cyan.entity.SysRoleDept;
 import com.cyan.security.annotation.RequiresPermission;
+import com.cyan.security.datascope.DataScopeContext;
 import com.cyan.security.datascope.ResourceScope;
 import com.cyan.security.domain.LoginUser;
 import com.cyan.security.service.PermissionService;
@@ -149,29 +150,29 @@ public class PermissionGuard {
 
     /**
      * 租户身份校验 + 资源租户归属校验（仅 targetScope.targetTenantId != null 时比对）。
-     * 复用 TenantAuthAspect + Controller 散落逻辑的核心判断。
+     * <p>
+     * 超管放通已统一在 doCheck() 入口完成（permissionService.isSuperAdmin + 通配符），
+     * 三层内部禁止散落 isSuperAdmin 判断——此方法仅处理非超管的租户硬隔离。
      */
     private void checkTenantIsolation(ResourceScope targetScope) {
         Long userId = SecurityUtils.getUserId();
         Long tenantId = SecurityUtils.getTenantId();
-        String username = SecurityUtils.getUsername();
 
-        // 步骤 1.1  必须登录
+        // 步骤 1.1  必须登录（入口已放过超管，这里全是非超管）
         if (userId == null) {
-            log.warn("[PermissionGuard][L1] 未登录访问，uri 对应 userId={}", userId);
+            log.warn("[PermissionGuard][L1] 未登录访问，userId={}", userId);
             throw new BusinessException(401, "请先登录");
         }
 
-        // 步骤 1.2  必须是租户用户 OR 平台超管
-        boolean isPlatformAdmin = "admin".equals(username);
-        if (!isPlatformAdmin && (tenantId == null || tenantId <= 0)) {
+        // 步骤 1.2  非超管必须是租户用户（tenantId > 0）——禁止平台侧非 admin 用户操作租户资源
+        if (tenantId == null || tenantId <= 0) {
             log.warn("[PermissionGuard][L1] 非租户用户越权访问 userId={}, tenantId={}", userId, tenantId);
             throw new BusinessException(403, "非租户用户无权访问租户接口");
         }
 
-        // 步骤 1.3  资源租户归属比对（超管跳过；新建场景 targetTenantId=null 跳过）
+        // 步骤 1.3  资源租户归属比对（新建场景 targetTenantId=null 跳过）
         if (targetScope != null && targetScope.targetTenantId() != null) {
-            if (!isPlatformAdmin && tenantId != null && !tenantId.equals(targetScope.targetTenantId())) {
+            if (!tenantId.equals(targetScope.targetTenantId())) {
                 log.warn("[PermissionGuard][L1] 跨租户访问 userId={}, currentTenant={}, targetTenant={}",
                         userId, tenantId, targetScope.targetTenantId());
                 throw new BusinessException(403, "无权操作其他租户的数据");
@@ -186,8 +187,21 @@ public class PermissionGuard {
     /**
      * 数据范围校验逻辑。复用 CyanDataPermissionHandler 的 scope 解析规则，
      * 从"构造 SQL 条件"改为"主动校验目标资源是否在范围内"。
+     * <p>
+     * 内部所有 DB 查询（roleService.listByIds / deptService.list / roleDeptService.list）
+     * 统一 skip 保护，防止 DataPermissionInterceptor 二次过滤导致 scope 规则残缺。
      */
     private void checkDataScope(ResourceScope targetScope) {
+        DataScopeContext.skip();
+        try {
+            doCheckDataScope(targetScope);
+        } finally {
+            DataScopeContext.reset();
+        }
+    }
+
+    /** checkDataScope 的实际执行逻辑（在 skip 保护下运行） */
+    private void doCheckDataScope(ResourceScope targetScope) {
         Long userId = SecurityUtils.getUserId();
         LoginUser loginUser = SecurityUtils.getLoginUser();
         if (loginUser == null) return;

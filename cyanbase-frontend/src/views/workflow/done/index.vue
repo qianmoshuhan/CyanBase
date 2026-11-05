@@ -1,4 +1,4 @@
-<template>
+﻿﻿﻿<template>
   <div class="workflow-done-container">
     <el-card shadow="hover">
       <template #header>
@@ -66,14 +66,16 @@
       </div>
 
       <!-- 分页 -->
-      <el-pagination
-        :total="total"
-        :current-page="pageNum"
-        :page-size="pageSize"
-        :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
-        @size-change="fetchData"
-        @current-change="fetchData"
-      />
+      <div class="pagination-wrap">
+        <el-pagination
+          :total="total"
+          :current-page="pageNum"
+          :page-size="pageSize"
+          :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </el-card>
 
     <!-- 详情弹窗 -->
@@ -100,6 +102,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'WorkflowDone' })
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 // 导入工作流API（已完成）
@@ -164,6 +167,17 @@ const handleView = (row) => {
 }
 
 // 重置搜索
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pageNum.value = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  pageNum.value = 1
+  fetchData()
+}
+
 const handleReset = () => {
   query.processName = ''
   query.status = ''
@@ -185,6 +199,7 @@ fetchData()
 .workflow-done-container { width: 100%; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .search-form { margin-bottom: 20px; }
+.pagination-wrap { margin-top: 16px; display: flex; justify-content: flex-end; }
 .detail-content { line-height: 1.6; }
 .form-data h4 { margin: 0 0 10px 0; font-size: 14px; color: #333; }
 </style>

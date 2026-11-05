@@ -1,4 +1,4 @@
-<template>
+﻿﻿<template>
   <div class="topic-page">
     <el-card class="search-card" shadow="never">
       <el-form :inline="true" :model="query">
@@ -63,8 +63,8 @@
         :total="total"
         :page-sizes="[10, 20, 50]"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="loadList"
-        @current-change="loadList"
+        @current-change="handlePageChange"
+        @size-change="handleSizeChange"
         class="pagination"
       />
     </el-card>
@@ -97,6 +97,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'SydydTopic' })
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
@@ -139,6 +140,17 @@ const loadList = async () => {
   } finally { loading.value = false }
 }
 const resetQuery = () => {
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  query.pageNum = page
+  loadList()
+}
+const handleSizeChange = (size) => {
+  query.pageSize = size
+  query.pageNum = 1
+  loadList()
+}
+
   query.keyword = ''; query.topicStatus = null; query.pageNum = 1; loadList()
 }
 

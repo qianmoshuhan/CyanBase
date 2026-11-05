@@ -9,7 +9,6 @@ import com.cyan.security.util.JwtUtil;
 import com.cyan.service.SysUserOnlineService;
 import com.cyan.service.SysLogLoginService;
 import com.cyan.service.SysLogininforService;
-import com.cyan.tenantauth.dto.TenantItemVO;
 import com.cyan.tenantauth.dto.TenantLoginReq;
 import com.cyan.tenantauth.service.TenantAuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 
 /**
  * 租户认证控制器
@@ -37,35 +36,34 @@ public class TenantAuthController {
     private final JwtUtil jwtUtil;
 
     /**
-     * 获取启用状态的租户列表（匿名访问）
-     */
-    @GetMapping("/tenant/list")
-    public R<List<TenantItemVO>> getTenantList() {
-        List<TenantItemVO> list = tenantAuthService.getEnableTenantList();
-        return R.ok(list);
-    }
-
-    /**
-     * 租户登录（匿名访问）
+     * 租户登录（匿名访问，手机号登录模式）
+     * 
+     * 返回类型有两种：
+     * 1. LoginResponse：登录成功（单租户命中或二次请求精确匹配）
+     * 2. Map{step:"select-tenant", list:[...]}：多租户命中，需要前端选租户后二次登录
      */
     @PostMapping("/login")
-    public R<LoginResponse> login(@RequestBody TenantLoginReq req, HttpServletRequest request) {
+    public R<Object> login(@RequestBody TenantLoginReq req, HttpServletRequest request) {
         String ip = getClientIp(request);
         String browser = getBrowser(request);
         String os = getOS(request);
 
         try {
-            LoginResponse resp = tenantAuthService.tenantLogin(req);
+            Object result = tenantAuthService.tenantLogin(req);
 
-            // ====== 从返回的 Access Token 解析 userId/userName ======
+            // 多租户选择场景：直接返回 Map，不写日志/在线用户
+            if (result instanceof Map) {
+                return R.ok(result);
+            }
+
+            // 真正登录成功：写 Token 解析 + 日志 + 在线用户
+            LoginResponse resp = (LoginResponse) result;
             String accessToken = resp.getAccessToken();
             Long userId = jwtUtil.getUserIdFromToken(accessToken);
             String userName = jwtUtil.getUserNameFromToken(accessToken);
 
-            // ====== 写登录日志（成功） ======
             saveLoginLog(userName, ip, browser, os, 0, "租户登录成功");
 
-            // ====== 写在线用户记录 ======
             String sessionId = "u_" + userId;
             SysUserOnline online = new SysUserOnline();
             online.setSessionId(sessionId);
@@ -81,8 +79,7 @@ public class TenantAuthController {
             return R.ok(resp);
         } catch (Exception e) {
             log.warn("租户登录失败: {}", e.getMessage());
-            // 失败也写日志
-            saveLoginLog(req.getUsername(), ip, browser, os, 1, e.getMessage());
+            saveLoginLog(req.getPhone(), ip, browser, os, 1, e.getMessage());
             return R.fail(e.getMessage());
         }
     }

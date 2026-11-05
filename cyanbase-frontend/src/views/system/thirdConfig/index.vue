@@ -1,4 +1,4 @@
-<template>
+﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
@@ -49,7 +49,8 @@
       </el-table>
 
       <div class="pagination">
-        <el-pagination v-model:current-page="pagination.current" v-model:page-size="pagination.size" :total="pagination.total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next, jumper" @size-change="fetchData" @current-change="fetchData" />
+        <el-pagination v-model:current-page="pagination.current" v-model:page-size="pagination.size" :total="pagination.total" :page-sizes="[10, 20, 50]" layout="total, sizes, prev, pager, next, jumper" @current-change="handlePageChange"
+          @size-change="handleSizeChange" />
       </div>
     </el-card>
 
@@ -84,6 +85,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'ThirdConfig' })
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getThirdConfigList, addThirdConfig, updateThirdConfig, deleteThirdConfig } from '@/api/thirdConfig'
@@ -124,7 +126,22 @@ const handleSubmit = async () => {
   })
 }
 const handleDialogClose = () => formRef.value?.resetFields()
-const handleReset = () => { Object.assign(searchForm, { configType: '', configName: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { configType: '', configName: '' })
+  pagination.current = 1
+  fetchData()
+}
 
 fetchData()
 </script>

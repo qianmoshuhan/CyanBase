@@ -12,6 +12,27 @@ export function login(data) {
 }
 
 /**
+ * 获取滑块验证资源（token + 背景图 + 缺口图）
+ */
+export function getCaptcha() {
+  return request({
+    url: '/auth/captcha',
+    method: 'get'
+  })
+}
+
+/**
+ * 校验滑块轨迹，发放一次性登录凭证 credentialKey
+ */
+export function checkCaptcha(data) {
+  return request({
+    url: '/auth/captcha/check',
+    method: 'post',
+    data
+  })
+}
+
+/**
  * 获取当前登录用户信息
  */
 export function getUserInfo() {

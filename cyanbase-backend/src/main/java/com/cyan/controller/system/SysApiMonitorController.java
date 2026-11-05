@@ -17,6 +17,7 @@ import java.time.LocalDate;
 public class SysApiMonitorController {
     private final SysApiMonitorService sysApiMonitorService;
 
+    @RequiresPermission("monitor:api:list")
     @GetMapping("/list")
     public R<?> list(
             @RequestParam(defaultValue = "1") Integer current,
@@ -36,9 +37,22 @@ public class SysApiMonitorController {
     }
 
     @PostMapping
-    @RequiresPermission("monitor:api:add")
     public R<?> add(@RequestBody SysApiMonitor monitor) {
         sysApiMonitorService.save(monitor);
         return R.ok("新增成功");
+    }
+
+    @PutMapping
+    @RequiresPermission("monitor:api:edit")
+    public R<?> update(@RequestBody SysApiMonitor monitor) {
+        sysApiMonitorService.updateById(monitor);
+        return R.ok("更新成功");
+    }
+
+    @DeleteMapping("/{id}")
+    @RequiresPermission("monitor:api:delete")
+    public R<?> delete(@PathVariable Long id) {
+        sysApiMonitorService.removeById(id);
+        return R.ok("删除成功");
     }
 }

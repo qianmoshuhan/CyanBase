@@ -28,6 +28,7 @@ public class ThreeBigSystemController {
 
     /** 分页列表（MP 自动隔离 tenant_id） */
     @GetMapping("/list")
+    @RequiresPermission("sydyd:system:list")
     public R<Page<ThreeBigSystem>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,

@@ -1,16 +1,22 @@
-<!-- src/views/form/designer/index.vue -->
+﻿﻿﻿﻿<!-- src/views/form/designer/index.vue -->
 <template>
   <div class="designer-page">
     <div class="header-bar">
       <el-button @click="$router.back()">← 返回列表</el-button>
-      <span class="title">表单可视化设计器</span>
-      <el-button type="primary" :loading="saving" @click="handleSave">保存配置</el-button>
-      <!-- 在 <div class="header-bar"> 内部添加 -->
-        <el-input
-        v-model="formName"  
+      <span class="title">
+        表单可视化设计器
+        <el-tag v-if="isVersionView" type="info" style="margin-left:8px">只读查看 v{{ versionNo }}</el-tag>
+        <el-tag v-else-if="isVersionEdit" type="warning" style="margin-left:8px">版本编辑 v{{ versionNo }}</el-tag>
+      </span>
+      <el-input
+        v-model="formName"
         placeholder="请输入表单名称"
         style="width: 200px; margin-right: 10px;"
-        />
+        :disabled="isVersionView"
+      />
+      <el-button type="primary" :loading="saving" :disabled="isVersionView" @click="handleSave" v-hasPermi="['form:definition:save']">
+        {{ isVersionEdit ? '保存版本快照' : '保存配置' }}
+      </el-button>
     </div>
     <!-- v3 designer 组件 -->
     <fc-designer ref="designerRef" height="80vh" />
@@ -18,11 +24,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick} from 'vue'
+defineOptions({ name: 'FormDesigner' })
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { parseLayoutConfig } from '@/plugins/formCreate'
-import { updateFormDefinition, getFormDefinitionById, addFormDefinition, batchSaveFormFields } from '@/api/form'
+import { updateFormDefinition, getFormDefinitionById, addFormDefinition, batchSaveFormFields, getFormVersionDetail, saveFormVersionSnapshot } from '@/api/form'
 // TODO: 替换为您项目中实际的表单API
 // import { saveForm, getFormDetail } from '@/api/form'
 
@@ -34,6 +41,12 @@ const formAction = ref(route.query.action);
 const formName = ref('');
 const formCode = ref('');
 
+// 版本模式参数
+const versionId = ref(route.query.versionId || null)
+const versionNo = ref(route.query.versionNo || null)
+const isVersionView = computed(() => formAction.value === 'version-view')
+const isVersionEdit = computed(() => formAction.value === 'version-edit')
+
 onMounted(async () => {
   const id = route.query.id;
   const action = route.query.action;
@@ -41,30 +54,50 @@ onMounted(async () => {
 
   if (id) formId.value = id;
 
-  if (action === "edit") {
-    if (!id) return;
+  // ⭐ 版本模式（view 或 edit）→ 从版本表加载 form_schema
+  if (action === 'version-view' || action === 'version-edit') {
+    if (!versionId.value) {
+      ElMessage.error('缺少版本ID参数')
+      return
+    }
+    formName.value = routeName || ''
+    try {
+      const res = await getFormVersionDetail(versionId.value)
+      const data = res.data
+      if (data?.formSchema) {
+        const cfg = JSON.parse(data.formSchema)
+        const rules = Array.isArray(cfg) ? cfg : cfg.fields || []
+        setTimeout(() => {
+          if (designerRef.value) {
+            designerRef.value.setRule(rules)
+            console.log('✅ 版本表单 Schema 回显成功')
+          }
+        }, 260)
+      }
+      if (isVersionView.value) {
+        console.log('🔒 当前为只读查看模式，禁止保存')
+      }
+    } catch (e) {
+      console.error('加载版本详情失败', e)
+      ElMessage.error('加载版本详情失败')
+    }
+    return
+  }
 
+  if (action === 'edit') {
+    if (!id) return;
     try {
       const res = await getFormDefinitionById(id);
       const data = res.data;
-
-      // 名称回显
       formName.value = routeName || data.formName;
-
-      // 代码回显
-      if (data.formCode) {
-        formCode.value = data.formCode;
-      }
-
-      // 表单配置回显（真正修复）
+      if (data.formCode) formCode.value = data.formCode;
       if (data.layoutConfig) {
         const cfg = JSON.parse(data.layoutConfig);
         const rules = Array.isArray(cfg) ? cfg : cfg.fields || [];
-
         setTimeout(() => {
           if (designerRef.value) {
             designerRef.value.setRule(rules);
-            console.log("✅ 表单回显成功！");
+            console.log('✅ 表单回显成功！');
           }
         }, 260);
       }
@@ -75,7 +108,7 @@ onMounted(async () => {
     if (routeName) {
       formName.value = routeName;
     } else {
-      ElMessage.warning("未检测到表单名称，请通过列表页新建");
+      ElMessage.warning('未检测到表单名称，请通过列表页新建');
     }
   }
 });
@@ -179,6 +212,12 @@ const extractFormFields = (rule) => {
 }
 
 const handleSave = async () => {
+  // 只读查看模式：禁止保存
+  if (isVersionView.value) {
+    ElMessage.warning('只读模式，不可保存')
+    return
+  }
+
   if (!formName.value.trim()) {
     ElMessage.error('请输入表单名称');
     return;
@@ -188,25 +227,32 @@ const handleSave = async () => {
   try {
     // 1. 获取设计器规则
     const rawRule = designerRef.value?.getRule() || []
-    
-    // ⭐ 先 normalize：把 fc-designer 顶层 type="input" + props.type="number" 改成 type="inputNumber"
-    //    这样 form-create 渲染时就是 el-input-number（v-model 天生 Number）
     const rule = normalizeFcRule(rawRule)
-    
     const layoutConfig = JSON.stringify(rule)
     const fields = extractFormFields(rule)
 
-    // 2. 保存表单定义（新增需拿返回的 ID）
+    // ⭐ 版本编辑模式 → 只写版本快照，不碰主表
+    if (isVersionEdit.value && versionId.value) {
+      await saveFormVersionSnapshot(versionId.value, layoutConfig)
+      // 同步字段元数据到 form_field（按表单定义ID）
+      if (formId.value) {
+        await batchSaveFormFields(formId.value, fields)
+      }
+      ElMessage.success(`版本快照保存成功，已同步 ${fields.length} 个字段`)
+      return
+    }
+
+    // 普通模式：保存主表
     let definitionId = formId.value
     if (formId.value) {
       await updateFormDefinition({ id: definitionId, formName: formName.value.trim(), layoutConfig })
     } else {
       const res = await addFormDefinition({ formName: formName.value.trim(), layoutConfig })
-      definitionId = res.data   // 后端返回 R.ok(form.getId())
+      definitionId = res.data
       formId.value = definitionId
     }
 
-    // 3. 同步保存字段到 form_field 表（供工作流设计器拉取）
+    // 同步保存字段到 form_field 表
     if (definitionId) {
       await batchSaveFormFields(definitionId, fields)
       console.log(`✅ 字段元数据同步成功: ${fields.length} 个字段已入库`)

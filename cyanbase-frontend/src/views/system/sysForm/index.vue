@@ -1,9 +1,9 @@
-<template>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <el-card shadow="hover" class="app-container">
     <template #header>
       <div class="card-header">
         <span>表单管理</span>
-        <el-button type="primary" @click="handleAdd">
+        <el-button type="primary" @click="handleAdd" v-hasPermi="['form:definition:save']">
           <el-icon><Plus /></el-icon>
           新增表单
         </el-button>
@@ -12,10 +12,10 @@
 
     <el-form :inline="true" class="search-form">
       <el-form-item label="表单名称">
-        <el-input v-model="queryParams.name" placeholder="请输入表单名称" clearable />
+        <el-input v-model="queryParams.formName" placeholder="请输入表单名称" clearable style="width: 200px" />
       </el-form-item>
       <el-form-item label="状态">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="全部状态" clearable style="width: 120px">
           <el-option label="正常" value="0" />
           <el-option label="停用" value="1" />
         </el-select>
@@ -27,7 +27,7 @@
     </el-form>
 
     <el-table v-loading="loading" :data="tableUp" border style="width: 100%">
-      <el-table-column prop="id" label="ID" width="80" />
+      <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (queryParams.pageNum - 1) * queryParams.pageSize + i + 1" />
       <el-table-column prop="formName" label="表单名称" min-width="150" />
       <el-table-column prop="code" label="表单编码" width="150" />
       <el-table-column label="状态" width="100">
@@ -42,11 +42,11 @@
       <!-- 操作列：预览 编辑 设计 删除 -->
       <el-table-column label="操作" width="350" fixed="right">
         <template #default="{ row }">
-          <el-button type="success" link size="small" @click="handlePreview(row)">预览</el-button>
-          <!-- 新增编辑按钮 -->
-          <el-button type="warning" link size="small" @click="handleOpenEdit(row)">编辑</el-button>
-          <el-button type="primary" link size="small" @click="handleDesign(row)">设计</el-button>
-          <el-button type="danger" link size="small" @click="handleDelete(row)">删除</el-button>
+          <!-- 需求3：新增 preview/designer 权限，保留现有 edit/remove 逻辑 -->
+          <el-button type="success" link size="small" @click="handlePreview(row)" v-hasPermi="['form:definition:preview']">预览</el-button>
+          <el-button type="warning" link size="small" @click="handleOpenEdit(row)" v-hasPermi="['form:definition:save']">编辑</el-button>
+          <el-button type="primary" link size="small" @click="handleDesign(row)" v-hasPermi="['form:definition:designer']">设计</el-button>
+          <el-button type="danger" link size="small" @click="handleDelete(row)" v-hasPermi="['form:definition:delete']">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -96,13 +96,79 @@
       <el-button type="primary" @click="handleSaveEdit">确定</el-button>
     </template>
   </el-dialog>
+
+  <!-- ============ 表单版本选择弹窗(新增) ============ -->
+  <el-dialog v-model="versionDialogVisible" title="选择表单版本" width="720px" :close-on-click-modal="true">
+    <div v-loading="versionLoading">
+      <el-table
+        :data="versionList"
+        border
+        highlight-current-row
+        :row-class-name="tableRowClassName"
+        @current-change="handleVersionRowChange"
+        style="width: 100%">
+        <el-table-column label="版本号" width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.isLatest === 1 ? 'success' : 'info'">v{{ row.versionNo }}</el-tag>
+            <span v-if="row.isLatest === 1" style="margin-left:6px;font-size:11px;color:#67c23a">最新</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="versionName" label="版本名称" min-width="160">
+          <template #default="{ row }">
+            <span v-if="row.versionName">{{ row.versionName }}</span>
+            <span v-else style="color:#bbb">—</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="createTime" label="保存时间" width="200" />
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{ row }">
+            <el-button type="primary" link size="small" @click="openDesignerFromVersion(row)">确定</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <template #footer>
+      <el-button @click="versionDialogVisible = false">取消</el-button>
+      <el-button
+        type="primary"
+        :disabled="!selectedVersionRow"
+        :loading="creatingVersion"
+        @click="handleCreateNewVersion">
+        新建版本
+      </el-button>
+    </template>
+  </el-dialog>
+
+  <!-- ========== 新建版本确认弹窗(新增) ========== -->
+  <el-dialog v-model="confirmCreateVersionDialogVisible" title="新建表单版本" width="420px"
+             :close-on-click-modal="false" append-to-body>
+    <el-form label-width="90px">
+      <el-form-item label="源版本">
+        <el-tag type="info">v{{ selectedVersionRow?.versionNo }}</el-tag>
+        <span v-if="selectedVersionRow?.versionName" style="margin-left:8px;color:#606266">{{ selectedVersionRow.versionName }}</span>
+        <span v-else style="margin-left:8px;color:#bbb">—</span>
+      </el-form-item>
+      <el-form-item label="新版本号">
+        <el-tag type="success">v{{ newVersionNoPreview }}</el-tag>
+        <span style="margin-left:6px;color:#909399;font-size:12px">(自动计算)</span>
+      </el-form-item>
+      <el-form-item label="版本名称">
+        <el-input v-model="newVersionNameInput" placeholder="如：简化审批流程、测试版" maxlength="50" show-word-limit />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button @click="confirmCreateVersionDialogVisible = false">取消</el-button>
+      <el-button type="primary" :loading="creatingVersion" @click="confirmCreateVersion">确认创建</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+defineOptions({ name: 'SysForm' })
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { addFormDefinition, getFormDefinitionList, deleteFormDefinition, updateFormDefinition } from '@/api/form'
+import { addFormDefinition, getFormDefinitionList, deleteFormDefinition, updateFormDefinition, getFormVersionList, createFormVersionFrom } from '@/api/form'
 
 const router = useRouter()
 const loading = ref(false)
@@ -112,7 +178,7 @@ const total = ref(0)
 const queryParams = reactive({
   pageNum: 1,
   pageSize: 10,
-  name: '',
+  formName: '',
   status: ''
 })
 
@@ -158,12 +224,99 @@ const handleAdd = async () => {
   }
 }
 
-// 设计
-const handleDesign = (row) => {
+// ========== 表单版本弹窗相关 ==========
+const versionDialogVisible = ref(false)
+const versionLoading = ref(false)
+const versionList = ref([])
+const selectedVersionRow = ref(null)
+const creatingVersion = ref(false)
+const currentDesignRow = ref(null)  // 当前操作的表单定义行
+
+// 新建版本二次确认弹窗
+const confirmCreateVersionDialogVisible = ref(false)
+const newVersionNameInput = ref('')
+const newVersionNoPreview = computed(() => {
+  if (!versionList.value?.length) return 1
+  const max = Math.max(...versionList.value.map(v => v.versionNo || 0))
+  return max + 1
+})
+
+/** 行高亮 */
+const tableRowClassName = ({ row }) => {
+  return selectedVersionRow.value && selectedVersionRow.value.id === row.id ? 'version-row-active' : ''
+}
+
+/** 行点击 → 单选 */
+const handleVersionRowChange = (row) => {
+  selectedVersionRow.value = row
+}
+
+/** 从版本打开设计器（只读查看模式） */
+const openDesignerFromVersion = (versionRow) => {
+  versionDialogVisible.value = false
   router.push({
     path: '/form/designer',
-    query: { id: row.id, name: row.formName, action: 'edit' }
+    query: {
+      id: currentDesignRow.value.id,
+      name: currentDesignRow.value.formName,
+      versionId: versionRow.id,
+      versionNo: versionRow.versionNo,
+      action: 'version-view'
+    }
   })
+}
+
+/** 点击「新建版本」按钮 → 弹出二次确认弹窗 */
+const handleCreateNewVersion = () => {
+  if (!selectedVersionRow.value) return
+  newVersionNameInput.value = ''  // 重置输入
+  confirmCreateVersionDialogVisible.value = true
+}
+
+/** 二次确认弹窗 → 真正调后端创建 */
+const confirmCreateVersion = async () => {
+  creatingVersion.value = true
+  try {
+    const res = await createFormVersionFrom(
+      selectedVersionRow.value.id,
+      newVersionNameInput.value?.trim() || null
+    )
+    const newVersionId = res.data
+    ElMessage.success('新版本 v' + newVersionNoPreview.value + ' 已创建')
+    confirmCreateVersionDialogVisible.value = false
+    versionDialogVisible.value = false
+    router.push({
+      path: '/form/designer',
+      query: {
+        id: currentDesignRow.value.id,
+        name: currentDesignRow.value.formName,
+        versionId: newVersionId,
+        versionNo: newVersionNoPreview.value,
+        action: 'version-edit'
+      }
+    })
+  } catch (e) {
+    ElMessage.error('创建新版本失败')
+  } finally {
+    creatingVersion.value = false
+  }
+}
+
+// 设计 → 改为弹出版本选择弹窗
+const handleDesign = async (row) => {
+  currentDesignRow.value = row
+  selectedVersionRow.value = null
+  versionLoading.value = true
+  versionDialogVisible.value = true
+  try {
+    const res = await getFormVersionList(row.id)
+    versionList.value = res.data || []
+  } catch (e) {
+    ElMessage.error('加载版本列表失败')
+    versionDialogVisible.value = false
+  } finally {
+    versionLoading.value = false
+  }
 }
 
 // 预览
@@ -233,12 +386,13 @@ const handleQuery = () => {
   getList()
 }
 const resetQuery = () => {
-  queryParams.name = ''
+  queryParams.formName = ''
   queryParams.status = ''
   handleQuery()
 }
 const handleSizeChange = (size) => {
   queryParams.pageSize = size
+  queryParams.pageNum = 1
   getList()
 }
 const handleCurrentChange = (page) => {
@@ -300,5 +454,10 @@ onMounted(() => {
 }
 .p-4 {
   padding: 16px;
+}
+
+/* 版本弹窗行高亮 */
+:deep(.version-row-active) {
+  background-color: #ecf5ff !important;
 }
 </style>

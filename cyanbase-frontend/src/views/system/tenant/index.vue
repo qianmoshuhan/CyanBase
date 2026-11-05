@@ -1,10 +1,10 @@
-<template>
+﻿﻿﻿﻿﻿<template>
   <div class="tenant-container">
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span>租户管理</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-hasPermi="['system:tenant:add']">
             <el-icon><Plus /></el-icon> 新增租户
           </el-button>
         </div>
@@ -33,9 +33,9 @@
 
       <!-- 数据表格 -->
       <el-table :data="tableData" border stripe>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="tenantName" label="租户名称" min-width="140" />
-        <el-table-column prop="tenantCode" label="租户编码" min-width="120" />
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(index) => (pagination.current - 1) * pagination.size + index + 1" />
+        <el-table-column prop="tenantName" label="租户名称" min-width="140" align="center" />
+        <el-table-column prop="tenantCode" label="租户编码" min-width="120" align="center" />
         <el-table-column prop="contactUser" label="联系人" width="100" />
         <el-table-column prop="contactPhone" label="联系电话" width="130" />
         <el-table-column prop="address" label="地址" min-width="180" show-overflow-tooltip />
@@ -62,8 +62,8 @@
         <el-table-column prop="createTime" label="创建时间" min-width="160" />
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-hasPermi="['system:tenant:edit']">编辑</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['system:tenant:delete']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -76,8 +76,8 @@
             :total="pagination.total"
             :page-sizes="[10, 20, 50, 100]"
             layout="total, sizes, prev, pager, next, jumper"
-            @size-change="fetchData"
-            @current-change="fetchData"
+            @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -176,6 +176,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'Tenant' })
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getTenantList, addTenant, updateTenant, deleteTenant, getAllMenuTree, getTenantMenuIds, saveTenantMenus } from '@/api/tenant'
@@ -401,6 +402,17 @@ const handleDialogClose = () => {
   checkedMenuIds.value = []
   menuTreeData.value = []
   menuCheckedApplied.value = false
+}
+
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
 }
 
 const handleReset = () => {

@@ -39,6 +39,7 @@ public class ThreeBigTopicController {
 
     /** 分页查询 */
     @GetMapping("/list")
+    @RequiresPermission("sydyd:topic:list")
     public R<IPage<ThreeBigTopic>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,

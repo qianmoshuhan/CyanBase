@@ -422,6 +422,23 @@ public class WorkflowDefinitionServiceImpl extends ServiceImpl<WorkflowDefinitio
             if (!result.isEmpty()) return result;
         }
 
+        // --- 5. post: assigneeValue 是 postId（逗号串），查该岗位所有用户 ---
+        if ("post".equals(type)) {
+            if (value != null && !value.isEmpty()) {
+                Set<Long> postIds = new HashSet<>();
+                for (String v : value.split(",")) {
+                    try { postIds.add(Long.parseLong(v.trim())); } catch (NumberFormatException ignore) {}
+                }
+                if (!postIds.isEmpty()) {
+                    List<SysUser> users = sysUserService.list(
+                            new LambdaQueryWrapper<SysUser>().in(SysUser::getPostId, postIds));
+                    for (SysUser u : users) result.add(u.getId());
+                }
+            }
+            log.debug("[Workflow] assigneeType=post → {}", result);
+            if (!result.isEmpty()) return result;
+        }
+
         // --- 兜底：解析失败返回发起人自己 ---
         if (result.isEmpty()) {
             result.add(initiatorId);

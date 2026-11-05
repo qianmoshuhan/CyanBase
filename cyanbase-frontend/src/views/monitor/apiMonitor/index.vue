@@ -1,4 +1,4 @@
-<template>
+﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
@@ -24,6 +24,7 @@
       </el-form>
 
       <el-table :data="tableData" border stripe>
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (pagination.current - 1) * pagination.size + i + 1" />
         <el-table-column prop="apiName" label="接口名称" min-width="200" show-overflow-tooltip />
         <el-table-column prop="apiUrl" label="请求路径" min-width="220" show-overflow-tooltip />
         <el-table-column prop="reqCount" label="请求次数" width="100" sortable />
@@ -46,8 +47,8 @@
             :total="pagination.total"
             :page-sizes="[10, 20, 50]"
             layout="total, sizes, prev, pager, next, jumper"
-            @size-change="fetchData"
-            @current-change="fetchData"
+            @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -55,6 +56,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'ApiMonitor' })
 import { ref, reactive } from 'vue'
 import { Refresh } from '@element-plus/icons-vue'
 import { getApiMonitorList } from '@/api/apiMonitor'
@@ -74,7 +76,22 @@ const fetchData = async () => {
 }
 
 const handleRefresh = () => fetchData()
-const handleReset = () => { Object.assign(searchForm, { apiName: '', apiUrl: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { apiName: '', apiUrl: '' })
+  pagination.current = 1
+  fetchData()
+}
 
 fetchData()
 </script>

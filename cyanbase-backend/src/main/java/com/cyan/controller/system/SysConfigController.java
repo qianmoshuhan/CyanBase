@@ -18,6 +18,7 @@ public class SysConfigController {
     private final SysConfigService sysConfigService;
     private final PermissionGuard permissionGuard;
 
+    @RequiresPermission("system:config:list")
     @GetMapping("/list")
     public R<?> list(
             @RequestParam(defaultValue = "1") Integer current,
@@ -63,13 +64,13 @@ public class SysConfigController {
     }
 
     @DeleteMapping("/{configId}")
-    @RequiresPermission("system:config:remove")
+    @RequiresPermission("system:config:delete")
     public R<?> delete(@PathVariable Long configId) {
         SysConfig exist = sysConfigService.getById(configId);
         if (exist == null) return R.fail("参数不存在");
         // 写操作：完整三层校验
         permissionGuard.check(ResourceScope.of(null, null, exist.getCreateBy()),
-                              "system:config:remove");
+                              "system:config:delete");
         sysConfigService.removeById(configId);
         return R.ok("删除成功");
     }

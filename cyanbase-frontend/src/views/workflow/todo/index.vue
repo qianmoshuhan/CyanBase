@@ -1,4 +1,4 @@
-<template>
+﻿﻿﻿<template>
   <div class="workflow-todo-container">
     <el-card shadow="hover">
       <template #header>
@@ -50,14 +50,16 @@
       </div>
 
       <!-- 分页 -->
-      <el-pagination
-        :total="total"
-        :current-page="pageNum"
-        :page-size="pageSize"
-        :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
-        @size-change="fetchData"
-        @current-change="fetchData"
-      />
+      <div class="pagination-wrap">
+        <el-pagination
+          :total="total"
+          :current-page="pageNum"
+          :page-size="pageSize"
+          :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </el-card>
 
     <!-- 详情弹窗 -->
@@ -98,6 +100,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'WorkflowTodo' })
 import { ref, reactive, onMounted, onBeforeUnmount, nextTick, markRaw } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
@@ -194,6 +197,17 @@ const getStatusColor = (status) => ({
   cancelled: 'info'
 }[status] || '')
 
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pageNum.value = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  pageNum.value = 1
+  fetchData()
+}
+
 const handleReset = () => {
   query.processName = ''
   pageNum.value = 1
@@ -214,6 +228,7 @@ onBeforeUnmount(() => { if (bpmnViewer) bpmnViewer.destroy() })
 .workflow-todo-container { width: 100%; }
 .card-header { display: flex; justify-content: space-between; align-items: center; }
 .search-form { margin-bottom: 20px; }
+.pagination-wrap { margin-top: 16px; display: flex; justify-content: flex-end; }
 </style>
 <style>
 .node-completed { outline: 3px solid #1677ff; outline-offset: -3px; }

@@ -71,6 +71,12 @@ public class FormData implements Serializable {
     private String variables;
 
     /**
+     * 填报部门ID（L2 DataScope 管控列）
+     */
+    @TableField("dept_id")
+    private Long deptId;
+
+    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

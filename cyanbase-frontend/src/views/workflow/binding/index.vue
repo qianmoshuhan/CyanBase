@@ -1,11 +1,11 @@
-<template>
+﻿﻿﻿﻿﻿﻿<template>
   <div class="binding-container">
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span><el-icon style="margin-right:6px;"><Connection /></el-icon>表单 ↔ 流程绑定配置</span>
-          <el-button type="primary" @click="handleAdd">
-            <el-icon><Plus /></el-icon>新增绑定
+          <el-button type="primary" @click="handleAdd" v-hasPermi="['workflow:binding:add']">
+            <el-icon><Plus /></el-icon> 新增绑定
           </el-button>
         </div>
       </template>
@@ -62,10 +62,10 @@
         <el-table-column prop="remark" label="备注" min-width="140" show-overflow-tooltip />
         <el-table-column label="操作" width="160" fixed="right">
           <template #default="{ row }">
-            <el-button type="primary" link @click="handleEdit(row)">编辑</el-button>
+            <el-button type="primary" link @click="handleEdit(row)" v-hasPermi="['workflow:binding:edit']">编辑</el-button>
             <el-popconfirm title="确定删除这条绑定吗？" @confirm="handleDelete(row)">
               <template #reference>
-                <el-button type="danger" link>删除</el-button>
+                <el-button type="danger" link v-hasPermi="['workflow:binding:delete']">删除</el-button>
               </template>
             </el-popconfirm>
           </template>
@@ -73,15 +73,16 @@
       </el-table>
 
       <!-- 分页 -->
-      <el-pagination
-        :total="total"
-        :current-page="pageNum"
-        :page-size="pageSize"
-        :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
-        @size-change="fetchData"
-        @current-change="fetchData"
-        style="margin-top:16px;justify-content:flex-end;"
-      />
+      <div class="pagination-wrap" style="margin-top:16px; display:flex; justify-content:flex-end;">
+        <el-pagination
+          :total="total"
+          :current-page="pageNum"
+          :page-size="pageSize"
+          :layout="isMobile ? 'prev, pager, next' : 'total, sizes, prev, pager, next, jumper'"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
     </el-card>
 
     <!-- 新增 / 编辑弹窗 -->
@@ -158,6 +159,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'WorkflowBinding' })
 import { ref, reactive, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Connection, Plus } from '@element-plus/icons-vue'
@@ -236,6 +238,17 @@ const fetchData = async () => {
   }
 }
 
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pageNum.value = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  pageNum.value = 1
+  fetchData()
+}
+
 const handleReset = () => { query.formKeyword = ''; query.status = null; pageNum.value = 1; fetchData() }
 
 // 新增
@@ -298,7 +311,8 @@ fetchData()
 </script>
 
 <style scoped>
-.binding-container { width: 100%; }
+.binding-container { width: 100%; display: flex; flex-direction: column; }
 .card-header { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 15px; }
 .search-form { margin-bottom: 16px; }
+.pagination-wrap { margin-top: 16px; display: flex; justify-content: flex-end; }
 </style>

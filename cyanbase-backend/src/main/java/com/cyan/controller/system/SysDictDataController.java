@@ -18,6 +18,7 @@ public class SysDictDataController {
     private final SysDictDataService sysDictDataService;
     private final PermissionGuard permissionGuard;
 
+    @RequiresPermission("system:dict:list")
     @GetMapping("/list")
     public R<?> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -71,13 +72,13 @@ public class SysDictDataController {
     }
 
     @DeleteMapping("/{id}")
-    @RequiresPermission("system:dict:remove")
+    @RequiresPermission("system:dict:delete")
     public R<?> delete(@PathVariable Long id) {
         SysDictData exist = sysDictDataService.getById(id);
         if (exist == null) return R.fail("字典数据不存在");
         // 写操作：完整三层校验
         permissionGuard.check(ResourceScope.of(null, null, exist.getCreateBy()),
-                              "system:dict:remove");
+                              "system:dict:delete");
         sysDictDataService.removeById(id);
         return R.ok("删除成功");
     }

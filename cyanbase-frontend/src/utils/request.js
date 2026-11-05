@@ -3,6 +3,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import router from '@/router'
 import storage from './storage'
 import { refreshToken as refreshTokenApi } from '@/api/auth'
+import { useUserStore } from '@/store/user'
 
 // ===== 自动续期核心状态 =====
 let isRefreshing = false               // 是否正在刷新（单飞标志）
@@ -17,10 +18,15 @@ const service = axios.create({
 // 请求拦截器
 service.interceptors.request.use(
   config => {
-    // 从本地存储获取Token并添加到请求头
-    const token = storage.getToken()
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
+    // ⭐ refreshToken 接口不要自动注入 Authorization header
+    // 业务上 refresh 只靠 refreshToken（body 里），不应该用 Access Token
+    // 如果注入了旧 Access Token，被踢下线后会导致 refresh 接口也被 Filter 拦截 → 死循环
+    const isRefreshApi = config.url?.includes('/auth/refresh')
+    if (!isRefreshApi) {
+      const token = storage.getToken()
+      if (token) {
+        config.headers['Authorization'] = `Bearer ${token}`
+      }
     }
     return config
   },
@@ -81,6 +87,16 @@ service.interceptors.response.use(
 function handle401(response) {
   const config = response.config
   const originalRequest = config
+  // ⭐ 提取后端返回的 msg（比如 "您已被管理员强制下线"）
+  const backendMsg = response.data?.msg
+
+  // ⭐ 墙 1：如果后端说"被强制下线"，直接 forceLogin，不尝试 refreshToken
+  // 因为 refreshToken 接口虽然现在不带 Access Token 了（墙 2），
+  // 但业务语义上：被管理员强制下线 = 不让续期 = 必须跳登录页
+  if (backendMsg && backendMsg.includes('强制下线')) {
+    forceLogin(backendMsg)
+    return Promise.reject(new Error(backendMsg))
+  }
 
   // ① 正在刷新中 → 把当前请求加入队列，等刷新完再重放
   if (isRefreshing) {
@@ -98,8 +114,8 @@ function handle401(response) {
   // ② 没在刷新 → 开始刷新
   const refreshTokenValue = storage.getRefreshToken()
   if (!refreshTokenValue) {
-    // 连 Refresh Token 都没有 → 强制跳登录
-    forceLogin()
+    // 连 Refresh Token 都没有 → 强制跳登录（用后端 msg）
+    forceLogin(backendMsg)
     return Promise.reject(new Error('无 Refresh Token'))
   }
 
@@ -120,10 +136,10 @@ function handle401(response) {
         resolve(service(originalRequest))
       })
       .catch(err => {
-        // Refresh Token 也过期了 → 强制登出
+        // Refresh Token 也过期了 → 强制登出（用后端 msg）
         pendingRequests.forEach(p => p.reject(err))
         pendingRequests = []
-        forceLogin()
+        forceLogin(backendMsg)
         reject(err)
       })
       .finally(() => {
@@ -134,16 +150,29 @@ function handle401(response) {
 
 /**
  * 强制跳登录页
+ * @param {string} msg 后端返回的提示信息（可选），不传则用默认 "登录已过期"
  */
-function forceLogin() {
-  storage.clearAuth()
+function forceLogin(msg) {
+  // ⭐ 先读 loginType —— 必须在 clearAuth 之前！
+  const loginType = storage.getLoginType()
+  const loginPath = loginType === 'tenant' ? '/tenant-login' : '/login'
+
+  // ⭐ 只有当前不在登录页时才弹窗
   if (router.currentRoute.value.path !== '/login' && router.currentRoute.value.path !== '/tenant-login') {
-    ElMessageBox.confirm('登录已过期，请重新登录', '提示', {
+    ElMessageBox.confirm(msg || '登录已过期，请重新登录', '提示', {
       confirmButtonText: '重新登录',
       cancelButtonText: '取消',
       type: 'warning'
     }).then(() => {
-      router.push('/login')
+      // ⭐ 用户确认后再清 auth —— 避免点"取消"后页面还在但 userInfo 被清空
+      try {
+        const userStore = useUserStore()
+        userStore.clearAuth()
+      } catch (e) {
+        storage.clearAuth()
+      }
+      storage.clearAuth()
+      router.push(loginPath)
     })
   }
 }

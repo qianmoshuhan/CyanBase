@@ -33,6 +33,8 @@ public class PermissionServiceImpl implements PermissionService {
     private final SysRoleMenuMapper roleMenuMapper;
     private final SysMenuMapper menuMapper;
     private final SysRoleMapper roleMapper;
+    private final SysTenantMenuMapper tenantMenuMapper;
+    private final SysUserMapper userMapper;
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
@@ -61,9 +63,14 @@ public class PermissionServiceImpl implements PermissionService {
         if (roleIds.isEmpty()) return Collections.emptySet();
 
         // 查 role_menu
-        List<Long> menuIds = roleMenuMapper.selectList(
+        List<Long> rawMenuIds = roleMenuMapper.selectList(
                 new LambdaQueryWrapper<SysRoleMenu>().in(SysRoleMenu::getRoleId, roleIds)
-        ).stream().map(SysRoleMenu::getMenuId).collect(Collectors.toList());
+        ).stream().map(SysRoleMenu::getMenuId).distinct().collect(Collectors.toList());
+        if (rawMenuIds.isEmpty()) return Collections.emptySet();
+
+        // ⭐⭐⭐ 租户菜单池硬边界过滤（核心兜底，不能只靠前端 saveMenuPerm 过滤）
+        // 规则：最终 perms 必须同时满足 —— 角色拥有 + 在租户菜单池内
+        List<Long> menuIds = filterByTenantMenuPool(userId, rawMenuIds);
         if (menuIds.isEmpty()) return Collections.emptySet();
 
         // 查 menu.perms
@@ -90,6 +97,43 @@ public class PermissionServiceImpl implements PermissionService {
             log.warn("写入 perms 缓存失败: {}", e.getMessage());
         }
         return perms;
+    }
+
+    /**
+     * 按租户菜单池过滤 menuIds —— 硬边界，不能绕过。
+     * <p>
+     * 流程：
+     * 1. 从 userId 查 SysUser → tenantId
+     * 2. tenantId 为 null/0（平台用户）→ 不过滤，返回全部
+     * 3. tenantId > 0（租户用户）→ 查 sys_tenant_menu 拿菜单池，取交集
+     */
+    private List<Long> filterByTenantMenuPool(Long userId, List<Long> rawMenuIds) {
+        try {
+            SysUser user = userMapper.selectById(userId);
+            if (user == null || user.getTenantId() == null || user.getTenantId() <= 0) {
+                // 平台侧用户（tenantId=0 或 null），不受租户菜单池约束
+                return rawMenuIds;
+            }
+
+            Long tenantId = user.getTenantId();
+            Set<Long> poolIds = tenantMenuMapper.selectList(
+                    new LambdaQueryWrapper<SysTenantMenu>().eq(SysTenantMenu::getTenantId, tenantId)
+            ).stream().map(SysTenantMenu::getMenuId).collect(Collectors.toSet());
+
+            // 取交集：角色菜单 ∩ 租户菜单池
+            List<Long> filtered = rawMenuIds.stream().filter(poolIds::contains).collect(Collectors.toList());
+            long filteredOut = rawMenuIds.size() - filtered.size();
+            if (filteredOut > 0) {
+                log.warn("[perms-filter] userId={}, tenantId={}, 角色菜单 {} 个, 越权 {} 个已截断, 最终 {} 个",
+                        userId, tenantId, rawMenuIds.size(), filteredOut, filtered.size());
+            } else {
+                log.debug("[perms-filter] userId={}, tenantId={}, 角色菜单全部在池内, {} 个", userId, tenantId, filtered.size());
+            }
+            return filtered;
+        } catch (Exception e) {
+            log.error("[perms-filter] 租户菜单池过滤异常，保守返回空集: {}", e.getMessage());
+            return Collections.emptyList();
+        }
     }
 
     @Override

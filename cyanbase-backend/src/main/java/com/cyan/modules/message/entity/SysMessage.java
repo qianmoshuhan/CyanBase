@@ -28,7 +28,7 @@ public class SysMessage implements Serializable {
     @TableField("content")
     private String content;
 
-    /** 消息类型(1系统公告 2操作通知 3预警提醒 4欢迎消息) */
+    /** 消息类型(1系统公告 2操作通知 3预警提醒 4欢迎消息 5工作流) */
     @TableField("message_type")
     private Integer messageType;
 
@@ -64,4 +64,8 @@ public class SysMessage implements Serializable {
     @TableLogic
     @TableField("del_flag")
     private Integer delFlag;
+
+    /** 是否已读（来自 SysMessageUser 关联表，虚拟字段） */
+    @TableField(exist = false)
+    private Integer isRead;
 }

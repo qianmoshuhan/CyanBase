@@ -1,10 +1,10 @@
-<template>
+﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span>消息管理</span>
-          <el-button type="primary" @click="handleAdd">
+          <el-button type="primary" @click="handleAdd" v-hasPermi="['system:message:send']">
             <el-icon><Plus /></el-icon> 发送消息
           </el-button>
         </div>
@@ -12,16 +12,25 @@
 
       <el-form :inline="true" class="search-form">
         <el-form-item label="消息类型">
-          <el-select v-model="searchForm.msgType" placeholder="请选择类型" clearable>
-            <el-option label="通知" value="1" />
-            <el-option label="消息" value="2" />
+          <el-select v-model="searchForm.messageType" placeholder="请选择类型" clearable style="width: 160px">
+            <el-option label="系统公告" :value="1" />
+            <el-option label="操作通知" :value="2" />
+            <el-option label="预警提醒" :value="3" />
+            <el-option label="欢迎消息" :value="4" />
+            <el-option label="工作流" :value="5" />
           </el-select>
         </el-form-item>
         <el-form-item label="是否已读">
-          <el-select v-model="searchForm.isRead" placeholder="请选择状态" clearable>
-            <el-option label="未读" value="0" />
-            <el-option label="已读" value="1" />
+          <el-select v-model="searchForm.isRead" placeholder="请选择状态" clearable style="width: 140px">
+            <el-option label="未读" :value="0" />
+            <el-option label="已读" :value="1" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="消息标题">
+          <el-input v-model="searchForm.title" placeholder="输入标题关键词" clearable style="width: 200px" />
+        </el-form-item>
+        <el-form-item label="发送人">
+          <el-input v-model="searchForm.senderName" placeholder="输入发送人" clearable style="width: 160px" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchData">查询</el-button>
@@ -30,23 +39,23 @@
       </el-form>
 
       <el-table :data="tableData" border stripe>
-        <el-table-column prop="msgId" label="消息ID" width="100" />
-        <el-table-column prop="msgTitle" label="消息标题" min-width="200" />
-        <el-table-column prop="msgType" label="类型" width="100">
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (pagination.current - 1) * pagination.size + i + 1" />
+        <el-table-column prop="title" label="消息标题" min-width="200" />
+        <el-table-column prop="messageType" label="类型" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.msgType === '1' ? 'success' : 'warning'">
-              {{ row.msgType === '1' ? '通知' : '消息' }}
+            <el-tag :type="row.messageType === 1 ? 'success' : row.messageType === 2 ? 'warning' : row.messageType === 3 ? 'danger' : row.messageType === 5 ? 'primary' : 'info'">
+              {{ row.messageType === 1 ? '系统公告' : row.messageType === 2 ? '操作通知' : row.messageType === 3 ? '预警提醒' : row.messageType === 5 ? '工作流' : '欢迎消息' }}
             </el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="isRead" label="状态" width="100">
           <template #default="{ row }">
-            <el-tag :type="row.isRead === '1' ? 'info' : 'danger'">
-              {{ row.isRead === '1' ? '已读' : '未读' }}
+            <el-tag :type="row.isRead === 1 ? 'info' : 'danger'">
+              {{ row.isRead === 1 ? '已读' : '未读' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createBy" label="发送人" width="120" />
+        <el-table-column prop="senderName" label="发送人" width="120" />
         <el-table-column prop="createTime" label="发送时间" min-width="160" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
@@ -63,8 +72,8 @@
           :total="pagination.total"
           :page-sizes="[10, 20, 50]"
           layout="total, sizes, prev, pager, next, jumper"
-          @size-change="fetchData"
-          @current-change="fetchData"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
         />
       </div>
     </el-card>
@@ -95,27 +104,28 @@
 
     <el-dialog v-model="viewVisible" title="消息详情" width="600px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="消息标题">{{ viewData.msgTitle }}</el-descriptions-item>
+        <el-descriptions-item label="消息标题">{{ viewData.title }}</el-descriptions-item>
         <el-descriptions-item label="消息类型">
-          <el-tag :type="viewData.msgType === '1' ? 'success' : 'warning'">
-            {{ viewData.msgType === '1' ? '通知' : '消息' }}
+          <el-tag :type="viewData.messageType === 1 ? 'success' : viewData.messageType === 2 ? 'warning' : viewData.messageType === 3 ? 'danger' : viewData.messageType === 5 ? 'primary' : 'info'">
+            {{ viewData.messageType === 1 ? '系统公告' : viewData.messageType === 2 ? '操作通知' : viewData.messageType === 3 ? '预警提醒' : viewData.messageType === 5 ? '工作流' : '欢迎消息' }}
           </el-tag>
         </el-descriptions-item>
-        <el-descriptions-item label="发送人">{{ viewData.createBy }}</el-descriptions-item>
+        <el-descriptions-item label="发送人">{{ viewData.senderName }}</el-descriptions-item>
         <el-descriptions-item label="发送时间">{{ viewData.createTime }}</el-descriptions-item>
-        <el-descriptions-item label="消息内容">{{ viewData.msgContent }}</el-descriptions-item>
+        <el-descriptions-item label="消息内容">{{ viewData.content }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
+defineOptions({ name: 'Message' })
 import { ref, reactive, computed } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getMyMessageList, addMessage, getMessageById, markMessageRead, markAllRead, deleteMessage } from '@/api/message'
 
 
-const searchForm = reactive({ msgType: '', isRead: '' })
+const searchForm = reactive({ messageType: null, isRead: null, title: '', senderName: '' })
 const tableData = ref([])
 const pagination = reactive({ current: 1, size: 10, total: 0 })
 const dialogVisible = ref(false)
@@ -133,17 +143,38 @@ const formRules = {
 
 const fetchData = async () => {
   try {
-    const res = await getMyMessageList({ current: pagination.current, size: pagination.size, ...searchForm })
+    // 后端 Controller 用 pageNum / pageSize，不是 current / size
+    const params = {
+      pageNum: pagination.current,
+      pageSize: pagination.size,
+      messageType: searchForm.messageType || null,
+      isRead: searchForm.isRead != null ? searchForm.isRead : null,
+      title: searchForm.title || null,
+      senderName: searchForm.senderName || null
+    }
+    const res = await getMyMessageList(params)
     tableData.value = res.data.records || []
     pagination.total = res.data.total || 0
   } catch (error) { console.error(error) }
 }
 
 const handleAdd = () => { Object.assign(formData, { msgId: null, msgTitle: '', msgType: '1', toUserId: 1, msgContent: '' }); dialogVisible.value = true }
-const handleView = async (row) => { viewData.value = row; viewVisible.value = true; if (row.isRead === '0') await markMessageRead(row.msgId); fetchData() }
-const handleDelete = (row) => {
+const handleView = async (row) => {
+  viewData.value = row
+  viewVisible.value = true
+  // row.id 现在是正确的后端主键
+  if (row.isRead !== 1) {
+    await markMessageRead(row.id)
+    row.isRead = 1   // 前端乐观更新，不用等 fetchData
+  }
+}
+const handleDelete = async (row) => {
   ElMessageBox.confirm('确定要删除该消息吗？', '提示', { type: 'warning' })
-    .then(async () => { await deleteMessage(row.msgId); ElMessage.success('删除成功'); fetchData() }).catch(() => {})
+    .then(async () => {
+      await deleteMessage(row.id)
+      ElMessage.success('删除成功')
+      fetchData()
+    }).catch(() => {})
 }
 const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
@@ -167,7 +198,22 @@ const handleSubmit = async () => {
   })
 }
 const handleDialogClose = () => formRef.value?.resetFields()
-const handleReset = () => { Object.assign(searchForm, { msgType: '', isRead: '' }); fetchData() }
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pagination.current = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pagination.size = size
+  pagination.current = 1
+  fetchData()
+}
+
+const handleReset = () => {
+  Object.assign(searchForm, { messageType: null, isRead: null, title: '', senderName: '' })
+  pagination.current = 1
+  fetchData()
+}
 
 fetchData()
 </script>

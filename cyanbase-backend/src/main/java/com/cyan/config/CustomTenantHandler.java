@@ -102,10 +102,7 @@ public class CustomTenantHandler implements TenantLineHandler {
             "sys_storage_config",
             "sys_third_config",
 
-            // === ④ 系统公告（全局共享） ===
-            "sys_notice",
-
-            // === ⑤ 监控/日志表 ===
+            // === ④ 监控/日志表 ===
             "sys_user_online",
             "sys_log_login",
             "sys_logininfor",

@@ -1,4 +1,4 @@
-<template>
+﻿﻿<template>
   <div class="form-data-list-container">
     <el-card shadow="hover">
       <template #header>
@@ -64,8 +64,8 @@
         :current-page="pageNum"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="fetchData"
-        @current-change="fetchData"
+        @current-change="handlePageChange"
+          @size-change="handleSizeChange"
       />
     </el-card>
 
@@ -99,6 +99,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'FormDataList' })
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 // 导入表单API（已完成）
@@ -178,6 +179,17 @@ const handleView = (row) => {
 
 
 // 重置搜索
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pageNum.value = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  pageNum.value = 1
+  fetchData()
+}
+
 const handleReset = () => {
   query.formId = ''
   query.createBy = ''

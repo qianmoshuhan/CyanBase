@@ -65,7 +65,7 @@ export function deleteJob(id) {
 export function executeJob(id) {
   return request({
     url: `/system/job/execute/${id}`,
-    method: 'post'
+    method: 'put'
   })
 }
 
@@ -75,7 +75,7 @@ export function executeJob(id) {
 export function pauseJob(id) {
   return request({
     url: `/system/job/pause/${id}`,
-    method: 'post'
+    method: 'put'
   })
 }
 
@@ -85,7 +85,7 @@ export function pauseJob(id) {
 export function resumeJob(id) {
   return request({
     url: `/system/job/resume/${id}`,
-    method: 'post'
+    method: 'put'
   })
 }
 

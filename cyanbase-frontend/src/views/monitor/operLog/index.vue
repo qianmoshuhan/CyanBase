@@ -1,10 +1,10 @@
-<template>
+﻿﻿﻿﻿﻿﻿<template>
   <div class="oper-log-container">
     <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span>操作日志</span>
-          <el-button type="danger" @click="handleClean">
+          <el-button type="danger" @click="handleClean" v-hasPermi="['monitor:operlog:clean']">
             <el-icon><Delete /></el-icon> 清空日志
           </el-button>
         </div>
@@ -26,8 +26,8 @@
 
       <!-- 数据表格 -->
       <el-table :data="list" border stripe highlight-current-row>
-        <el-table-column prop="id" label="ID" width="80" />
-        <el-table-column prop="title" label="操作模块" min-width="150" />
+        <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (pageNum - 1) * pageSize + i + 1" />
+        <el-table-column prop="title" label="模块标题" min-width="160" />
         <el-table-column label="操作类型">
           <template #default="{ row }">
             <el-tag :type="getTagType(row.businessType)">
@@ -49,7 +49,7 @@
         <el-table-column label="操作" width="150" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link @click="handleView(row)">详情</el-button>
-            <el-button type="danger" link @click="handleDelete(row)">删除</el-button>
+            <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['monitor:operlog:delete']">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -60,8 +60,8 @@
         :current-page="pageNum"
         :page-size="pageSize"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="fetchData"
-        @current-change="fetchData"
+        @current-change="handlePageChange"
+          @size-change="handleSizeChange"
       />
     </el-card>
 
@@ -91,6 +91,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'OperLog' })
 import { ref, reactive } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getOperLogList, deleteOperLog, cleanOperLog } from '@/api/operLog'
@@ -149,6 +150,17 @@ const handleClean = () => {
     ElMessage.success('清空成功')
     fetchData()
   }).catch(() => {})
+}
+
+// 分页回调：显式先赋值再请求，@current-change 时序早于 v-model update
+const handlePageChange = (page) => {
+  pageNum.value = page
+  fetchData()
+}
+const handleSizeChange = (size) => {
+  pageSize.value = size
+  pageNum.value = 1
+  fetchData()
 }
 
 const handleReset = () => {

@@ -94,6 +94,7 @@ import { getMyTodoList } from '@/api/wfDefinition'
 import { getItemList } from '@/api/sydyd'
 import { getUnreadCount } from '@/api/message'
 import storage from '@/utils/storage'
+import { useTagsViewStore } from '@/store/tagsView'
 
 const router = useRouter()
 
@@ -147,7 +148,9 @@ const handleLogout = () => {
       // 先记下来登录类型，再清 auth（清了就读不到了）
       const loginType = storage.getLoginType()
       storage.clearAuth()  // 清 token / refreshToken / loginType
-      storage.clear()      // 清所有用户数据
+      storage.clear()      // 清所有用户数据（localStorage cyan_ 前缀）
+      // ⭐ 清标签页（tagsView 存 sessionStorage，storage.clear() 清不到）
+      try { useTagsViewStore().reset() } catch (e) {}
       // 租户跳租户登录页，平台跳平台登录页
       router.push(loginType === 'tenant' ? '/tenant-login' : '/login')
     }).catch(() => {})

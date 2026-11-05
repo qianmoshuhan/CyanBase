@@ -36,11 +36,17 @@ public class RefreshTokenService {
     private static final String KEY_REFRESH = "auth:refresh:";
     private static final String KEY_USER_REFRESH = "auth:user:refresh:";
     private static final String KEY_BLACKLIST = "auth:blacklist:";
+    /** 踢下线标记：auth:kick:{userId} = "1"，TTL = refreshExpireMs，Filter 命中直接 401 */
+    private static final String KEY_KICK = "auth:kick:";
 
     /**
      * 生成 Refresh Token（UUID），写入 Redis
      */
     public String createRefreshToken(Long userId) {
+        // ⭐ 用户重新登录成功 → 清掉之前的踢下线标记（如果有）
+        // 这样被踢过的用户可以正常重新登录，不会陷入死锁
+        redisTemplate.delete(KEY_KICK + userId);
+
         String uuid = UUID.randomUUID().toString().replace("-", "");
         String refreshKey = KEY_REFRESH + uuid;
         String userRefreshKey = KEY_USER_REFRESH + userId;
@@ -122,15 +128,35 @@ public class RefreshTokenService {
     }
 
     /**
-     * 踢下线 —— 强制某个用户登出
+     * 踢下线 —— 强制某个用户登出（完整流程）
+     * <p>做三件事：
+     *  ① 删 Redis 里的 Refresh Token → 阻止自动续期
+     *  ② 写踢下线标记 auth:kick:{userId} → JwtAuthenticationFilter 检查到直接 401
+     *  ③ 返回踢标记的 TTL（毫秒），Filter 用于判断是否需要清理过期踢标记
+     * </p>
      */
     public void kickUser(Long userId) {
+        if (userId == null) return;
+
+        // ① 删 Refresh Token
         String uuid = redisTemplate.opsForValue().get(KEY_USER_REFRESH + userId);
         if (uuid != null) {
             redisTemplate.delete(KEY_REFRESH + uuid);
-            redisTemplate.delete(KEY_USER_REFRESH + userId);
-            log.info("[Refresh] 用户 userId={} 已被踢下线", userId);
         }
+        redisTemplate.delete(KEY_USER_REFRESH + userId);
+
+        // ② ⭐ 写踢下线标记 —— JwtAuthenticationFilter 检查 auth:kick:{userId} 是否存在
+        redisTemplate.opsForValue().set(KEY_KICK + userId, "1", refreshExpireMs, TimeUnit.MILLISECONDS);
+
+        log.info("[Refresh] 用户 userId={} 已被强制下线（Refresh Token 已删 + 踢标记已写）", userId);
+    }
+
+    /**
+     * 判断某个 userId 是否被踢下线过（踢标记在有效期内返回 true）
+     */
+    public boolean isUserKicked(Long userId) {
+        if (userId == null) return false;
+        return Boolean.TRUE.equals(redisTemplate.hasKey(KEY_KICK + userId));
     }
 
     /**

@@ -83,8 +83,20 @@ public class WorkflowNode extends BaseEntity implements Serializable {
     private String conditionExpr;
 
     /**
-     * 网关类型：exclusive=排他网关（条件分支，只走一条） / parallel=并行网关（所有分支都走）。
-     * <p>并行网关下 conditionExpr 全部忽略，所有 nextNodeIds 指向的节点都会被激活。</p>
+     * ⭐ 分支条件中文描述（BPMN sequenceFlow.name 属性）
+     * <p>例如："50万 ≤ 金额 ＜ 100万"、"其他情况"</p>
+     */
+    @TableField("show_desc")
+    private String showDesc;
+
+    /**
+     * 网关类型取值：
+     * <ul>
+     *   <li>{@code exclusive} — 排他分流网关（默认）：条件分支，SpEL 匹配只走一条</li>
+     *   <li>{@code parallel} — 并行网关：所有 nextNodeIds 指向的节点都会被激活，conditionExpr 忽略</li>
+     *   <li>{@code exclusiveJoin} — 排他汇聚网关：仅用于 BPMN 画布自动布局优化，多条入边合并为一条出边，
+     *       任意一条入边到达即向下流转。引擎层按排他逻辑处理（只有一条出边时自动正确）。</li>
+     * </ul>
      */
     @TableField("gateway_type")
     private String gatewayType;

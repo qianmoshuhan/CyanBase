@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class SysLogininforController {
     private final SysLogininforService sysLogininforService;
 
+    @RequiresPermission("monitor:logininfor:list")
     @GetMapping("/list")
     public R<?> list(
             @RequestParam(defaultValue = "1") Integer current,
@@ -31,15 +32,17 @@ public class SysLogininforController {
     }
 
     @DeleteMapping("/{infoId}")
-    @RequiresPermission("monitor:logininfor:remove")
+    @RequiresPermission("monitor:logininfor:delete")
     public R<?> delete(@PathVariable Long infoId) {
         sysLogininforService.removeById(infoId);
         return R.ok("删除成功");
     }
 
+    // ========== 需求2：新增登录日志清空按钮独立权限（原 remove 仅保留给单条删除，前端当前无单条删除入口） ==========
     @DeleteMapping("/clean")
-    @RequiresPermission("monitor:logininfor:remove")
+    @RequiresPermission("monitor:logininfor:clean")
     public R<?> clean() {
+        sysLogininforService.remove(new LambdaQueryWrapper<>());
         return R.ok("清空成功");
     }
 }

@@ -8,11 +8,22 @@ import com.cyan.service.SysThirdConfigService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 【暂未完成权限改造，禁止调用，后续迭代补齐】
+ * <p>
+ * 2026-10-25 标记废弃：本期无第三方对接业务，本期不做权限改造。
+ * 所有接口请求一律返回 "禁止调用"。
+ */
 @RestController
 @RequestMapping("/system/third/config")
 @RequiredArgsConstructor
+@Deprecated
 public class SysThirdConfigController {
     private final SysThirdConfigService sysThirdConfigService;
+
+    private R<?> blocked() {
+        return R.fail("该接口暂未完成权限改造，禁止调用");
+    }
 
     @GetMapping("/list")
     public R<?> list(
@@ -21,34 +32,26 @@ public class SysThirdConfigController {
             @RequestParam(required = false) String configType,
             @RequestParam(required = false) String configName,
             @RequestParam(required = false) String status) {
-        LambdaQueryWrapper<SysThirdConfig> wrapper = new LambdaQueryWrapper<>();
-        if (configType != null && !configType.isEmpty()) wrapper.eq(SysThirdConfig::getConfigType, configType);
-        if (configName != null && !configName.isEmpty()) wrapper.like(SysThirdConfig::getConfigName, configName);
-        if (status != null && !status.isEmpty()) wrapper.eq(SysThirdConfig::getStatus, status);
-        wrapper.orderByDesc(SysThirdConfig::getId);
-        return R.ok(sysThirdConfigService.page(new Page<>(current, size), wrapper));
+        return blocked();
     }
 
     @GetMapping("/{id}")
     public R<?> getById(@PathVariable Long id) {
-        return R.ok(sysThirdConfigService.getById(id));
+        return blocked();
     }
 
     @PostMapping
     public R<?> add(@RequestBody SysThirdConfig config) {
-        sysThirdConfigService.save(config);
-        return R.ok("新增成功");
+        return blocked();
     }
 
     @PutMapping
     public R<?> update(@RequestBody SysThirdConfig config) {
-        sysThirdConfigService.updateById(config);
-        return R.ok("更新成功");
+        return blocked();
     }
 
     @DeleteMapping("/{id}")
     public R<?> delete(@PathVariable Long id) {
-        sysThirdConfigService.removeById(id);
-        return R.ok("删除成功");
+        return blocked();
     }
 }

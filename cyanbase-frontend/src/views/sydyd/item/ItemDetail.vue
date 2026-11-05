@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="item-detail-container">
     <el-card shadow="hover">
       <template #header>
@@ -77,6 +77,7 @@
 </template>
 
 <script setup>
+defineOptions({ name: 'SydydItemDetail' })
 import { ref, computed, onMounted, onBeforeUnmount, nextTick, markRaw } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'

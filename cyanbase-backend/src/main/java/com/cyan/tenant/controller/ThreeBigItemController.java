@@ -13,14 +13,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 三重一大 - 业务事项填报（租户侧）
- * <p>
- * 权限控制（阶段 1 简化版，后续阶段再细化角色粒度）：
- * - 默认：所有租户用户都能填报 + 看本部门的事项（submitDeptId = 当前登录人 deptId）
- * - 管理员角色：通过 isAdmin 参数绕过部门过滤，全量可见
- * - 部门领导：同理，通过部门归属控制
- * </p>
- */
+     * 三重一大 - 业务事项填报（租户侧）
+     * <p>
+     * 权限控制（L2 DataScope 统一管控）：
+     * - Handler 通过 DEPT_COLUMN_MAP 自动追加 submit_dept_id IN (...) 条件
+     * - 数据范围由角色 dataScope 配置决定（ALL/DEPT/DEPT_AND_CHILD/SELF/CUSTOM）
+     * - 超管自动跳过，租户内管理员角色配置 ALL 即可全量可见
+     * </p>
+     */
 @Slf4j
 @RestController
 @RequestMapping("/tenant/sydyd/item")
@@ -31,28 +31,25 @@ public class ThreeBigItemController {
     private final SysUserService sysUserService;
 
     /**
-     * 分页列表
-     *
-     * @param isAdmin   是否管理员（true 则全量可见，默认 false）
+     * 分页列表 — 权限由 L2 DataScope 拦截器自动管控
+     * <p>
+     * Handler 通过 DEPT_COLUMN_MAP 识别 t_three_big_item 表的部门列是 submit_dept_id，
+     * 按当前用户角色的 dataScope 配置自动追加条件。
+     * 前端只传业务筛选条件，不传权限标志（之前的 isAdmin 参数是安全漏洞已移除）。
+     * </p>
      */
     @GetMapping("/list")
+    @RequiresPermission("sydyd:item:list")
     public R<IPage<ThreeBigItem>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) Integer itemStatus,
             @RequestParam(required = false) Integer itemType,
             @RequestParam(required = false) Long systemId,
-            @RequestParam(required = false) String itemName,
-            @RequestParam(defaultValue = "false") Boolean isAdmin) {
-
-        // 取当前登录人信息（用于部门过滤）
-        Long userId = SecurityUtils.getUserId();
-        SysUser user = sysUserService.getById(userId);
-        Long userDeptId = (user != null) ? user.getDeptId() : null;
+            @RequestParam(required = false) String itemName) {
 
         IPage<ThreeBigItem> page = itemService.queryPage(
-                pageNum, pageSize, itemStatus, itemType, systemId, itemName,
-                userDeptId, Boolean.TRUE.equals(isAdmin));
+                pageNum, pageSize, itemStatus, itemType, systemId, itemName);
         return R.ok(page);
     }
 

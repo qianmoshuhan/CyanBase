@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.entity.SysNotice;
 import com.cyan.security.annotation.RequiresPermission;
+import com.cyan.common.util.XssFilter;
 import com.cyan.service.SysNoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class SysNoticeController {
     private final SysNoticeService sysNoticeService;
 
+    @RequiresPermission("system:notice:list")
     @GetMapping("/list")
     public R<?> list(
             @RequestParam(defaultValue = "1") Integer current,
@@ -39,6 +41,7 @@ public class SysNoticeController {
     @RequiresPermission("system:notice:add")
     public R<?> add(@RequestBody SysNotice notice) {
         notice.setNoticeId(null);
+        notice.setNoticeContent(XssFilter.clean(notice.getNoticeContent()));
         sysNoticeService.save(notice);
         return R.ok("新增成功");
     }
@@ -46,12 +49,13 @@ public class SysNoticeController {
     @PutMapping
     @RequiresPermission("system:notice:edit")
     public R<?> update(@RequestBody SysNotice notice) {
+        notice.setNoticeContent(XssFilter.clean(notice.getNoticeContent()));
         sysNoticeService.updateById(notice);
         return R.ok("更新成功");
     }
 
     @DeleteMapping("/{noticeId}")
-    @RequiresPermission("system:notice:remove")
+    @RequiresPermission("system:notice:delete")
     public R<?> delete(@PathVariable Long noticeId) {
         sysNoticeService.removeById(noticeId);
         return R.ok("删除成功");

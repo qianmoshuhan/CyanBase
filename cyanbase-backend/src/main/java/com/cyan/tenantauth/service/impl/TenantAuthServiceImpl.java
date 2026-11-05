@@ -11,16 +11,16 @@ import com.cyan.security.dto.LoginResponse;
 import com.cyan.security.util.JwtUtil;
 import com.cyan.security.service.RefreshTokenService;
 import com.cyan.service.SysUserService;
-import com.cyan.tenantauth.dto.TenantItemVO;
+import com.cyan.tenantauth.dto.TenantAccountVO;
+import com.cyan.tenantauth.service.TenantLoginCaptchaService;
 import com.cyan.tenantauth.dto.TenantLoginReq;
 import com.cyan.tenantauth.service.TenantAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap; // 👉本次新增
-import java.util.List;
-import java.util.Map;     // 👉本次新增
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -37,65 +37,173 @@ public class TenantAuthServiceImpl implements TenantAuthService {
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final SysUserService sysUserService;
+    private final TenantLoginCaptchaService tenantLoginCaptchaService;
 
     @Override
-    public List<TenantItemVO> getEnableTenantList() {
-        LambdaQueryWrapper<SysTenant> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysTenant::getStatus, 0);
-        // 额外过滤已过期租户（避免登录页下拉里出现）
-        wrapper.and(w -> w.isNull(SysTenant::getExpireDate)
-                        .or().ge(SysTenant::getExpireDate, java.time.LocalDateTime.now()));
-        List<SysTenant> tenantList = sysTenantMapper.selectList(wrapper);
-
-        return tenantList.stream().map(t -> {
-            TenantItemVO vo = new TenantItemVO();
-            vo.setId(t.getId());
-            vo.setTenantName(t.getTenantName());
-            vo.setStatus(t.getStatus());
-            return vo;
-        }).collect(Collectors.toList());
-    }
-
-    @Override
-    public LoginResponse tenantLogin(TenantLoginReq req) {
-        // 1. 校验租户
-        SysTenant tenant = sysTenantMapper.selectById(req.getTenantId());
-        if (tenant == null) throw new RuntimeException("租户不存在");
-        // status=1(冻结) 或 status=2(过期) 一律拒绝登录
-        if (tenant.getStatus() != null && tenant.getStatus() != 0) {
-            throw new RuntimeException("租户已过期或已冻结，请联系平台管理员");
+    public Object tenantLogin(TenantLoginReq req) {
+        // 参数校验
+        if (req.getPhone() == null || req.getPhone().isBlank()) {
+            throw new RuntimeException("手机号或密码错误");
+        }
+        if (req.getPassword() == null || req.getPassword().isBlank()) {
+            throw new RuntimeException("手机号或密码错误");
         }
 
-        // 2. 校验用户（多租户联合查询）
+        // ========== 强制凭证校验（两个入口都校验，select-tenant 场景只 check 不 consume） ==========
+        if (!tenantLoginCaptchaService.checkCredential(req.getCredentialKey())) {
+            log.warn("租户登录拦截：无有效 credentialKey，phone={}", req.getPhone());
+            throw new RuntimeException("请先完成滑块验证");
+        }
+
+        // ========== 模式 A：二次请求（已选择租户，精确登录） ==========
+        if (req.getTenantId() != null) {
+            return loginWithTenant(req);
+        }
+
+        // ========== 模式 B：首次请求（手机号查全部租户账号 + 统一验密） ==========
+        return loginWithoutTenant(req);
+    }
+
+    /** 模式 B：首次请求 —— 手机号查全部候选账号 + 统一验密 */
+    private Object loginWithoutTenant(TenantLoginReq req) {
+        // ① 查 sys_user：手机号匹配 + 租户ID>0 + status=0 正常启用（delFlag 由 @TableLogic 自动过滤）
         LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
-        userWrapper.eq(SysUser::getUserName, req.getUsername())
+        userWrapper.eq(SysUser::getPhone, req.getPhone())
+                   .eq(SysUser::getStatus, 0)
+                   .gt(SysUser::getTenantId, 0);
+        List<SysUser> allUsers = sysUserMapper.selectList(userWrapper);
+
+        if (allUsers == null || allUsers.isEmpty()) {
+            throw new RuntimeException("手机号或密码错误");
+        }
+
+        // ② 同一手机号 + 同一租户多条记录 → 脏数据，报错让运维清理
+        Map<Long, Long> tenantDupCount = new HashMap<>();
+        for (SysUser u : allUsers) {
+            tenantDupCount.merge(u.getTenantId(), 1L, Long::sum);
+        }
+        for (Map.Entry<Long, Long> e : tenantDupCount.entrySet()) {
+            if (e.getValue() > 1) {
+                log.error("手机号 {} 在租户 {} 下存在 {} 条未删除账号，疑似脏数据",
+                        req.getPhone(), e.getKey(), e.getValue());
+                throw new RuntimeException("账号异常，请联系管理员");
+            }
+        }
+
+        // ③ 批量查 sys_tenant，过滤冻结/过期租户
+        Set<Long> tenantIds = allUsers.stream().map(SysUser::getTenantId).collect(Collectors.toSet());
+        List<SysTenant> tenants = sysTenantMapper.selectBatchIds(tenantIds);
+        Set<Long> validTenantIds = tenants.stream()
+                .filter(t -> t.getStatus() != null && t.getStatus() == 0)
+                .filter(t -> t.getExpireDate() == null || t.getExpireDate().isAfter(LocalDateTime.now()))
+                .map(SysTenant::getId)
+                .collect(Collectors.toSet());
+
+        // 只保留有效租户下的账号
+        List<SysUser> validUsers = allUsers.stream()
+                .filter(u -> validTenantIds.contains(u.getTenantId()))
+                .collect(Collectors.toList());
+
+        if (validUsers.isEmpty()) {
+            throw new RuntimeException("手机号或密码错误");
+        }
+
+        // ④ 统一验密码 —— 筛出密码对的账号
+        List<SysUser> matched = new ArrayList<>();
+        for (SysUser u : validUsers) {
+            if (sysUserService.verifyPassword(u.getId(), req.getPassword())) {
+                matched.add(u);
+            }
+        }
+
+        if (matched.isEmpty()) {
+            throw new RuntimeException("手机号或密码错误");
+        }
+
+        // ⑤ 恰好 1 个账号密码对 → 直接登录成功 + 消费凭证
+        if (matched.size() == 1) {
+            SysUser target = matched.get(0);
+            tenantLoginCaptchaService.consumeCredential(req.getCredentialKey());
+            return buildLoginResponse(target);
+        }
+
+        // ⑥ 多个账号密码对 → 返回租户选择列表
+        Map<Long, SysTenant> tenantMap = tenants.stream()
+                .collect(Collectors.toMap(SysTenant::getId, t -> t));
+
+        List<TenantAccountVO> list = matched.stream().map(u -> {
+            TenantAccountVO vo = new TenantAccountVO();
+            vo.setUserId(u.getId());
+            vo.setTenantId(u.getTenantId());
+            vo.setNickName(u.getNickName());
+            SysTenant t = tenantMap.get(u.getTenantId());
+            vo.setTenantName(t != null ? t.getTenantName() : "未知租户");
+            return vo;
+        }).collect(Collectors.toList());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("step", "select-tenant");
+        result.put("list", list);
+        return result;
+    }
+
+    /** 模式 A：二次请求 —— phone + tenantId 精确锁定账号 + 验密 */
+    private LoginResponse loginWithTenant(TenantLoginReq req) {
+        // ① 查 sys_user：phone + tenantId（delFlag 由 @TableLogic 自动过滤）
+        LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.eq(SysUser::getPhone, req.getPhone())
                    .eq(SysUser::getTenantId, req.getTenantId());
         SysUser sysUser = sysUserMapper.selectOne(userWrapper);
-        if (sysUser == null) throw new RuntimeException("账号不存在");
-        if (sysUser.getStatus() == 1) throw new RuntimeException("账号已被禁用");
-        // ⭐ 统一密码校验（BCrypt + 明文兼容 + 自动迁移）
-        if (!sysUserService.verifyPassword(sysUser.getId(), req.getPassword()))
-            throw new RuntimeException("密码错误");
 
-        // 3. 角色
+        if (sysUser == null) {
+            throw new RuntimeException("手机号或密码错误");
+        }
+
+        // ② 租户状态校验
+        SysTenant tenant = sysTenantMapper.selectById(req.getTenantId());
+        if (tenant == null || tenant.getStatus() == null || tenant.getStatus() != 0
+                || (tenant.getExpireDate() != null && tenant.getExpireDate().isBefore(LocalDateTime.now()))) {
+            throw new RuntimeException("租户已过期或已冻结，请联系管理员");
+        }
+
+        // ③ 用户停用校验
+        if (sysUser.getStatus() != null && sysUser.getStatus() == 1) {
+            throw new RuntimeException("账号已被停用，请联系管理员");
+        }
+
+        // ④ 密码校验（二次请求仍必须重新验密）
+        if (!sysUserService.verifyPassword(sysUser.getId(), req.getPassword())) {
+            throw new RuntimeException("手机号或密码错误");
+        }
+
+        // 模式 A 最终登录成功 → 消费凭证（防止重放）
+        tenantLoginCaptchaService.consumeCredential(req.getCredentialKey());
+        return buildLoginResponse(sysUser);
+    }
+
+    /** 构建登录成功响应（Token 生成 + 角色查询） */
+    private LoginResponse buildLoginResponse(SysUser sysUser) {
+        // 角色
         LambdaQueryWrapper<SysUserRole> roleWrapper = new LambdaQueryWrapper<>();
         roleWrapper.eq(SysUserRole::getUserId, sysUser.getId());
         List<SysUserRole> userRoles = sysUserRoleMapper.selectList(roleWrapper);
         String roleStr = userRoles == null || userRoles.isEmpty() ? ""
-                : userRoles.stream().map(SysUserRole::getRoleId).map(String::valueOf).collect(Collectors.joining(","));
+                : userRoles.stream().map(SysUserRole::getRoleId)
+                        .map(String::valueOf).collect(Collectors.joining(","));
 
-        // 4. 生成 Access Token（claims 带 tenantId）
+        // Access Token
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", sysUser.getId());
         claims.put("userName", sysUser.getUserName());
         claims.put("roles", roleStr);
-        jwtUtil.putTenantId(claims, req.getTenantId());
+        jwtUtil.putTenantId(claims, sysUser.getTenantId());   // ✅ L1 租户隔离
+        jwtUtil.putDeptId(claims, sysUser.getDeptId());        // ✅ L2 DataScope
         String accessToken = jwtUtil.createToken(claims);
 
-        // 5. 生成 Refresh Token
+        // Refresh Token
         String refreshToken = refreshTokenService.createRefreshToken(sysUser.getId());
 
-        log.info("租户登录成功，tenantId={}, userId={}", req.getTenantId(), sysUser.getId());
+        log.info("租户登录成功，tenantId={}, userId={}", sysUser.getTenantId(), sysUser.getId());
 
         long expiresIn = jwtUtil.getAccessExpireMs() / 1000;
         return new LoginResponse(accessToken, refreshToken, expiresIn);

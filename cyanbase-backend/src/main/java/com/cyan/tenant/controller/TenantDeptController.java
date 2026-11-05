@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 /**
  * 租户侧独立部门管理
  * <p>
@@ -34,6 +37,7 @@ public class TenantDeptController {
     /**
      * 分页列表（MP 自动追加 tenant_id = 当前租户ID）
      */
+    @RequiresPermission("system:dept:list")
     @GetMapping("/list")
     public R<Page<SysDept>> list(
             @RequestParam(defaultValue = "1") Integer pageNum,
@@ -56,13 +60,64 @@ public class TenantDeptController {
     }
 
     /**
-     * 全部部门（下拉选项用，同样自动按租户隔离）
+     * 全部部门（下拉选项 + 树形表格用，同样自动按租户隔离）
+     * <p>
+     * 支持 deptName（模糊）、status（精确）两个可选过滤条件。
+     * 租户侧不需要 tenantId 参数（CustomTenantHandler 自动追加）。
+     * 树形搜索时补齐祖先链，保证树不断链。
+     * </p>
      */
     @GetMapping("/all")
-    public R<?> all() {
-        LambdaQueryWrapper<SysDept> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(SysDept::getStatus, 0).orderByAsc(SysDept::getSortNum);
-        return R.ok(sysDeptService.list(wrapper));
+    public R<?> all(
+            @RequestParam(required = false) String deptName,
+            @RequestParam(required = false) Integer status) {
+
+        // 1. 查隔离范围内全量部门（MP 自动追加 tenant_id = 当前租户ID）
+        LambdaQueryWrapper<SysDept> scopeWrapper = new LambdaQueryWrapper<>();
+        // 有 deptName 时不在 scope 里按 status 过滤（避免祖先节点被过滤导致树断链）
+        if (deptName == null || deptName.isEmpty()) {
+            if (status != null) scopeWrapper.eq(SysDept::getStatus, status);
+        }
+        scopeWrapper.orderByAsc(SysDept::getSortNum);
+        List<SysDept> scopeList = sysDeptService.list(scopeWrapper);
+
+        // 2. 无过滤条件直接返回（最优路径）
+        if ((deptName == null || deptName.isEmpty()) && status == null) {
+            return R.ok(scopeList);
+        }
+
+        // 3. 构建内存 Map 加速查找
+        Map<Long, SysDept> idMap = scopeList.stream()
+                .collect(Collectors.toMap(SysDept::getId, d -> d));
+
+        // 4. 找出「命中节点」
+        Set<Long> hitIds = new HashSet<>();
+        for (SysDept d : scopeList) {
+            boolean nameHit = deptName == null || deptName.isEmpty()
+                    || (d.getDeptName() != null && d.getDeptName().contains(deptName));
+            boolean statusHit = status == null || Objects.equals(d.getStatus(), status);
+            if (nameHit && statusHit) {
+                hitIds.add(d.getId());
+            }
+        }
+
+        // 5. 递归向上补齐祖先链
+        Set<Long> finalIds = new HashSet<>(hitIds);
+        for (Long hitId : hitIds) {
+            SysDept cur = idMap.get(hitId);
+            while (cur != null && cur.getParentId() != null && cur.getParentId() != 0) {
+                finalIds.add(cur.getParentId());
+                cur = idMap.get(cur.getParentId());
+            }
+        }
+
+        // 6. 收集结果并排序
+        List<SysDept> result = scopeList.stream()
+                .filter(d -> finalIds.contains(d.getId()))
+                .sorted(Comparator.comparingInt(d -> d.getSortNum() != null ? d.getSortNum() : 0))
+                .collect(Collectors.toList());
+
+        return R.ok(result);
     }
 
     /**
@@ -109,13 +164,13 @@ public class TenantDeptController {
      * 删除（含子部门校验，只校验当前租户下的子部门）
      */
     @DeleteMapping("/{id}")
-    @RequiresPermission("system:dept:remove")
+    @RequiresPermission("system:dept:delete")
     public R<Void> delete(@PathVariable Long id) {
         SysDept target = sysDeptService.getById(id);
         if (target == null) return R.fail("部门不存在");
         // 三层原子校验
         permissionGuard.check(ResourceScope.of(target.getTenantId(), target.getId(), target.getCreateBy()),
-                              "system:dept:remove");
+                              "system:dept:delete");
 
         // 子部门校验（MP 自动隔离，只会查当前租户下的）
         LambdaQueryWrapper<SysDept> queryWrapper = new LambdaQueryWrapper<>();

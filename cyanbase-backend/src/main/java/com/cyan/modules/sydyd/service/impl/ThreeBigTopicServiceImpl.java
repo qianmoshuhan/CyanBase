@@ -51,9 +51,10 @@ public class ThreeBigTopicServiceImpl
             throw new BusinessException("该事项已生成过议题，不能重复生成（itemId=" + itemId + "）");
         }
 
-        // 4. 创建议题
+        // 4. 创建议题（deptId 冗余自事项 submitDeptId，L2 DataScope 管控列）
         ThreeBigTopic topic = new ThreeBigTopic();
         topic.setItemId(itemId);
+        topic.setDeptId(item.getSubmitDeptId()); // ⭐ 冗余部门归属
         topic.setTopicTitle(item.getItemName()); // 默认取事项名称
         topic.setItemName(item.getItemName());
         topic.setItemType(item.getItemType());

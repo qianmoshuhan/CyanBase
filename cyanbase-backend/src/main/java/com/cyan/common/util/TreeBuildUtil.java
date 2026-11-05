@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Map;
 
 public class TreeBuildUtil {
-    // 入参出参泛型完美匹配TreeUtil接口，调用代码不用改任何一行！
-    @SuppressWarnings("unchecked")
-    public static <T extends TreeUtil> List<T> build(List<T> list, long rootParentId) {
+    /**
+     * 构建树形结构。泛型约束 T extends TreeUtil<T> 保证节点类型与 children 元素类型一致。
+     * 泛型化 TreeUtil 后不再需要 (List<T>)parent.getChildren() 的强转。
+     */
+    public static <T extends TreeUtil<T>> List<T> build(List<T> list, long rootParentId) {
         if(list == null || list.isEmpty()) return new ArrayList<>();
 
         Map<Long, T> idMap = new HashMap<>(list.size());
@@ -25,8 +27,7 @@ public class TreeBuildUtil {
             }else{
                 T parent = idMap.get(pid);
                 if(parent != null){
-                    // getChildren返回List<? extends TreeUtil>，强转塞入
-                    ((List<T>)parent.getChildren()).add(node);
+                    parent.getChildren().add(node);  // ← 不再需要 unchecked 强转
                 }
             }
         }
