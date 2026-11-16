@@ -151,13 +151,11 @@
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
+                    <!-- ⭐ 不再显式声明 annotationProcessorPaths，交给 Spring Boot parent 默认 SPI 发现机制。
+                         原因：显式声明会覆盖默认扫描，Lombok processor 在 clean compile 首轮偶发加载失败，
+                         导致 WorkflowInstanceServiceImpl 等依赖 Lombok 生成 getter 的类反复报"cannot find symbol"。
+                         Lombok 自带 META-INF/services/javax.annotation.processing.Processor SPI 文件，
+                         provided scope 下 Maven 默认就能正确发现，不需要手动指定。 -->
                 </configuration>
             </plugin>
         </plugins>

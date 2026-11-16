@@ -17,7 +17,7 @@
     "bpmn-js": "^18.16.1",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.20",
-    "element-plus": "^2.4.0",
+    "element-plus": "^2.14.8",
     "pinia": "^2.1.0",
     "vue": "^3.4.0",
     "vue-router": "^4.2.0"

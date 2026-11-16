@@ -65,7 +65,8 @@ public class SysUserController {
             @RequestParam(required = false) Long tenantId,
             @RequestParam(required = false) Long roleId,
             @RequestParam(required = false) Long deptId,
-            @RequestParam(required = false) Long postId) {
+            @RequestParam(required = false) Long postId,
+            @RequestParam(required = false) Boolean deptIdIncludeChildren) {
 
         // ⭐ skip TenantLine：原注释说为 admin(tenantId=0) 跳过 TenantLine 自动隔离
         // 但实际上 admin tenantId=0 时 TenantHandler.getTenantId() 已返回 null，
@@ -111,7 +112,13 @@ public class SysUserController {
                 wrapper.eq(SysUser::getTenantId, tenantId);
             }
             if (deptId != null) {
-                wrapper.eq(SysUser::getDeptId, deptId);
+                if (Boolean.TRUE.equals(deptIdIncludeChildren)) {
+                    // 级联：查自身+所有子孙部门ID，再 IN 过滤
+                    List<Long> allDeptIds = sysDeptService.getChildDeptIds(deptId);
+                    wrapper.in(SysUser::getDeptId, allDeptIds);
+                } else {
+                    wrapper.eq(SysUser::getDeptId, deptId);
+                }
             }
             if (postId != null) {
                 wrapper.eq(SysUser::getPostId, postId);

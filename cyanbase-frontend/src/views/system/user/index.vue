@@ -1,6 +1,17 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="user-container">
-    <el-card shadow="hover">
+    <!-- 左侧组织树面板（可复用组件） -->
+    <OrgTreePanel
+      ref="orgTreeRef"
+      :tree-data="orgTreeData"
+      :loading="orgTreeLoading"
+      :default-collapsed="false"
+      @node-click="handleOrgNodeClick"
+      @refresh="loadOrgTree"
+    />
+    <!-- 右侧原有业务表格 -->
+    <div class="right-content">
+      <el-card shadow="hover">
       <template #header>
         <div class="card-header">
           <span>用户管理</span>
@@ -122,7 +133,8 @@
           @size-change="handleSizeChange"
         />
       </div>
-    </el-card>
+      </el-card>
+    </div>
 
     <!-- 重置密码弹窗 -->
     <el-dialog v-model="resetPwdVisible" title="重置密码" width="480px" :close-on-click-modal="false">
@@ -389,6 +401,8 @@ import { getAllPost } from '@/api/post'
 import { getBizUnitTree, getUserBizUnitScopes, assignBizUnitScope } from '@/api/bizUnitScope'
 import storage from '@/utils/storage'
 import { useUserStore } from '@/store/user'
+import OrgTreePanel from '@/components/OrgTreePanel.vue'
+import { getOrgTree } from '@/api/org'
 
 const userStore = useUserStore()
 
@@ -399,12 +413,51 @@ const currentTenantId = computed(() => userStore.getTenantId)
 
 const searchForm = reactive({
   userName: '',
-  tenantId: null,  // null=全部，0=平台用户，>0=指定租户
+  tenantId: null,
   roleId: null,
   deptId: null,
+  deptIdIncludeChildren: false,
   postId: null,
   status: null
 })
+
+// ⭐ 组织树数据
+const orgTreeData = ref([])
+const orgTreeLoading = ref(false)
+const orgTreeRef = ref(null)
+const loadOrgTree = async () => {
+  orgTreeLoading.value = true
+  try {
+    const res = await getOrgTree()
+    orgTreeData.value = res.data || []
+  } catch (e) {
+    orgTreeData.value = []
+  } finally {
+    orgTreeLoading.value = false
+  }
+}
+
+/** 左侧组织树节点点击 → 同步到 searchForm 并刷新列表 */
+const handleOrgNodeClick = (node) => {
+  // 清空旧的部门级联标记（每次点击树都是一次新的筛选）
+  searchForm.deptIdIncludeChildren = false
+
+  if (node.nodeType === 'platform-root') {
+    // 平台主体虚拟节点：清空所有组织维度筛选
+    searchForm.tenantId = null
+    searchForm.deptId = null
+  } else if (node.nodeType === 'tenant') {
+    searchForm.tenantId = node.tenantId
+    searchForm.deptId = null
+  } else if (node.nodeType === 'dept') {
+    // 部门节点：同时带 tenantId + deptIdIncludeChildren=true（级联子部门）
+    searchForm.tenantId = node.tenantId
+    searchForm.deptId = node.deptId
+    searchForm.deptIdIncludeChildren = true
+  }
+  pagination.current = 1
+  fetchData()
+}
 
 const tableData = ref([])
 
@@ -514,6 +567,8 @@ const formRules = computed(() => ({
 }))
 
 onMounted(async()=>{
+  // 左侧组织树
+  loadOrgTree()
   // 部门树形下拉（公司+部门）
   fetchDeptTree()
   // 岗位下拉
@@ -544,7 +599,10 @@ const fetchData = async () => {
     if (searchForm.userName) params.userName = searchForm.userName
     if (searchForm.tenantId != null) params.tenantId = searchForm.tenantId
     if (searchForm.roleId != null) params.roleId = searchForm.roleId
-    if (searchForm.deptId != null) params.deptId = searchForm.deptId
+    if (searchForm.deptId != null) {
+      params.deptId = searchForm.deptId
+      if (searchForm.deptIdIncludeChildren) params.deptIdIncludeChildren = true
+    }
     if (searchForm.postId != null) params.postId = searchForm.postId
     if (searchForm.status != null) params.status = searchForm.status
     const res = await getUserList(params)
@@ -696,9 +754,12 @@ const handleReset = () => {
   searchForm.tenantId = null
   searchForm.roleId = null
   searchForm.deptId = null
+  searchForm.deptIdIncludeChildren = false
   searchForm.postId = null
   searchForm.status = null
   pagination.current = 1
+  // ⭐ 同步清空左侧组织树的选中/搜索/折叠状态
+  orgTreeRef.value?.reset()
   fetchData()
 }
 
@@ -879,6 +940,17 @@ fetchData()
 <style scoped>
 .user-container {
   width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+  overflow: hidden;
+}
+.right-content {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .card-header {
