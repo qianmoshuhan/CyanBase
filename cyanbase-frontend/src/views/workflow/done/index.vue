@@ -1,4 +1,4 @@
-﻿﻿﻿<template>
+﻿﻿﻿﻿<template>
   <div class="workflow-done-container">
     <el-card shadow="hover">
       <template #header>
@@ -13,7 +13,7 @@
           <el-input v-model="query.processName" placeholder="请输入流程名称" clearable />
         </el-form-item>
         <el-form-item label="审批状态">
-          <el-select v-model="query.status" placeholder="请选择审批状态" clearable>
+          <el-select v-model="query.status" placeholder="请选择审批状态" clearable style="width: 140px">
             <el-option label="已通过" value="APPROVED" />
             <el-option label="已驳回" value="REJECTED" />
           </el-select>

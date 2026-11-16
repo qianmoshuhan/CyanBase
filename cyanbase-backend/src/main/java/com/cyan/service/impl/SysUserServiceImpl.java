@@ -4,13 +4,17 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.cyan.entity.SysUser;
 import com.cyan.entity.SysUserRole;
+import com.cyan.config.CustomTenantHandler;
 import com.cyan.mapper.SysUserMapper;
 import com.cyan.mapper.SysUserRoleMapper;
+import com.cyan.security.service.PermissionVersionService;
 import com.cyan.service.SysUserRoleService;
 import com.cyan.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import com.cyan.common.exception.BusinessException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +31,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private final SysUserRoleMapper userRoleMapper;
     private final SysUserRoleService userRoleService;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final PermissionVersionService permissionVersionService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -39,10 +44,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        boolean save = save(user);
-        if (!save) return false;
-        saveUserRoleRel(user.getId(), user.getRoleIds());
-        return true;
+        try {
+            boolean save = save(user);
+            if (!save) return false;
+            saveUserRoleRel(user.getId(), user.getRoleIds());
+            return true;
+        } catch (DuplicateKeyException e) {
+            // ⭐ 不再吞掉异常：re-throw 让调用方根据「用户名 vs 手机号」哪个字段前置校验了未通过
+            // 给出精确的错误提示（如 "用户名已存在" vs "手机号已被使用"）。
+            log.warn("[唯一索引冲突] DuplicateKeyException, userName={}, phone={}", user.getUserName(), user.getPhone());
+            throw e;
+        }
     }
 
     @Override
@@ -57,13 +69,20 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user.getPassword() != null && !user.getPassword().startsWith("$2a$")) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        boolean update = updateById(user);
-        if (!update) return false;
-        LambdaQueryWrapper<SysUserRole> removeWrapper = new LambdaQueryWrapper<>();
-        removeWrapper.eq(SysUserRole::getUserId, user.getId());
-        userRoleMapper.delete(removeWrapper);
-        saveUserRoleRel(user.getId(), user.getRoleIds());
-        return true;
+        try {
+            boolean update = updateById(user);
+            if (!update) return false;
+            LambdaQueryWrapper<SysUserRole> removeWrapper = new LambdaQueryWrapper<>();
+            removeWrapper.eq(SysUserRole::getUserId, user.getId());
+            userRoleMapper.delete(removeWrapper);
+            saveUserRoleRel(user.getId(), user.getRoleIds());
+            // 🔐 权限版本预埋：用户角色/租户/部门变更后 → 版本号 +1
+            permissionVersionService.bumpVersion(user.getId());
+            return true;
+        } catch (DuplicateKeyException e) {
+            log.warn("[唯一索引冲突] DuplicateKeyException, phone={}, userId={}", user.getPhone(), user.getId());
+            throw e;
+        }
     }
 
     @Override
@@ -125,13 +144,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (oldPwd == null || newPwd == null || newPwd.length() < 6) {
             return "新密码长度不能少于6位";
         }
-        if (!verifyPassword(userId, oldPwd)) {
-            return "原密码错误";
+        // ⭐ 必须 skip 租户拦截：操作的是当前登录用户自己，永远不应该被 tenant_id 隔离
+        // 场景：平台主体(tenant_id=NULL)选了活跃租户后，resolveTenantId() 返回 activeTenantId(如6)，
+        //       SQL 会被追加 WHERE tenant_id=6，但主体自身 tenant_id 是 NULL → 查不到 / 更新0行
+        CustomTenantHandler.skip();
+        try {
+            if (!verifyPassword(userId, oldPwd)) {
+                return "原密码错误";
+            }
+            SysUser update = new SysUser();
+            update.setId(userId);
+            update.setPassword(passwordEncoder.encode(newPwd));
+            updateById(update);
+        } finally {
+            CustomTenantHandler.reset();
         }
-        SysUser update = new SysUser();
-        update.setId(userId);
-        update.setPassword(passwordEncoder.encode(newPwd));
-        updateById(update);
         return null;
     }
 }

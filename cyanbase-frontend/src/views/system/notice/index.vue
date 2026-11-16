@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
@@ -15,7 +15,7 @@
           <el-input v-model="searchForm.noticeTitle" placeholder="请输入公告标题" clearable />
         </el-form-item>
         <el-form-item label="公告类型">
-          <el-select v-model="searchForm.noticeType" placeholder="请选择类型" clearable>
+          <el-select v-model="searchForm.noticeType" placeholder="请选择类型" clearable style="width: 140px">
             <el-option label="通知" value="1" />
             <el-option label="公告" value="2" />
           </el-select>

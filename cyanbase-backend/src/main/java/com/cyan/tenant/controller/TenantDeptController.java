@@ -1,20 +1,35 @@
 package com.cyan.tenant.controller;
 
+import com.alibaba.excel.EasyExcel;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
+import com.cyan.common.log.annotation.Log;
+import com.cyan.common.log.enums.BusinessType;
 import com.cyan.common.security.util.SecurityUtils;
+import com.cyan.dto.DeptExportVO;
+import com.cyan.dto.DeptImportResultVO;
+import com.cyan.dto.DeptImportTemplateVO;
+import com.cyan.excel.ImportTemplateHandler;
+import org.springframework.web.multipart.MultipartFile;
 import com.cyan.entity.SysDept;
+import com.cyan.mapper.SysBizUnitScopeMapper;
 import com.cyan.service.SysDeptService;
 import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.security.aspect.PermissionGuard;
 import com.cyan.security.datascope.ResourceScope;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 /**
  * 租户侧独立部门管理
@@ -33,6 +48,7 @@ public class TenantDeptController {
 
     private final SysDeptService sysDeptService;
     private final PermissionGuard permissionGuard;
+    private final SysBizUnitScopeMapper bizUnitScopeMapper;
 
     /**
      * 分页列表（MP 自动追加 tenant_id = 当前租户ID）
@@ -140,7 +156,15 @@ public class TenantDeptController {
     @RequiresPermission("system:dept:add")
     public R<Void> add(@RequestBody SysDept sysDept) {
         sysDept.setId(null);
+        // ⭐ 自动生成 dept_code：技术字段，前端传了也被覆盖，保证租户内全局唯一
+        sysDept.setDeptCode(generateDeptCode());
         Long tenantId = SecurityUtils.getTenantId();
+        Long userId = SecurityUtils.getUserId();
+
+        // === 三层原子校验：预期目标 = 当前租户 + 新部门父ID + 当前操作用户 ===
+        permissionGuard.check(ResourceScope.of(tenantId, sysDept.getParentId(), SecurityUtils.getUsername()),
+                              "system:dept:add");
+
         sysDept.setTenantId(tenantId);
         return sysDeptService.save(sysDept) ? R.ok() : R.fail("新增失败");
     }
@@ -156,6 +180,19 @@ public class TenantDeptController {
         if (exist == null) return R.fail("部门不存在");
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), exist.getId(), exist.getCreateBy()),
                               "system:dept:edit");
+
+        // ⭐ 经营单元绑定校验：原 isBizUnit=1 → 新值=0 时，禁止取消已存在绑定的经营单元标记
+        if (Integer.valueOf(1).equals(exist.getIsBizUnit())
+                && sysDept.getIsBizUnit() != null && sysDept.getIsBizUnit() == 0) {
+            long bindCount = bizUnitScopeMapper.selectCount(
+                    new LambdaQueryWrapper<com.cyan.entity.SysBizUnitScope>()
+                            .eq(com.cyan.entity.SysBizUnitScope::getBizUnitId, exist.getId())
+            );
+            if (bindCount > 0) {
+                return R.fail("当前经营单元已存在用户绑定关系（" + bindCount + " 条），请先解绑后再取消标记");
+            }
+        }
+
         sysDept.setTenantId(SecurityUtils.getTenantId());
         return sysDeptService.updateById(sysDept) ? R.ok() : R.fail("更新失败");
     }
@@ -182,5 +219,116 @@ public class TenantDeptController {
         }
 
         return sysDeptService.removeById(id) ? R.ok() : R.fail("删除失败");
+    }
+
+    /**
+     * 部门数据导出 —— 租户侧
+     * <p>
+     * 与平台侧 export 的唯一差异：不传 tenantId 参数，CustomTenantHandler 自动追加隔离条件。
+     * 其他逻辑完全一致（阈值校验 + 层级路径构造 + 枚举翻译 + EasyExcel 流式输出 + 审计日志）。
+     * </p>
+     */
+    @Log(title = "部门管理", businessType = BusinessType.EXPORT, isSaveRequestData = false, isSaveResponseData = false)
+    @RequiresPermission("system:dept:list")
+    @GetMapping("/export")
+    public void export(
+            @RequestParam(required = false) String deptName,
+            @RequestParam(required = false) Integer status,
+            HttpServletResponse resp) throws Exception {
+
+        // 批次号：DEPT-yyyyMMdd-HHmmss-8位随机串（格式与平台侧一致）
+        String batchNo = "DEPT-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+                + "-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+
+        try {
+            // 不传 tenantId → MP TenantLineInnerInterceptor 自动追加 tenant_id = 当前租户ID
+            List<DeptExportVO> voList = sysDeptService.buildExportData(deptName, status, null);
+
+            String fileName = "部门数据_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".xlsx";
+            String encoded = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
+            resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            resp.setCharacterEncoding("utf-8");
+            resp.setHeader("Content-Disposition", "attachment; filename=\"" + encoded + "\"; filename*=UTF-8''" + encoded);
+
+            EasyExcel.write(resp.getOutputStream(), DeptExportVO.class)
+                    .sheet("部门数据")
+                    .doWrite(voList);
+
+            log.info("[部门导出完成][租户侧] batchNo={}, operName={}, operId={}, tenantId={}, exportCount={}",
+                    batchNo, SecurityUtils.getUsername(), SecurityUtils.getUserId(), SecurityUtils.getTenantId(), voList.size());
+
+        } catch (Exception e) {
+            log.error("[部门导出失败][租户侧] batchNo={}, operName={}, tenantId={}, error={}",
+                    batchNo, SecurityUtils.getUsername(), SecurityUtils.getTenantId(), e.getMessage(), e);
+            resp.resetBuffer();
+            resp.setContentType("application/json;charset=UTF-8");
+            resp.getWriter().write("{\"code\":500,\"msg\":\"导出失败：" + e.getMessage() + "\"}");
+            resp.flushBuffer();
+        }
+    }
+
+    /**
+     * 下载部门导入模板 —— 租户侧
+     * <p>与平台侧实现完全一致，模板内容相同（表头、说明行、下拉）。</p>
+     */
+    @Log(title = "部门导入模板下载", businessType = BusinessType.IMPORT, isSaveRequestData = false, isSaveResponseData = false)
+    @RequiresPermission("system:dept:list")
+    @GetMapping("/importTemplate")
+    public void importTemplate(HttpServletResponse resp) throws Exception {
+        String fileName = "部门导入模板.xlsx";
+        String encoded = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
+        resp.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        resp.setCharacterEncoding("utf-8");
+        resp.setHeader("Content-Disposition", "attachment; filename=\"" + encoded + "\"; filename*=UTF-8''" + encoded);
+
+        EasyExcel.write(resp.getOutputStream(), DeptImportTemplateVO.class)
+                .registerWriteHandler(new ImportTemplateHandler())
+                .sheet("部门导入模板")
+                .doWrite(java.util.Collections.emptyList());
+
+        log.info("[部门导入模板下载][租户侧] operName={}, operId={}, tenantId={}",
+                SecurityUtils.getUsername(), SecurityUtils.getUserId(), SecurityUtils.getTenantId());
+    }
+
+    /**
+     * 部门数据导入 —— 租户侧
+     * <p>
+     * 与平台侧镜像：唯一差异是 isTenantMode=true，
+     * 完全忽略 Excel 的【所属租户】列，导入数据全部归属当前登录租户。
+     * </p>
+     */
+    @Log(title = "部门导入", businessType = BusinessType.IMPORT, isSaveRequestData = false, isSaveResponseData = false)
+    @RequiresPermission("system:dept:list")
+    @PostMapping("/import")
+    public R<DeptImportResultVO> importDept(@RequestParam("file") MultipartFile file) throws Exception {
+        if (file == null || file.isEmpty()) {
+            return R.fail("请选择要导入的文件");
+        }
+        String filename = file.getOriginalFilename();
+        if (filename == null || !filename.toLowerCase().endsWith(".xlsx")) {
+            return R.fail("仅支持 .xlsx 格式文件，请将旧版 .xls 另存为 .xlsx 后再导入");
+        }
+
+        String batchNo = "DEPT-IMPORT-" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss"))
+                + "-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+
+        try {
+            DeptImportResultVO result = sysDeptService.importDept(true, SecurityUtils.getTenantId(), file.getInputStream());
+
+            log.info("[部门导入完成][租户侧] batchNo={}, operName={}, operId={}, tenantId={}, total={}, success={}, fail={}",
+                    batchNo, SecurityUtils.getUsername(), SecurityUtils.getUserId(), SecurityUtils.getTenantId(),
+                    result.getTotalRows(), result.getSuccessRows(), result.getFailRows());
+
+            return R.ok(result);
+        } catch (Exception e) {
+            log.error("[部门导入失败][租户侧] batchNo={}, operName={}, tenantId={}, error={}",
+                    batchNo, SecurityUtils.getUsername(), SecurityUtils.getTenantId(), e.getMessage(), e);
+            throw e;
+        }
+    }
+
+    /** 生成 dept_code：UUID 去横线，32 位小写。与平台侧 SysDeptController.generateDeptCode() 实现完全一致。 */
+    private String generateDeptCode() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 }

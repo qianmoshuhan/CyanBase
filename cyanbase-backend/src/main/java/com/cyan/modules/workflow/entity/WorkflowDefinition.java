@@ -74,4 +74,19 @@ public class WorkflowDefinition extends BaseEntity implements Serializable {
      */
     @TableField(exist = false)
     private Boolean allowEdit;
+
+    /**
+     * ⭐ 该流程定义已分发到的租户名称（逗号分隔，非数据库字段）
+     * 未分发时为 null
+     */
+    @TableField(exist = false)
+    private String distributeTenantNames;
+
+    /**
+     * ⭐ 创建该流程定义的租户名称（非数据库字段）
+     * 平台侧来源列显示用：admin 登录时 definition.tenantId 指向创建租户
+     * tenantId=0 或 null 时为"平台"
+     */
+    @TableField(exist = false)
+    private String creatorTenantName;
 }

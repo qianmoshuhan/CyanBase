@@ -10,6 +10,7 @@ import com.cyan.security.service.PermissionService;
 import com.cyan.service.SysDeptService;
 import com.cyan.service.SysRoleDeptService;
 import com.cyan.service.SysRoleService;
+import com.cyan.service.TenantBizUnitHelper;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.jsqlparser.expression.Expression;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +53,9 @@ public class CyanDataPermissionHandler implements MultiDataPermissionHandler {
     /** 显式不追加数据权限的表（全局系统表 / 无 dept_id 字段的表） */
     private static final Set<String> IGNORED_TABLES = new HashSet<>(Arrays.asList(
             // ════════ RBAC 元数据表（L1 租户隔离已覆盖） ════════
-            "sys_user_role", "sys_role_menu", "sys_role_dept", "sys_tenant_menu",
+            "sys_user_role", "sys_role_menu", "sys_role_dept", "sys_tenant_menu", "sys_tenant_module",
+            // ════════ 租户内经营单元绑定（无 dept_id 中间表） ════════
+            "sys_biz_unit_scope",
             // ⚠️ sys_role 已加 dept_id → 不在 IGNORED，实现部门私有角色（NULL=全局角色）
             "sys_menu",
 
@@ -138,6 +141,7 @@ public class CyanDataPermissionHandler implements MultiDataPermissionHandler {
     @Autowired @Lazy private SysRoleDeptService roleDeptService;
     @Autowired @Lazy private SysDeptService deptService;
     @Autowired @Lazy private PermissionService permissionService;
+    @Autowired @Lazy private TenantBizUnitHelper bizUnitHelper;
 
     @Override
     public Expression getSqlSegment(Table table, Expression where, String mappedStatementId) {
@@ -175,6 +179,15 @@ public class CyanDataPermissionHandler implements MultiDataPermissionHandler {
      * 实际的 DataScope 决策逻辑（在 skip 保护块内执行）
      */
     private Expression doGetSqlSegment(Table table, String tableName, LoginUser loginUser) {
+        // ══════ 优先介入：租户内经营单元覆盖模式 ══════
+        // 设计对齐：只对普通租户用户生效，平台主体账号（platformPrincipal=true）完全禁用此能力
+        // 介入时机：在原角色 dataScope switch 判断之前，有 activeBizUnitId 则直接覆盖
+        Long activeBizUnitId = loginUser.getActiveBizUnitId();
+        boolean isPlatformPrincipal = Boolean.TRUE.equals(loginUser.getPlatformPrincipal());
+        if (!isPlatformPrincipal && activeBizUnitId != null) {
+            return doBizUnitOverride(table, tableName, loginUser, activeBizUnitId);
+        }
+
         // 超管 → 跳过（内部查 sys_role，需要 skip 保护）
         if (permissionService.isSuperAdmin(loginUser.getUserId())) {
             log.debug("[DataScope] 平台超管，跳过表 {}", tableName);
@@ -365,5 +378,31 @@ public class CyanDataPermissionHandler implements MultiDataPermissionHandler {
         in.setLeftExpression(new Column(alias + "." + column));
         in.setRightItemsList(list);
         return in;
+    }
+
+    /**
+     * ══════ 租户内经营单元覆盖模式（首期仅实现覆盖，AND 叠加预留） ══════
+     * <p>
+     * 规则：activeBizUnitId 存在时，直接跳过角色本身 dataScope 配置，
+     * 改为经营单元自身 + 所有子部门做 dept_id IN (...) 过滤。
+     * </p>
+     *
+     * @param bizUnitId 当前选中的经营单元部门ID
+     * @return SQL 条件片段，null=不追加
+     */
+    private Expression doBizUnitOverride(Table table, String tableName, LoginUser loginUser, Long bizUnitId) {
+        String alias = table.getAlias() != null ? table.getAlias().getName() : tableName;
+        String deptColumn = DEPT_COLUMN_MAP.getOrDefault(tableName, DEFAULT_DEPT_COLUMN);
+
+        List<Long> ids = bizUnitHelper.collectBizUnitAndChildren(bizUnitId);
+        if (ids.isEmpty()) {
+            log.debug("[DataScope-BizUnit] 覆盖模式：bizUnitId={} 展开到 0 个部门，跳过表 {}", bizUnitId, tableName);
+            return null;
+        }
+
+        Expression result = deptIdIn(alias, deptColumn, ids);
+        log.debug("[DataScope-BizUnit] 覆盖模式：bizUnitId={}, 展开{}个部门, 表={}, SQL={}",
+                bizUnitId, ids.size(), tableName, result);
+        return result;
     }
 }

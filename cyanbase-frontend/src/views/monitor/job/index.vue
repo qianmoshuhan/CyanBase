@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
@@ -18,7 +18,7 @@
           <el-input v-model="searchForm.jobGroup" placeholder="请输入任务分组" clearable />
         </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable style="width: 140px">
             <el-option label="正常" value="0" />
             <el-option label="暂停" value="1" />
           </el-select>

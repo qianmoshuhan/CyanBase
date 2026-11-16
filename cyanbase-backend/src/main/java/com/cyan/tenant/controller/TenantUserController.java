@@ -20,6 +20,8 @@ import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.security.aspect.PermissionGuard;
 import com.cyan.security.datascope.ResourceScope;
 import com.cyan.security.service.PermissionService;
+import com.cyan.security.service.PermissionVersionService;
+import com.cyan.config.CustomTenantHandler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -57,6 +59,7 @@ public class TenantUserController {
     private final SysTenantMapper sysTenantMapper;
     private final SysDeptService sysDeptService;
     private final SysPostService sysPostService;
+    private final PermissionVersionService permissionVersionService;
 
     /**
      * 分页列表（MP 自动追加 tenant_id 隔离）
@@ -214,15 +217,29 @@ public class TenantUserController {
     public R<Void> add(@RequestBody SysUser sysUser) {
         sysUser.setId(null);
         Long tenantId = SecurityUtils.getTenantId();
+        Long userId = SecurityUtils.getUserId();
 
-        // ===== 手机号租户内唯一性校验 =====
-        if (sysUser.getPhone() != null && !sysUser.getPhone().isEmpty()) {
+        // === 三层原子校验：新建场景用「预期目标」构造 ResourceScope ===
+        // 新建没有已存在的目标资源，tenantId 从 token 强制取，createBy 用当前操作用户
+        // L1 租户隔离校验 activeTenantId/tenantId 匹配预期租户 → 通过
+        // L2 DataScope 校验 deptId/createBy 是否在范围内 → 提前拦截越权创建
+        // L3 按钮权限 @RequiresPermission AOP 已前置拦截，这里也会再校验一次（幂等，小成本换完整性）
+        permissionGuard.check(ResourceScope.of(tenantId, sysUser.getDeptId(), SecurityUtils.getUsername()),
+                              "system:user:add");
+
+        // ===== 手机号必填 + 全局唯一性校验 =====
+        if (sysUser.getPhone() == null || sysUser.getPhone().isEmpty()) {
+            return R.fail("手机号不能为空");
+        }
+        CustomTenantHandler.skip();
+        try {
             long phoneCount = sysUserService.count(new LambdaQueryWrapper<SysUser>()
-                    .eq(SysUser::getTenantId, tenantId)
                     .eq(SysUser::getPhone, sysUser.getPhone()));
             if (phoneCount > 0) {
-                return R.fail("该手机号已在当前租户使用");
+                return R.fail("该手机号已被使用");
             }
+        } finally {
+            CustomTenantHandler.reset();
         }
 
         // ===== 租户用户配额校验 =====
@@ -259,34 +276,45 @@ public class TenantUserController {
         Long tenantId = SecurityUtils.getTenantId();
         sysUser.setTenantId(tenantId);
 
-        // ===== 手机号租户内唯一性校验（排除自己） =====
-        if (sysUser.getPhone() != null && !sysUser.getPhone().isEmpty()) {
+        // ===== 手机号必填 + 全局唯一性校验（排除自身） =====
+        if (sysUser.getPhone() == null || sysUser.getPhone().isEmpty()) {
+            return R.fail("手机号不能为空");
+        }
+        CustomTenantHandler.skip();
+        try {
             long phoneCount = sysUserService.count(new LambdaQueryWrapper<SysUser>()
-                    .eq(SysUser::getTenantId, tenantId)
                     .eq(SysUser::getPhone, sysUser.getPhone())
                     .ne(SysUser::getId, sysUser.getId()));
             if (phoneCount > 0) {
-                return R.fail("该手机号已在当前租户使用");
+                return R.fail("该手机号已被使用");
             }
+        } finally {
+            CustomTenantHandler.reset();
         }
 
+        // 🔐 权限版本预埋：updateUserAndRole 内部已执行 bumpVersion(userId)
+        log.info("[TenantUser-update] userId={}, 准备触发 bumpVersion", sysUser.getId());
         return sysUserService.updateUserAndRole(sysUser) ? R.ok() : R.fail("更新失败");
     }
 
     /**
-     * 前端表单实时校验：手机号在当前租户是否唯一
-     * <p>租户侧自动按 token 里的 tenantId 隔离，不串租户</p>
+     * 前端表单实时校验：手机号是否全局唯一
+     * <p>手机号全局唯一后，租户侧同样走全库校验</p>
      */
     @GetMapping("/checkPhone")
     public R<Boolean> checkPhone(@RequestParam String phone,
                                  @RequestParam(required = false) Long excludeId) {
         if (phone == null || phone.isEmpty()) return R.ok(true);
-        Long tenantId = SecurityUtils.getTenantId();
-        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<SysUser>()
-                .eq(SysUser::getTenantId, tenantId)
-                .eq(SysUser::getPhone, phone);
-        if (excludeId != null) wrapper.ne(SysUser::getId, excludeId);
-        return R.ok(sysUserService.count(wrapper) == 0);
+
+        CustomTenantHandler.skip();
+        try {
+            LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<SysUser>()
+                    .eq(SysUser::getPhone, phone);
+            if (excludeId != null) wrapper.ne(SysUser::getId, excludeId);
+            return R.ok(sysUserService.count(wrapper) == 0);
+        } finally {
+            CustomTenantHandler.reset();
+        }
     }
 
     /**
@@ -392,6 +420,9 @@ public class TenantUserController {
 
         log.info("[saveRolePerm] tenantId={}, userId={}, 分配角色数={}", tenantId, userId,
                 roleIds == null ? 0 : roleIds.size());
+        // 🔐 权限版本预埋：用户角色绑定变更 → 该用户版本号 +1
+        log.info("[TenantUser-saveRolePerm] userId={}, 准备触发 bumpVersion", userId);
+        permissionVersionService.bumpVersion(userId);
         return R.ok();
     }
 
@@ -446,7 +477,9 @@ public class TenantUserController {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         user.setPassword(encoder.encode(plain));
         sysUserService.updateById(user);
-        log.info("[重置密码] tenantId={}, userId={}, userName={}", user.getTenantId(), userId, user.getUserName());
+        // 🔐 bumpVersion：密码重置后让该用户旧 JWT 失效，强制重登录
+        permissionVersionService.bumpVersion(userId);
+        log.info("[租户侧重置密码] tenantId={}, userId={}, userName={}, 已触发 bumpVersion", user.getTenantId(), userId, user.getUserName());
         Map<String, String> result = new HashMap<>();
         result.put("password", plain);
         return R.ok(result);

@@ -1,6 +1,7 @@
 package com.cyan.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -13,7 +14,14 @@ public class SysUser implements Serializable {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 租户ID */
+    /**
+     * 租户ID。
+     * <p>
+     * ⭐ 使用 ALWAYS 策略：INSERT 时永远显式包含该字段（值为 null 也会写 tenant_id=NULL），
+     * 而不是因 MP 默认 NOT_NULL 策略跳过 null 字段，触发数据库 DEFAULT 0 兜底。
+     * 平台主体场景需要 tenant_id=NULL（身份标识），必须跳过 TenantMetaObjectHandler 自动填充。
+     */
+    @TableField(insertStrategy = FieldStrategy.ALWAYS)
     private Long tenantId;
 
     /** 部门ID */
@@ -26,7 +34,19 @@ public class SysUser implements Serializable {
     @TableField("user_name")
     private String userName;
 
-    /** 密码 */
+    /**
+     * 密码（BCrypt 哈希）。
+     * <p>
+     * ⚠️ 安全：只允许「写入」不允许「序列化输出」。
+     * 之前 GET /auth/getUserInfo、GET /system/user/list 等出参会把 BCrypt 哈希原样返回给前端，
+     * 属于敏感信息泄露。WRITE_ONLY 保证：
+     * <ul>
+     *   <li>入参（新增/编辑用户 @RequestBody SysUser）的 password 仍可正常反序列化；</li>
+     *   <li>所有出参 JSON 不再包含 password 字段。</li>
+     * </ul>
+     * 重置密码接口返回的是 {@code R<Map<String,String>>} 里的明文新密码，不受本注解影响。
+     */
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     /** 昵称 */

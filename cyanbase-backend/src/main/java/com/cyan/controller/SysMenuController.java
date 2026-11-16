@@ -12,11 +12,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.cyan.common.R;
+import com.cyan.common.security.util.SecurityUtils;
 import com.cyan.entity.SysMenu;
 import com.cyan.entity.SysTenantMenu;
 import com.cyan.entity.SysUser;
 import com.cyan.mapper.SysTenantMenuMapper;
 import com.cyan.mapper.SysUserMapper;
+import com.cyan.security.domain.LoginUser;
 import com.cyan.security.service.PermissionService;
 import com.cyan.service.SysMenuService;
 import com.cyan.common.security.util.SecurityUtils;
@@ -156,9 +158,24 @@ public R<Void> delete(@PathVariable Long id) {
    @GetMapping("/getUserMenu")
     public R<List<SysMenu>> getUserMenu() {
         Long userId = SecurityUtils.getUserId();
-        Long tenantId = SecurityUtils.getTenantId();
 
-        // ⭐ 双重保险：如果 JWT 里 tenantId 为 null（旧 token / 登录时没放），
+        // ⭐ 关键修复：tenantId 用 activeTenantId（支持平台主体切换租户的场景）
+        //   - 普通租户用户：SecurityUtils.getTenantId() = sys_user.tenant_id（正常）
+        //   - 平台主体切租户：SecurityUtils.getLoginUser().getActiveTenantId() = 选中的租户ID
+        //     主体 sys_user.tenant_id = null，必须用 activeTenantId
+        Long tenantId = null;
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        // ⭐ 经营单元维度：平台主体完全禁用该能力，显式置空防止串视图
+        Long activeBizUnitId = loginUser != null && !Boolean.TRUE.equals(loginUser.getPlatformPrincipal())
+                ? loginUser.getActiveBizUnitId() : null;
+        if (loginUser != null && Boolean.TRUE.equals(loginUser.getPlatformPrincipal())
+                && loginUser.getActiveTenantId() != null) {
+            tenantId = loginUser.getActiveTenantId();
+        } else {
+            tenantId = SecurityUtils.getTenantId();
+        }
+
+        // ⭐ 双重保险：如果 tenantId 为 null（旧 token / 登录时没放），
         // 从 userId 反查 SysUser 拿 tenantId，防止 filterByTenant 被跳过导致越权
         if (tenantId == null) {
             try {
@@ -172,10 +189,17 @@ public R<Void> delete(@PathVariable Long id) {
             }
         }
 
-        log.info("[getUserMenu] userId={}, tenantId={}", userId, tenantId);
+        log.info("[getUserMenu] userId={}, tenantId={}, activeTenantId={}, activeBizUnitId={}",
+                userId, tenantId,
+                loginUser != null ? loginUser.getActiveTenantId() : null,
+                activeBizUnitId);
 
-        // 缓存key带上tenantId，避免不同租户串菜单
-        String cacheKey = "rbac:menu:flat:" + userId + ":" + (tenantId != null ? tenantId : "root");
+        // ⭐ 缓存 key 三个维度：userId + effectiveTenantId + activeBizUnitId（"none" 占位）。
+        //    旧 key 只有前两维，切换经营单元后会命中默认态菜单缓存 → 权限码变了菜单树却不变。
+        //    与 PermissionServiceImpl 的 rbac:perms:{userId}:{tenant}:{bizUnitKey} 保持同构。
+        String bizUnitKey = activeBizUnitId != null ? String.valueOf(activeBizUnitId) : "none";
+        String cacheKey = "rbac:menu:flat:" + userId + ":"
+                + (tenantId != null ? tenantId : "root") + ":" + bizUnitKey;
         List<SysMenu> menus = null;
 
         // 1. 从 Redis 取
@@ -191,8 +215,12 @@ public R<Void> delete(@PathVariable Long id) {
 
         // 2. 缓存没有 → 查库
         if (menus == null) {
-            // 2a. 按角色查出完整菜单
-            menus = sysMenuService.selectMenuByUserId(userId);
+            // 2a. 按角色查出完整菜单（显式传四个维度，保证与 cacheKey 的隔离维度严格一致）
+            menus = sysMenuService.selectMenuByUserId(
+                    userId,
+                    loginUser != null ? loginUser.getActiveTenantId() : null,
+                    loginUser != null ? loginUser.getPlatformPrincipal() : null,
+                    activeBizUnitId);
             log.info("[getUserMenu] 角色菜单数={}", menus != null ? menus.size() : 0);
 
             // 2b. 租户用户（tenantId > 0）必须二次过滤：角色菜单 ∩ 租户菜单池（硬边界）

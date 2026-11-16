@@ -96,7 +96,7 @@ public class CustomTenantHandler implements TenantLineHandler {
             "sys_role_dept",
             "sys_message_user",
             "sys_tenant_menu",
-            "sys_tenant_menu",
+            "sys_tenant_module",
 
             // === ③ 全局存储/第三方配置 ===
             "sys_storage_config",
@@ -115,7 +115,17 @@ public class CustomTenantHandler implements TenantLineHandler {
 
             // === ⑦ 开发辅助 ===
             "sys_form",
-            "gen_table"
+            "gen_table",
+
+            // === ⑧ 平台主体跨租户能力 ===
+            // principal_tenant_scope：平台主体↔允许访问租户 关联表，无 tenant_id 列
+            "principal_tenant_scope",
+            // platform_privilege_log：平台主体特权操作审计日志，无 tenant_id 列
+            "platform_privilege_log",
+
+            // === ⑨ 租户内经营单元绑定（新增） ===
+            // sys_biz_unit_scope：用户-经营单元-角色 关联绑定表，无 tenant_id 列（业务层校验归属）
+            "sys_biz_unit_scope"
     ));
 
     @Override
@@ -136,8 +146,16 @@ public class CustomTenantHandler implements TenantLineHandler {
      * 保证实体层 tenantId 填充与 SQL 拦截层 tenantId 注入完全同源。
      */
     public Long resolveTenantId() {
-        // 优先级 1：SecurityContext → LoginUser.sysUser.tenantId
+        // ====== 最高优先级 0：平台主体已选活跃租户 → 直接用 activeTenantId ======
+        // 平台主体本身 tenantId=NULL，但选中活跃租户后整条链路必须按 activeTenantId 参与拦截
+        // 这是为了避免 tenantId=NULL 被误当作"无租户上下文"而跳过 SQL 隔离
         LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (loginUser != null && Boolean.TRUE.equals(loginUser.getPlatformPrincipal())
+                && loginUser.getActiveTenantId() != null) {
+            return loginUser.getActiveTenantId();
+        }
+
+        // 优先级 1：SecurityContext → LoginUser.sysUser.tenantId
         if (loginUser != null && loginUser.getSysUser() != null
                 && loginUser.getSysUser().getTenantId() != null) {
             return loginUser.getSysUser().getTenantId();
@@ -157,6 +175,11 @@ public class CustomTenantHandler implements TenantLineHandler {
                 String auth = request.getHeader("Authorization");
                 if (auth != null && auth.startsWith("Bearer ")) {
                     String token = auth.substring(7);
+                    // 先尝试从 token 解析 activeTenantId（平台主体选租户场景）
+                    Long activeTenantId = jwtUtil.getActiveTenantIdFromToken(token);
+                    if (activeTenantId != null) {
+                        return activeTenantId;
+                    }
                     Long tenantId = jwtUtil.getTenantIdFromToken(token);
                     if (tenantId != null) {
                         return tenantId;

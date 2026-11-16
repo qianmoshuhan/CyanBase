@@ -78,42 +78,6 @@
         </div>
       </el-dialog>
     </div>
-
-    <!-- 多租户选择弹窗 -->
-    <el-dialog
-      v-model="tenantDialogVisible"
-      title="请选择登录租户"
-      width="420px"
-      :close-on-click-modal="false"
-      :close-on-press-escape="true"
-      center
-    >
-      <p class="dialog-tip">该手机号关联了多个租户账号，请选择要登录的租户：</p>
-      <div class="tenant-list">
-        <div
-          v-for="item in tenantOptions"
-          :key="item.userId"
-          class="tenant-item"
-          :class="{ active: selectedTenantId === item.tenantId }"
-          @click="selectedTenantId = item.tenantId"
-        >
-          <el-radio
-            :model-value="selectedTenantId"
-            :label="item.tenantId"
-            @change="selectedTenantId = item.tenantId"
-          >
-            <div class="tenant-info">
-              <div class="tenant-name">{{ item.tenantName }}</div>
-              <div class="tenant-nick">{{ item.nickName }}</div>
-            </div>
-          </el-radio>
-        </div>
-      </div>
-      <template #footer>
-        <el-button @click="tenantDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="loading" @click="confirmTenantLogin">确定登录</el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -136,11 +100,6 @@ const loading = ref(false)
 
 // 滑块验证码弹窗状态
 const showCaptchaDialog = ref(false)
-
-// 多租户选择弹窗状态
-const tenantDialogVisible = ref(false)
-const tenantOptions = ref([])      // 后端返回的候选账号列表
-const selectedTenantId = ref(null)  // 弹窗里当前选中的 tenantId
 
 const loginForm = reactive({
   phone: '',
@@ -338,8 +297,7 @@ async function doCheck() {
     window.removeEventListener('pointerup', endDrag)
     window.removeEventListener('pointercancel', endDrag)
 
-    // ⭐ 租户侧特殊：验证成功后直接在 doCheck 里走 tenantLogin
-    // 不回 handleLogin（handleLogin 有表单 validate 锁），绕过路径分支直接带凭证调后端
+    // ⭐ 手机号全局唯一后，tenantLogin 永远命中一个账号，直接登录成功
     console.log('[滑块校验] 验证成功！开始租户登录...')
     loading.value = true
     try {
@@ -348,17 +306,7 @@ async function doCheck() {
         password: loginForm.password,
         credentialKey: loginForm.credentialKey
       })
-
-      if (loginRes.data && loginRes.data.step === 'select-tenant') {
-        // 多租户命中 → 弹租户选择弹窗（凭证后端只 check 不 consume，二次登录还能用）
-        tenantOptions.value = loginRes.data.list || []
-        selectedTenantId.value = tenantOptions.value.length > 0
-          ? tenantOptions.value[0].tenantId : null
-        tenantDialogVisible.value = true
-      } else {
-        // 单租户直接登录成功 → 后端已 consume 凭证
-        handleLoginSuccess(loginRes.data)
-      }
+      handleLoginSuccess(loginRes.data)  // 直接成功，后端已 consume 凭证
     } catch (error) {
       console.error('[滑块校验] 租户登录失败：', error)
       loginForm.credentialKey = ''  // 凭证被 consume / 密码错 → 清了让用户重新弹滑块
@@ -436,7 +384,7 @@ const handleLogin = async () => {
   await loginFormRef.value.validate(async (valid) => {
     if (!valid) return
 
-    // === 路径 1：有凭证 → 直接登录 ===
+    // === 路径 1：有凭证 → 直接登录（手机号全局唯一，永远命中一个账号） ===
     if (loginForm.credentialKey) {
       loading.value = true
       try {
@@ -445,15 +393,7 @@ const handleLogin = async () => {
           password: loginForm.password,
           credentialKey: loginForm.credentialKey
         })
-
-        if (res.data && res.data.step === 'select-tenant') {
-          tenantOptions.value = res.data.list || []
-          selectedTenantId.value = tenantOptions.value.length > 0
-            ? tenantOptions.value[0].tenantId : null
-          tenantDialogVisible.value = true
-        } else {
-          handleLoginSuccess(res.data)
-        }
+        handleLoginSuccess(res.data)
       } catch (error) {
         loginForm.credentialKey = ''  // 凭证失效，清了让用户重新验证
         ElMessage.error(error?.message || '登录失败，请稍后重试')
@@ -480,33 +420,7 @@ const handleLogin = async () => {
   })
 }
 
-/** 弹窗选租户后的二次登录（带 tenantId + credentialKey） */
-const confirmTenantLogin = async () => {
-  if (!selectedTenantId.value) {
-    ElMessage.warning('请先选择登录租户')
-    return
-  }
 
-  loading.value = true
-  try {
-    // 二次请求：phone + password + tenantId + credentialKey（后端 consume 凭证）
-    const res = await tenantLogin({
-      phone: loginForm.phone,
-      password: loginForm.password,
-      tenantId: selectedTenantId.value,
-      credentialKey: loginForm.credentialKey
-    })
-    tenantDialogVisible.value = false
-    handleLoginSuccess(res.data)
-  } catch (error) {
-    // 二次请求凭证被 consume / 密码错误 → 清空让用户重新弹滑块
-    loginForm.credentialKey = ''
-    tenantDialogVisible.value = false
-    ElMessage.error(error?.message || '登录失败，请稍后重试')
-  } finally {
-    loading.value = false
-  }
-}
 </script>
 
 <style scoped>

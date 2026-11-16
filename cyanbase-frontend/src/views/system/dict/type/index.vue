@@ -47,14 +47,17 @@
       </el-table>
 
       <!-- 分页 -->
-      <el-pagination
-        :total="total"
-        :current-page="pageNum"
-        :page-size="pageSize"
-        layout="total, sizes, prev, pager, next, jumper"
-        @current-change="handlePageChange"
+      <div class="pagination">
+        <el-pagination
+          v-model:current-page="pageNum"
+          v-model:page-size="pageSize"
+          :total="total"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="handlePageChange"
           @size-change="handleSizeChange"
-      />
+        />
+      </div>
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
@@ -217,5 +220,11 @@ fetchData()
 
 .search-form {
   margin-bottom: 20px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

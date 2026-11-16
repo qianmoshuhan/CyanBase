@@ -112,6 +112,63 @@
             </el-button>
           </el-badge>
 
+          <!-- ⭐ 平台主体租户切换下拉：仅 tenantId IS NULL 且授权租户 > 1 时渲染 -->
+          <el-dropdown
+            v-if="userStore.getIsPlatformPrincipal && tenantScopes.length > 1"
+            @command="handleTenantSwitch"
+          >
+            <span class="user-info tenant-switch-btn">
+              <el-icon><OfficeBuilding /></el-icon>
+              <span class="username">{{ currentTenantName }}</span>
+              <el-icon><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="t in tenantScopes"
+                  :key="t.id"
+                  :command="t.id"
+                  :class="{ 'is-active': t.id === activeTenantId }"
+                >
+                  {{ t.tenantName }}
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+
+          <!-- ⭐ 租户内经营单元切换下拉：仅「非平台主体 + tenantId>0 + 已绑定经营单元」时渲染 -->
+          <el-dropdown
+            v-if="showBizUnitSwitch"
+            :disabled="bizUnitSwitching"
+            @command="handleBizUnitSwitch"
+          >
+            <span class="user-info biz-unit-switch-btn">
+              <el-icon><OfficeBuilding /></el-icon>
+              <span class="username">{{ currentBizUnitName }}</span>
+              <el-icon><ArrowDown /></el-icon>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item
+                  v-for="b in availableBizUnits"
+                  :key="b.bizUnitId"
+                  :command="b.bizUnitId"
+                  :class="{ 'is-active': Number(b.bizUnitId) === Number(activeBizUnitId) }"
+                >
+                  {{ b.bizUnitName }}
+                </el-dropdown-item>
+                <!-- 已激活时才提供清空入口；用字符串哨兵，避免 command=null 被下拉组件吞掉 -->
+                <el-dropdown-item
+                  v-if="activeBizUnitId != null"
+                  divided
+                  :command="CLEAR_BIZ_UNIT"
+                >
+                  恢复原始范围
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+
           <el-dropdown @command="handleCommand">
             <span class="user-info">
               <el-icon><User /></el-icon>
@@ -148,16 +205,18 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { useTagsViewStore } from '@/store/tagsView'
-import { ElMessageBox } from 'element-plus'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import storage from '@/utils/storage'
 import { getConfigByKey, getUserMenu } from "@/api/config.js";
+import { getMyTenantScopes } from '@/api/auth'
+import { getAvailableBizUnits } from '@/api/bizUnitScope'
 import { useMessageSse } from '@/composables/useMessageSse'
 import TagsView from '@/components/TagsView/index.vue'
 
 // 导入需要的图标（修复：移除不存在的Post，替换为Element Plus真实存在的图标，其余保留）
 import { 
-  HomeFilled, Setting, Monitor, Expand, Fold, User, ArrowDown, Bell,
-  Menu as MenuIcon, Files as FileIcon, Tools as ToolIcon // 关键修正
+  HomeFilled, Setting, Monitor, Expand, Fold, User, ArrowDown, Bell, OfficeBuilding,
+  Menu as MenuIcon, Files as FileIcon, Tools as ToolIcon
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -182,6 +241,103 @@ const handleResize = () => { checkMobile(); if (!isMobile.value) drawerVisible.v
 const activeMenu = computed(() => route.path)
 
 const currentRouteName = computed(() => route.meta.title || '')
+// ⭐ 平台主体租户切换下拉
+const tenantScopes = ref([])     // 当前主体的有效授权租户列表
+// activeTenantId 在 LoginUser 根层级（不是 sysUser 里）：
+// LoginUser { userId, userName, tenantId, activeTenantId, sysUser: {...} }
+const activeTenantId = computed(() => {
+  return userStore.userInfo?.activeTenantId ?? null
+})
+const currentTenantName = computed(() => {
+  const t = tenantScopes.value.find(x => x.id === activeTenantId.value)
+  return t?.tenantName || '选择租户'
+})
+
+// ══════════ ⭐ 租户内经营单元（BizUnit）切换 —— 与平台主体 Scope 两套链路完全隔离 ══════════
+const CLEAR_BIZ_UNIT = '__CLEAR_BIZ_UNIT__'  // 下拉 command 哨兵：表示传 bizUnitId=null
+const availableBizUnits = ref([])             // 当前用户可切换的经营单元扁平列表
+const bizUnitSwitching = ref(false)           // 切换中防重复点击
+
+// F4：activeBizUnitId 在 getUserInfo 返回的 LoginUser 根层级，不是 sysUser 里
+const activeBizUnitId = computed(() => userStore.userInfo?.activeBizUnitId ?? null)
+
+const currentBizUnitName = computed(() => {
+  if (activeBizUnitId.value == null) return '选择经营单元'
+  const hit = availableBizUnits.value.find(b => Number(b.bizUnitId) === Number(activeBizUnitId.value))
+  return hit?.bizUnitName || '选择经营单元'
+})
+
+// F3 + F5：平台主体调 /tenant/biz-unit/* 会被后端 403；admin 超管(tenantId=0)也不需要下拉
+// getIsPlatformPrincipal 已在 store 里改为 JWT claim 优先（auditor01 的 tenantId 是 6，不能只看 tenantId）
+const isTenantUser = computed(() => {
+  if (!userStore.isLoggedIn) return false
+  if (userStore.getIsPlatformPrincipal) return false
+  return Number(userStore.getTenantId) > 0
+})
+
+// 切换中 userInfo 会被短暂清空，用 bizUnitSwitching 兜住，避免下拉闪烁消失
+const showBizUnitSwitch = computed(() =>
+  (isTenantUser.value || bizUnitSwitching.value) && availableBizUnits.value.length > 0
+)
+
+// ⚠️ 不能用 showBizUnitSwitch 判断是否去拉列表：初始 0 条 → false → 永远不拉 → 下拉永远不出现
+const fetchAvailableBizUnits = async () => {
+  if (!isTenantUser.value && !bizUnitSwitching.value) {
+    availableBizUnits.value = []
+    return
+  }
+  try {
+    const res = await getAvailableBizUnits()
+    availableBizUnits.value = Array.isArray(res.data) ? res.data : []
+  } catch (e) {
+    // 403 / 业务错误的精准 msg 已由 request.js 拦截器原样弹出，这里只兜底清空
+    console.warn('[经营单元切换] 获取可切换列表失败:', e?.message || e)
+    availableBizUnits.value = []
+  }
+}
+
+// userInfo 可能晚于布局挂载到达；身份就绪后一定拉一次，身份不变时不会重复请求
+watch(isTenantUser, (ok) => {
+  if (bizUnitSwitching.value) return  // 切换中 userInfo 抖动，忽略
+  if (ok) fetchAvailableBizUnits()
+  else availableBizUnits.value = []
+}, { immediate: true })
+
+const handleBizUnitSwitch = async (command) => {
+  if (bizUnitSwitching.value) return
+  const targetId = command === CLEAR_BIZ_UNIT ? null : command
+  // 重复点当前项 → 不请求；清空项只在已激活时才存在
+  if (targetId !== null && Number(targetId) === Number(activeBizUnitId.value)) return
+  if (targetId === null && activeBizUnitId.value == null) return
+
+  // 名称必须按目标 ID 从列表查，不能用切换前的 currentBizUnitName（那是旧值）
+  const targetName = targetId === null
+    ? null
+    : availableBizUnits.value.find(b => Number(b.bizUnitId) === Number(targetId))?.bizUnitName || '经营单元'
+
+  bizUnitSwitching.value = true
+  try {
+    // store action 内部：覆盖双 Token + 清 userInfo/roles/permissions + reset tagsView
+    await userStore.switchBizUnitAndUpdateToken(targetId)
+    await userStore.fetchUserInfo()   // F2：从新 token 重拉 activeBizUnitId + 合并后的权限
+    await fetchUserMenu()             // 角色合并后可见菜单可能变化
+    await fetchAvailableBizUnits()    // 同步下拉数据
+    ElMessage({
+      message: targetId === null ? '已恢复原始权限范围' : `已切换到「${targetName}」`,
+      type: 'success',
+      customClass: 'tenant-switch-success'
+    })
+    // 跳首页，避免当前页继续用旧权限/旧数据渲染
+    if (route.path !== '/home') router.push('/home')
+  } catch (e) {
+    // F6：后端精准消息已由 request.js 拦截器原样弹出，这里不重复弹窗、不重写文案
+    console.warn('[经营单元切换] 切换失败:', e?.message || e)
+  } finally {
+    bizUnitSwitching.value = false
+  }
+}
+// ════════════════════════════════════════════════════════════════════════════════════
+
 const systemName = ref("CyanBase");
 const systemLogo = ref("");
 // 菜单列表
@@ -336,6 +492,34 @@ const getIconComponent = (icon) => {
   return iconMap[icon] || MenuIcon
 }
 
+// ⭐ 平台主体：拉取授权租户列表（用于右上角切换下拉）
+const fetchMyTenantScopes = async () => {
+  if (!userStore.getIsPlatformPrincipal) return  // 非主体不拉
+  try {
+    const res = await getMyTenantScopes()
+    tenantScopes.value = res.data || []
+  } catch (e) {
+    console.warn('[租户切换] 获取授权租户列表失败:', e?.message)
+    tenantScopes.value = []
+  }
+}
+
+// ⭐ 平台主体：切换活跃租户
+const handleTenantSwitch = async (tenantId) => {
+  if (!tenantId || tenantId === activeTenantId.value) return
+  try {
+    await userStore.switchTenantAndUpdateToken(tenantId)
+    await userStore.fetchUserInfo()
+    await fetchUserMenu()
+    await fetchMyTenantScopes()  // ⭐ 重新拉 scopes，确保 activeTenantId + tenantScopes 同步
+    tagsViewStore.reset()
+    ElMessage({ message: '切换租户成功', type: 'success', customClass: 'tenant-switch-success' })
+    router.push('/home')
+  } catch (e) {
+    ElMessage.error('切换租户失败：' + (e?.message || ''))
+  }
+}
+
 // 侧边栏折叠/展开（PC）或抽屉开关（手机）
 const toggleSidebar = () => {
   if (isMobile.value) {
@@ -383,6 +567,7 @@ onMounted(async () => {
     let logoRes = await getConfigByKey("system_logo");
     if (logoRes?.data) { systemLogo.value = logoRes.data }
     await fetchUserMenu()
+    await fetchMyTenantScopes()
   } catch (e) {
     console.log("加载配置失败", e);
   }
@@ -510,6 +695,14 @@ onBeforeUnmount(() => {
 .username {
   color: #303133;
   font-size: 14px;
+}
+
+/* 经营单元名称可能较长，避免撑破 header */
+.biz-unit-switch-btn .username {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .content {

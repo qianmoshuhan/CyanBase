@@ -38,6 +38,18 @@ public class LoginCaptchaService {
     }
 
     /**
+     * 仅校验凭证是否存在（不删除）。
+     * 用于登录入口先判断账号类型，再决定是否 consume（平台主体分支需留着凭证给 switch-tenant-token 消费）。
+     */
+    public boolean checkCredential(String credentialKey) {
+        if (credentialKey == null || credentialKey.isBlank()) {
+            return false;
+        }
+        String fullKey = CREDENTIAL_PREFIX + credentialKey;
+        return Boolean.TRUE.equals(redisUtil.hasKey(fullKey));
+    }
+
+    /**
      * 登录时一次性消费凭证。
      * 无论凭证是否存在都删除，防止重放攻击；返回 false 表示无合法凭证需拦截。
      */

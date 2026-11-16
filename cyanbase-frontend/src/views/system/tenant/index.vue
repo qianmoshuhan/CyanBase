@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="tenant-container">
     <el-card shadow="hover">
       <template #header>
@@ -34,34 +34,31 @@
       <!-- 数据表格 -->
       <el-table :data="tableData" border stripe>
         <el-table-column type="index" label="序号" width="70" align="center" :index="(index) => (pagination.current - 1) * pagination.size + index + 1" />
-        <el-table-column prop="tenantName" label="租户名称" min-width="140" align="center" />
-        <el-table-column prop="tenantCode" label="租户编码" min-width="120" align="center" />
-        <el-table-column prop="contactUser" label="联系人" width="100" />
-        <el-table-column prop="contactPhone" label="联系电话" width="130" />
-        <el-table-column prop="address" label="地址" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="status" label="状态" width="80">
+        <el-table-column prop="tenantName" label="租户名称" min-width="160" align="center" />
+        <el-table-column prop="status" label="状态" width="80" align="center">
           <template #default="{ row }">
             <el-tag :type="statusTagType(row.status)">
               {{ statusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="expireDate" label="到期时间" width="180">
+        <el-table-column prop="contactUser" label="联系人" width="100" align="center" />
+        <el-table-column prop="contactPhone" label="联系电话" width="130" align="center" />
+        <el-table-column prop="expireDate" label="到期时间" width="180" align="center">
           <template #default="{ row }">
             <span v-if="row.expireDate">{{ row.expireDate }}</span>
             <span v-else class="text-muted">永不过期</span>
           </template>
         </el-table-column>
-        <el-table-column prop="maxUserNum" label="用户配额" width="100">
+        <el-table-column prop="maxUserNum" label="用户配额" width="100" align="center">
           <template #default="{ row }">
             <span v-if="row.maxUserNum">{{ row.maxUserNum }}</span>
             <span v-else class="text-muted">不限</span>
           </template>
         </el-table-column>
-        <el-table-column prop="remark" label="备注" min-width="120" show-overflow-tooltip />
-        <el-table-column prop="createTime" label="创建时间" min-width="160" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="260" fixed="right">
           <template #default="{ row }">
+            <el-button type="info" link @click="handleDetail(row)">详情</el-button>
             <el-button type="primary" link @click="handleEdit(row)" v-hasPermi="['system:tenant:edit']">编辑</el-button>
             <el-button type="danger" link @click="handleDelete(row)" v-hasPermi="['system:tenant:delete']">删除</el-button>
           </template>
@@ -172,6 +169,76 @@
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <!-- ========== 租户详情弹窗（只读） ========== -->
+    <el-dialog
+        v-model="detailVisible"
+        title="租户详情"
+        width="900px"
+        destroy-on-close
+    >
+      <!-- 区块 1：基础信息 -->
+      <el-descriptions :column="2" border>
+        <el-descriptions-item label="租户ID">{{ detailData.id }}</el-descriptions-item>
+        <el-descriptions-item label="租户编码">{{ detailData.tenantCode }}</el-descriptions-item>
+        <el-descriptions-item label="租户名称">{{ detailData.tenantName }}</el-descriptions-item>
+        <el-descriptions-item label="状态">
+          <el-tag :type="statusTagType(detailData.status)">
+            {{ statusText(detailData.status) }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="到期时间">
+          <span v-if="detailData.expireDate">{{ detailData.expireDate }}</span>
+          <span v-else class="text-muted">永不过期</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="配额总量">
+          <span v-if="detailData.maxUserNum">{{ detailData.maxUserNum }}</span>
+          <span v-else class="text-muted">不限</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="已用配额">
+          <span>{{ detailData.usedUserNum ?? 0 }}</span>
+          <span class="text-muted" v-if="detailData.maxUserNum"> / {{ detailData.maxUserNum }}</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="联系人">{{ detailData.contactUser || '—' }}</el-descriptions-item>
+        <el-descriptions-item label="联系电话">{{ detailData.contactPhone || '—' }}</el-descriptions-item>
+        <el-descriptions-item label="地址" :span="2">{{ detailData.address || '—' }}</el-descriptions-item>
+        <el-descriptions-item label="备注" :span="2">{{ detailData.remark || '—' }}</el-descriptions-item>
+        <el-descriptions-item label="创建人">{{ detailData.createBy || '—' }}</el-descriptions-item>
+        <el-descriptions-item label="创建时间">{{ detailData.createTime || '—' }}</el-descriptions-item>
+      </el-descriptions>
+
+      <el-divider content-position="left">已开通模块</el-divider>
+
+      <!-- 区块 2：已开通模块列表 -->
+      <el-table :data="detailData.modules || []" border stripe empty-text="暂无开通模块">
+        <el-table-column prop="moduleCode" label="模块编码" width="180" />
+        <el-table-column prop="moduleName" label="模块名称" width="160" />
+        <el-table-column label="启用状态" width="100" align="center">
+          <template #default="{ row }">
+            <el-tag :type="row.enabled === 1 ? 'success' : 'info'" effect="plain">
+              {{ row.enabled === 1 ? '启用' : '禁用' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="有效期起" width="170">
+          <template #default="{ row }">
+            <span v-if="row.validFrom">{{ row.validFrom }}</span>
+            <span v-else class="text-muted">—</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="有效期止" width="170">
+          <template #default="{ row }">
+            <span v-if="row.validTo">{{ row.validTo }}</span>
+            <span v-else class="text-muted">长期</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="remark" label="备注" show-overflow-tooltip />
+      </el-table>
+
+      <template #footer>
+        <el-button @click="detailVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -179,7 +246,7 @@
 defineOptions({ name: 'Tenant' })
 import { ref, reactive, computed, watch, nextTick } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getTenantList, addTenant, updateTenant, deleteTenant, getAllMenuTree, getTenantMenuIds, saveTenantMenus } from '@/api/tenant'
+import { getTenantList, addTenant, updateTenant, deleteTenant, getAllMenuTree, getTenantMenuIds, saveTenantMenus, getTenantDetail } from '@/api/tenant'
 
 // ===== 菜单权限相关 =====
 const activeTab = ref('basic')
@@ -421,6 +488,35 @@ const handleReset = () => {
   searchForm.status = null
   pagination.current = 1
   fetchData()
+}
+
+// ===== 详情弹窗 =====
+const detailVisible = ref(false)
+const detailData = reactive({
+  id: null,
+  tenantName: '',
+  tenantCode: '',
+  status: null,
+  expireDate: null,
+  maxUserNum: null,
+  usedUserNum: 0,
+  contactUser: '',
+  contactPhone: '',
+  address: '',
+  remark: '',
+  createBy: '',
+  createTime: '',
+  modules: []
+})
+
+const handleDetail = async (row) => {
+  try {
+    const res = await getTenantDetail(row.id)
+    Object.assign(detailData, res.data || {})
+    detailVisible.value = true
+  } catch (e) {
+    console.error('加载租户详情失败', e)
+  }
 }
 
 fetchData()

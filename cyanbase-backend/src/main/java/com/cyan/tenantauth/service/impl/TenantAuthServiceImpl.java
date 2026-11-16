@@ -9,6 +9,7 @@ import com.cyan.mapper.SysUserMapper;
 import com.cyan.mapper.SysUserRoleMapper;
 import com.cyan.security.dto.LoginResponse;
 import com.cyan.security.util.JwtUtil;
+import com.cyan.security.service.PermissionVersionService;
 import com.cyan.security.service.RefreshTokenService;
 import com.cyan.service.SysUserService;
 import com.cyan.tenantauth.dto.TenantAccountVO;
@@ -38,6 +39,7 @@ public class TenantAuthServiceImpl implements TenantAuthService {
     private final RefreshTokenService refreshTokenService;
     private final SysUserService sysUserService;
     private final TenantLoginCaptchaService tenantLoginCaptchaService;
+    private final PermissionVersionService permissionVersionService;
 
     @Override
     public Object tenantLogin(TenantLoginReq req) {
@@ -64,7 +66,7 @@ public class TenantAuthServiceImpl implements TenantAuthService {
         return loginWithoutTenant(req);
     }
 
-    /** 模式 B：首次请求 —— 手机号查全部候选账号 + 统一验密 */
+    /** 模式 B：首次请求 —— 手机号查唯一租户账号 + 统一验密（手机号全局唯一后，一个手机号最多匹配一条有效账号） */
     private Object loginWithoutTenant(TenantLoginReq req) {
         // ① 查 sys_user：手机号匹配 + 租户ID>0 + status=0 正常启用（delFlag 由 @TableLogic 自动过滤）
         LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
@@ -77,20 +79,7 @@ public class TenantAuthServiceImpl implements TenantAuthService {
             throw new RuntimeException("手机号或密码错误");
         }
 
-        // ② 同一手机号 + 同一租户多条记录 → 脏数据，报错让运维清理
-        Map<Long, Long> tenantDupCount = new HashMap<>();
-        for (SysUser u : allUsers) {
-            tenantDupCount.merge(u.getTenantId(), 1L, Long::sum);
-        }
-        for (Map.Entry<Long, Long> e : tenantDupCount.entrySet()) {
-            if (e.getValue() > 1) {
-                log.error("手机号 {} 在租户 {} 下存在 {} 条未删除账号，疑似脏数据",
-                        req.getPhone(), e.getKey(), e.getValue());
-                throw new RuntimeException("账号异常，请联系管理员");
-            }
-        }
-
-        // ③ 批量查 sys_tenant，过滤冻结/过期租户
+        // ② 批量查 sys_tenant，过滤冻结/过期租户
         Set<Long> tenantIds = allUsers.stream().map(SysUser::getTenantId).collect(Collectors.toSet());
         List<SysTenant> tenants = sysTenantMapper.selectBatchIds(tenantIds);
         Set<Long> validTenantIds = tenants.stream()
@@ -108,7 +97,7 @@ public class TenantAuthServiceImpl implements TenantAuthService {
             throw new RuntimeException("手机号或密码错误");
         }
 
-        // ④ 统一验密码 —— 筛出密码对的账号
+        // ③ 统一验密码 —— 手机号全局唯一后，validUsers 最多一条记录
         List<SysUser> matched = new ArrayList<>();
         for (SysUser u : validUsers) {
             if (sysUserService.verifyPassword(u.getId(), req.getPassword())) {
@@ -120,31 +109,10 @@ public class TenantAuthServiceImpl implements TenantAuthService {
             throw new RuntimeException("手机号或密码错误");
         }
 
-        // ⑤ 恰好 1 个账号密码对 → 直接登录成功 + 消费凭证
-        if (matched.size() == 1) {
-            SysUser target = matched.get(0);
-            tenantLoginCaptchaService.consumeCredential(req.getCredentialKey());
-            return buildLoginResponse(target);
-        }
-
-        // ⑥ 多个账号密码对 → 返回租户选择列表
-        Map<Long, SysTenant> tenantMap = tenants.stream()
-                .collect(Collectors.toMap(SysTenant::getId, t -> t));
-
-        List<TenantAccountVO> list = matched.stream().map(u -> {
-            TenantAccountVO vo = new TenantAccountVO();
-            vo.setUserId(u.getId());
-            vo.setTenantId(u.getTenantId());
-            vo.setNickName(u.getNickName());
-            SysTenant t = tenantMap.get(u.getTenantId());
-            vo.setTenantName(t != null ? t.getTenantName() : "未知租户");
-            return vo;
-        }).collect(Collectors.toList());
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("step", "select-tenant");
-        result.put("list", list);
-        return result;
+        // ④ 恰好 1 个账号密码对 → 直接登录成功 + 消费凭证
+        SysUser target = matched.get(0);
+        tenantLoginCaptchaService.consumeCredential(req.getCredentialKey());
+        return buildLoginResponse(target);
     }
 
     /** 模式 A：二次请求 —— phone + tenantId 精确锁定账号 + 验密 */
@@ -198,6 +166,8 @@ public class TenantAuthServiceImpl implements TenantAuthService {
         claims.put("roles", roleStr);
         jwtUtil.putTenantId(claims, sysUser.getTenantId());   // ✅ L1 租户隔离
         jwtUtil.putDeptId(claims, sysUser.getDeptId());        // ✅ L2 DataScope
+        // 🔐 权限版本预埋：登录时初始化/读取 Redis 版本号并写入 JWT
+        jwtUtil.putPermVer(claims, permissionVersionService.getOrInitVersion(sysUser.getId()));
         String accessToken = jwtUtil.createToken(claims);
 
         // Refresh Token

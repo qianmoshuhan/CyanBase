@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <el-card shadow="hover" class="app-container">
     <template #header>
       <div class="card-header">
@@ -17,7 +17,7 @@
         <el-input v-model="queryParams.processKey" placeholder="请输入标识" clearable />
       </el-form-item>
       <el-form-item label="状态">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 140px">
           <el-option label="草稿" value="0" />
           <el-option label="已发布" value="1" />
           <el-option label="已停用" value="2" />
@@ -31,12 +31,31 @@
     <el-table v-loading="loading" :data="tableData" border style="width: 100%">
       <el-table-column type="index" label="序号" width="70" align="center" :index="(i) => (queryParams.pageNum - 1) * queryParams.pageSize + i + 1" />
       <el-table-column prop="processName" label="流程名称" min-width="180" />
-      <el-table-column prop="processKey" label="流程标识" width="200" />
+
+      <!-- ⭐ 平台侧才显示"分发租户"列：租户没有分发权限，不需要看这列 -->
+      <el-table-column v-if="!isTenantLogin" label="分发租户" min-width="200">
+        <template #default="{ row }">
+          <template v-if="row.distributeTenantNames">
+            <el-tag v-for="name in row.distributeTenantNames.split(', ')" :key="name" size="small" style="margin-right: 4px;">
+              {{ name }}
+            </el-tag>
+          </template>
+          <el-tag v-else type="info" effect="plain">未分发</el-tag>
+        </template>
+      </el-table-column>
+
       <el-table-column prop="category" label="分类" width="120" />
       <el-table-column prop="version" label="版本" width="80" />
 
-      <!-- ⭐ 新增：数据来源列 -->
-      <el-table-column label="来源" width="110">
+      <!-- ⭐ 来源列：平台侧显示创建租户名；租户侧显示"本租户"/"分发给我" -->
+      <el-table-column v-if="!isTenantLogin" label="创建租户" min-width="140">
+        <template #default="{ row }">
+          <el-tag :type="row.creatorTenantName === '平台' ? 'info' : 'primary'" effect="plain">
+            {{ row.creatorTenantName || '-' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column v-else label="来源" width="110">
         <template #default="{ row }">
           <el-tag v-if="row.source === 'OWN'" type="primary">本租户</el-tag>
           <el-tag v-else-if="row.source === 'DISTRIBUTED'" type="warning">分发给我</el-tag>
@@ -207,6 +226,10 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getWorkflowDefinitionList, deleteWorkflowDefinition, updateWorkflowDefinition, addWorkflowDefinition, getVersionList, createVersionFrom } from '@/api/wfDefinition'
+import storage from '@/utils/storage'
+
+// ⭐ 判断是租户侧还是平台侧登录
+const isTenantLogin = computed(() => storage.getLoginType() === 'tenant')
 
 const router = useRouter()
 const loading = ref(false)

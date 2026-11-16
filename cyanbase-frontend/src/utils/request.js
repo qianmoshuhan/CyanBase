@@ -39,6 +39,18 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   response => {
+    // ⭐ 旁路：responseType=blob / arraybuffer 的下载请求 —— 跳过 JSON code 判断
+    //   直接返回完整 response（业务方自己用 response.data 拿 Blob）
+    //   根因：Blob 对象没有 .code 属性，走下面 res.code===200 会永远判失败
+    const ct = response.headers?.['content-type'] || ''
+    if (response.config?.responseType === 'blob'
+        || response.config?.responseType === 'arraybuffer'
+        || ct.includes('application/octet-stream')
+        || ct.includes('application/vnd.openxmlformats')
+        || ct.includes('application/pdf')) {
+      return response
+    }
+
     const res = response.data
 
     // code为200表示成功

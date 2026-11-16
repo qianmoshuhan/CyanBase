@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿<template>
   <div class="page-container">
     <el-card shadow="hover">
       <template #header>
@@ -16,7 +16,7 @@
           <el-input v-model="searchForm.loginName" placeholder="请输入登录账号" clearable />
         </el-form-item>
         <el-form-item label="登录状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
+          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable style="width: 140px">
             <el-option label="成功" value="0" />
             <el-option label="失败" value="1" />
           </el-select>

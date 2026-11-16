@@ -12,14 +12,21 @@ import com.cyan.security.datascope.DataScopeContext;
 import com.cyan.security.datascope.ResourceScope;
 import com.cyan.security.domain.LoginUser;
 import com.cyan.security.service.PermissionService;
+import com.cyan.entity.SysTenant;
+import com.cyan.service.PrincipalTenantScopeService;
 import com.cyan.service.SysDeptService;
 import com.cyan.service.SysRoleDeptService;
 import com.cyan.service.SysRoleService;
+import com.cyan.service.SysTenantService;
+import com.cyan.service.PlatformPrivilegeLogService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.*;
 
@@ -62,6 +69,10 @@ public class PermissionGuard {
     @Autowired @Lazy private SysRoleService roleService;
     @Autowired @Lazy private SysRoleDeptService roleDeptService;
     @Autowired @Lazy private SysDeptService deptService;
+    @Autowired @Lazy private PrincipalTenantScopeService principalTenantScopeService;
+    @Autowired @Lazy private com.cyan.mapper.PrincipalTenantScopeMapper principalTenantScopeMapper;
+    @Autowired @Lazy private PlatformPrivilegeLogService platformPrivilegeLogService;
+    @Autowired @Lazy private SysTenantService sysTenantService;
 
     // ====================================================================
     //  对外统一入口（仅这两个 public 方法，不暴露分层方法）
@@ -149,35 +160,97 @@ public class PermissionGuard {
     // ====================================================================
 
     /**
-     * 租户身份校验 + 资源租户归属校验（仅 targetScope.targetTenantId != null 时比对）。
+     * 租户硬隔离 —— 可配置授权策略链。
      * <p>
-     * 超管放通已统一在 doCheck() 入口完成（permissionService.isSuperAdmin + 通配符），
-     * 三层内部禁止散落 isSuperAdmin 判断——此方法仅处理非超管的租户硬隔离。
+     * 升级后支持三种主体类型，每种走独立分支，绝不混淆：
+     * <pre>
+     *   主体类型判断优先级：
+     *   ① platformPrincipal=true + activeTenantId!=null → 平台主体已选活跃租户
+     *      → 用 activeTenantId 参与隔离，同时校验 principal_tenant_scope 许可
+     *   ② tenantId=0 → 平台超管（已在 doCheck 入口放行，不会走到这里）
+     *   ③ tenantId>0 → 普通租户用户
+     *      → 原逻辑：当前租户必须等于资源租户
+     *   ④ platformPrincipal=true + activeTenantId=null → 平台主体未选租户
+     *      → 拒绝访问租户接口（应该先选活跃租户）
+     *   ⑤ tenantId=null + 非平台主体 → 真正无租户上下文
+     *      → 拒绝
+     * </pre>
+     * <p>
+     * 所有跨租户许可校验都收敛在本方法内，业务代码禁止散落 if 判断。
+     * 超管放通已统一在 doCheck() 入口完成，三层内部禁止散落 isSuperAdmin 判断。
      */
     private void checkTenantIsolation(ResourceScope targetScope) {
         Long userId = SecurityUtils.getUserId();
         Long tenantId = SecurityUtils.getTenantId();
+        LoginUser loginUser = SecurityUtils.getLoginUser();
 
-        // 步骤 1.1  必须登录（入口已放过超管，这里全是非超管）
+        // ====== 步骤 1：必须登录 ======
         if (userId == null) {
             log.warn("[PermissionGuard][L1] 未登录访问，userId={}", userId);
             throw new BusinessException(401, "请先登录");
         }
 
-        // 步骤 1.2  非超管必须是租户用户（tenantId > 0）——禁止平台侧非 admin 用户操作租户资源
-        if (tenantId == null || tenantId <= 0) {
-            log.warn("[PermissionGuard][L1] 非租户用户越权访问 userId={}, tenantId={}", userId, tenantId);
-            throw new BusinessException(403, "非租户用户无权访问租户接口");
+        // ====== 步骤 2：主体类型识别 + 策略链分发 ======
+        boolean isPlatformPrincipal = loginUser != null && Boolean.TRUE.equals(loginUser.getPlatformPrincipal());
+        Long activeTenantId = loginUser != null ? loginUser.getActiveTenantId() : null;
+
+        // --- 分支 A：平台主体已选活跃租户（最高优先级）---
+        if (isPlatformPrincipal && activeTenantId != null) {
+            // 2A.1  跨租户许可校验：activeTenantId 必须在 principal_tenant_scope 分配范围内
+            boolean scopeAllowed = principalTenantScopeMapper.selectCount(
+                    new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<com.cyan.entity.PrincipalTenantScope>()
+                            .eq(com.cyan.entity.PrincipalTenantScope::getPrincipalUserId, userId)
+                            .eq(com.cyan.entity.PrincipalTenantScope::getTenantId, activeTenantId)
+            ) > 0;
+            if (!scopeAllowed) {
+                log.warn("[PermissionGuard][L1][策略链] 平台主体未被授权访问该活跃租户 userId={}, activeTenantId={}", userId, activeTenantId);
+                throw new BusinessException(403, "当前主体未被授权访问该租户，请先联系平台管理员分配权限");
+            }
+            // 2A.2  资源租户归属比对（新建场景 targetTenantId=null 跳过）
+            if (targetScope != null && targetScope.targetTenantId() != null) {
+                if (!activeTenantId.equals(targetScope.targetTenantId())) {
+                    log.warn("[PermissionGuard][L1][策略链] 平台主体活跃租户与目标租户不匹配 userId={}, activeTenant={}, targetTenant={}",
+                            userId, activeTenantId, targetScope.targetTenantId());
+                    throw new BusinessException(403, "无权操作其他租户的数据");
+                }
+            }
+            // ✅ 分支 A 通过
+            // 📝 跨租户访问审计：只记录写操作（targetScope != null），读操作太频繁不写
+            if (targetScope != null) {
+                writeCrossTenantAudit(userId, loginUser.getUserName(), activeTenantId, targetScope);
+            }
+            // 后续 L2/L3 完全沿用现有逻辑
+            return;
         }
 
-        // 步骤 1.3  资源租户归属比对（新建场景 targetTenantId=null 跳过）
-        if (targetScope != null && targetScope.targetTenantId() != null) {
-            if (!tenantId.equals(targetScope.targetTenantId())) {
-                log.warn("[PermissionGuard][L1] 跨租户访问 userId={}, currentTenant={}, targetTenant={}",
-                        userId, tenantId, targetScope.targetTenantId());
-                throw new BusinessException(403, "无权操作其他租户的数据");
+        // --- 分支 B：普通租户用户（tenantId > 0）---
+        if (tenantId != null && tenantId > 0) {
+            // 资源租户归属比对
+            if (targetScope != null && targetScope.targetTenantId() != null) {
+                if (!tenantId.equals(targetScope.targetTenantId())) {
+                    log.warn("[PermissionGuard][L1][策略链] 普通租户用户跨租户访问 userId={}, currentTenant={}, targetTenant={}",
+                            userId, tenantId, targetScope.targetTenantId());
+                    throw new BusinessException(403, "无权操作其他租户的数据");
+                }
             }
+            // ✅ 分支 B 通过
+            // 📝 平台主体（platformPrincipal=true）走分支 B 也要审计：
+            //    auditor01 (tenantId=6, platformPrincipal=true) 没选活跃租户时走这里，
+            //    本质仍是「平台主体利用特权操作租户数据」，需要审计。
+            if (isPlatformPrincipal && targetScope != null) {
+                writeCrossTenantAudit(userId, loginUser.getUserName(), tenantId, targetScope);
+            }
+            return;
         }
+
+        // --- 分支 C：其余全部拒绝 ---
+        // 可能情况：
+        //   1. platformPrincipal=true + activeTenantId=null → 平台主体未选活跃租户
+        //   2. tenantId=0 → 平台超管（理论上不会走到这里，入口已放通）
+        //   3. tenantId=null + 非平台主体 → 真正无租户上下文
+        log.warn("[PermissionGuard][L1][策略链] 主体无有效租户上下文 userId={}, tenantId={}, platformPrincipal={}, activeTenantId={}",
+                userId, tenantId, isPlatformPrincipal, activeTenantId);
+        throw new BusinessException(403, "当前主体无权访问租户接口" + (isPlatformPrincipal ? "（请先选择活跃租户）" : ""));
     }
 
     // ====================================================================
@@ -369,5 +442,57 @@ public class PermissionGuard {
             } catch (NumberFormatException ignore) {}
         }
         return ids;
+    }
+
+    /**
+     * 📝 跨租户访问审计日志写入
+     * <p>
+     * 触发时机：平台主体（platformPrincipal=true + activeTenantId!=null）通过 scope 许可校验后，
+     * 执行写操作（targetScope!=null）时记录一条 CROSS_TENANT_ACCESS 审计。
+     * <p>
+     * 只记录写操作的设计意图：读操作太频繁（每次列表查询都触发），全量记录会导致表膨胀。
+     * 写操作意味着「主体在租户内产生了变更」，这才是审计真正关心的核心事件。
+     * <p>
+     * 静默降级：任何异常都不抛出，只打 warn 日志，保证审计失败不阻断主业务。
+     */
+    private void writeCrossTenantAudit(Long userId, String userName, Long activeTenantId, ResourceScope targetScope) {
+        try {
+            // 1. 查目标租户名（skip 租户拦截防死锁）
+            String tenantName = null;
+            try {
+                SysTenant tenant = sysTenantService.getById(activeTenantId);
+                if (tenant != null) tenantName = tenant.getTenantName();
+            } catch (Exception ignore) { /* 查名失败降级为 null */ }
+
+            // 2. 取请求 IP
+            String ip = "-";
+            try {
+                ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                if (attrs != null) {
+                    HttpServletRequest request = attrs.getRequest();
+                    String fwd = request.getHeader("X-Forwarded-For");
+                    if (fwd != null && !fwd.isEmpty() && !"unknown".equalsIgnoreCase(fwd)) {
+                        ip = fwd.contains(",") ? fwd.split(",")[0].trim() : fwd;
+                    } else {
+                        ip = request.getRemoteAddr();
+                    }
+                }
+            } catch (Exception ignore) { /* 取 IP 失败降级 */ }
+
+            // 3. 组装详情（JSON 风格字符串）
+            String detail = String.format("activeTenant=%d, deptId=%s, createBy=%s",
+                    activeTenantId,
+                    targetScope.targetDeptId(),
+                    targetScope.targetCreateBy());
+
+            platformPrivilegeLogService.audit(
+                    userId, userName,
+                    "CROSS_TENANT_ACCESS",
+                    activeTenantId, tenantName,
+                    detail, ip);
+        } catch (Exception e) {
+            // 审计失败绝对不能阻断主业务
+            log.warn("[PermissionGuard] 跨租户审计日志写入失败（已静默降级）userId={}, err={}", userId, e.getMessage());
+        }
     }
 }

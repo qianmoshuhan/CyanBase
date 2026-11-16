@@ -1,9 +1,17 @@
 <template>
   <div class="login-container">
+    <!-- 背景装饰光斑 -->
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+    <div class="bg-blob bg-blob-3"></div>
+
     <div class="login-box">
       <div class="login-header">
+        <div class="logo-mark">
+          <span class="logo-dot"></span>
+        </div>
         <h1 class="title">CyanBase</h1>
-        <p class="subtitle">青渊数字底座</p>
+        <p class="subtitle">青渊数字底座 · 平台管理</p>
       </div>
       <el-form
         ref="loginFormRef"
@@ -12,12 +20,35 @@
         class="login-form"
         @keyup.enter="handleLogin"
       >
-        <el-form-item prop="userName">
+        <!-- 登录模式 Tab 切换 -->
+        <div class="login-mode-tabs">
+          <div
+            class="mode-tab"
+            :class="{ active: loginForm.loginMode === 'account' }"
+            @click="switchLoginMode('account')"
+          >账号登录</div>
+          <div
+            class="mode-tab"
+            :class="{ active: loginForm.loginMode === 'phone' }"
+            @click="switchLoginMode('phone')"
+          >手机登录</div>
+        </div>
+
+        <el-form-item v-if="loginForm.loginMode === 'account'" prop="userName">
           <el-input
             v-model="loginForm.userName"
             placeholder="请输入用户名"
             size="large"
             prefix-icon="User"
+            autocomplete="off"
+          />
+        </el-form-item>
+        <el-form-item v-else prop="phone">
+          <el-input
+            v-model="loginForm.phone"
+            placeholder="请输入手机号"
+            size="large"
+            prefix-icon="Iphone"
             autocomplete="off"
           />
         </el-form-item>
@@ -80,6 +111,46 @@
           </div>
         </div>
       </el-dialog>
+
+      <!-- ⭐ 平台主体选活跃租户弹窗（和 tenantLogin 同款 el-dialog + v-for） -->
+      <el-dialog
+        v-model="tenantDialogVisible"
+        title="选择活跃租户"
+        width="460px"
+        :close-on-click-modal="false"
+        :close-on-press-escape="true"
+        center
+      >
+        <p class="dialog-tip">
+          当前账号是平台主体，可访问 {{ scopeTenants.length }} 个租户，请选择审计目标：
+        </p>
+        <div class="tenant-list">
+          <div
+            v-for="item in scopeTenants"
+            :key="item.id"
+            class="tenant-item"
+            :class="{ active: selectedTenantId === item.id }"
+            @click="selectedTenantId = item.id"
+          >
+            <el-radio
+              :model-value="selectedTenantId"
+              :label="item.id"
+              @change="selectedTenantId = item.id"
+            >
+              <div class="tenant-info">
+                <div class="tenant-name">{{ item.tenantName }}</div>
+                <div class="tenant-nick">{{ item.tenantCode }} · ID:{{ item.id }}</div>
+              </div>
+            </el-radio>
+          </div>
+        </div>
+        <template #footer>
+          <el-button @click="handleCancelTenantSelect">取消</el-button>
+          <el-button type="primary" :loading="tenantSwitchLoading" @click="handleConfirmTenant">
+            确认进入
+          </el-button>
+        </template>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -88,7 +159,7 @@
 import { ref, reactive, computed, nextTick, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/store/user'
-import { getCaptcha, checkCaptcha } from '@/api/auth'
+import { getCaptcha, checkCaptcha, getTenantScopes } from '@/api/auth'
 import { ElMessage } from 'element-plus'
 import storage from '@/utils/storage'
 import { getConfigByKey } from '@/api/config'
@@ -103,18 +174,32 @@ const loading = ref(false)
 const showCaptchaDialog = ref(false)
 
 const loginForm = reactive({
+  loginMode: 'account',   // 'account' | 'phone'
   userName: '',
+  phone: '',
   password: '',
   credentialKey: ''
 })
 
-const loginRules = {
+// 动态校验规则：根据登录模式切换必填字段
+const loginRules = computed(() => ({
   userName: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
+    { required: loginForm.loginMode === 'account', message: '请输入用户名', trigger: 'blur' }
+  ],
+  phone: [
+    { required: loginForm.loginMode === 'phone', message: '请输入手机号', trigger: 'blur' }
   ],
   password: [
     { required: true, message: '请输入密码', trigger: 'blur' }
   ]
+}))
+
+// 切换登录模式：清空另一模式的输入值
+function switchLoginMode(mode) {
+  if (loginForm.loginMode === mode) return
+  loginForm.loginMode = mode
+  if (mode === 'account') loginForm.phone = ''
+  else loginForm.userName = ''
 }
 
 // Console 打印的兜底账号（后端配置 key 缺失或接口异常时使用，与 loginForm 默认值解耦）
@@ -328,14 +413,16 @@ async function doCheck() {
     console.log('[滑块校验] 验证成功！开始登录...')
     loading.value = true
     try {
-      await userStore.login(loginForm.userName, loginForm.password, loginForm.credentialKey)
-      storage.setLoginType('admin')
-      ElMessage.success('登录成功')
-      await userStore.fetchUserInfo()
+      const loginBody = {
+        password: loginForm.password,
+        credentialKey: loginForm.credentialKey
+      }
+      if (loginForm.loginMode === 'phone') loginBody.phone = loginForm.phone
+      else loginBody.userName = loginForm.userName
+      const loginRes = await userStore.login(loginBody)
       const isMobile = window.innerWidth <= 768
       const redirect = route.query.redirect || (isMobile ? '/mobile/home' : '/home')
-      console.log('[滑块校验] 登录成功，跳转', redirect)
-      router.push(redirect)
+      await handlePostLogin(redirect, loginRes)
     } catch (error) {
       console.error('[滑块校验] 登录失败：', error)
       loginForm.credentialKey = ''
@@ -354,6 +441,81 @@ async function doCheck() {
 // ==================== 滑块验证码 ====================
 
 let isAutoClosing = false  // doCheck 成功后自动关弹窗的标志
+
+// ==================== ⭐ 平台主体选租户 dialog 状态 ====================
+const tenantDialogVisible = ref(false)
+const scopeTenants = ref([])          // 登录响应里直接带的 tenants 列表（后端 step='select-tenant' 分支返回）
+const selectedTenantId = ref(null)
+const tenantSwitchLoading = ref(false)
+let pendingRedirect = ''
+let pendingUserId = null               // 登录响应返回的 userId，用于 switchTenantToken 接口
+
+// ==================== ⭐ 平台主体选租户流程 ====================
+/**
+ * 登录成功后的统一处理：
+ *   1. 后端响应里 step='select-tenant' → 平台主体，弹窗等用户选租户换 token
+ *   2. 否则 → fetchUserInfo + 正常跳转
+ */
+async function handlePostLogin(redirect, loginRes) {
+  storage.setLoginType('admin')
+
+  // ⭐ 后端 step='select-tenant' → 平台主体，直接用响应里的 tenants 弹窗
+  if (loginRes?.data?.step === 'select-tenant') {
+    const tenants = loginRes.data.tenants || []
+    if (tenants.length === 0) {
+      ElMessage.warning('当前平台主体未分配任何有效租户，请联系管理员配置后重试')
+      userStore.clearAuth()
+      return
+    }
+    pendingUserId = loginRes.data.userId
+    scopeTenants.value = tenants
+    selectedTenantId.value = tenants[0]?.id ?? null
+    pendingRedirect = redirect
+    tenantDialogVisible.value = true
+    return  // 等用户在 dialog 里选
+  }
+
+  // 超管 / 租户用户 —— fetchUserInfo + 直接跳
+  await userStore.fetchUserInfo()
+  ElMessage.success('登录成功')
+  router.push(redirect)
+}
+
+/** 用户点取消 → 退出登录 */
+function handleCancelTenantSelect() {
+  tenantDialogVisible.value = false
+  ElMessage.info('已取消，退出登录')
+  userStore.clearAuth()
+}
+
+/** 用户点确认 → switchTenantToken 换双 token + 重新拉菜单池 → 跳转 */
+async function handleConfirmTenant() {
+  if (!selectedTenantId.value) {
+    ElMessage.warning('请选择一个租户')
+    return
+  }
+  tenantSwitchLoading.value = true
+  try {
+    // 用登录响应里的 userId + 滑块凭证走首次换 token 接口
+    await userStore.switchTenantTokenAndUpdateToken(
+      pendingUserId,
+      selectedTenantId.value,
+      loginForm.credentialKey
+    )
+    loginForm.credentialKey = ''  // 凭证已被后端 consume，清空
+    await userStore.fetchUserInfo()
+    tenantDialogVisible.value = false
+    const tenantName = scopeTenants.value.find(t => t.id === selectedTenantId.value)?.tenantName || ''
+    ElMessage.success(`进入租户 ${tenantName} 成功`)
+    router.push(pendingRedirect)
+  } catch (err) {
+    ElMessage.error('切换租户失败：' + (err.message || ''))
+    userStore.clearAuth()
+    tenantDialogVisible.value = false
+  } finally {
+    tenantSwitchLoading.value = false
+  }
+}
 
 /**
  * 弹窗关闭时的清理函数 — @close 触发就说明 dialog 肯定要关了！
@@ -425,13 +587,16 @@ const handleLogin = async () => {
     if (loginForm.credentialKey) {
       loading.value = true
       try {
-        await userStore.login(loginForm.userName, loginForm.password, loginForm.credentialKey)
-        storage.setLoginType('admin')
-        ElMessage.success('登录成功')
-        await userStore.fetchUserInfo()
+        const loginBody = {
+          password: loginForm.password,
+          credentialKey: loginForm.credentialKey
+        }
+        if (loginForm.loginMode === 'phone') loginBody.phone = loginForm.phone
+        else loginBody.userName = loginForm.userName
+        const loginRes = await userStore.login(loginBody)
         const isMobile = window.innerWidth <= 768
         const redirect = route.query.redirect || (isMobile ? '/mobile/home' : '/home')
-        router.push(redirect)
+        await handlePostLogin(redirect, loginRes)
       } catch (error) {
         loginForm.credentialKey = ''  // 凭证失效，清了让用户重新验证
       } finally {
@@ -462,48 +627,195 @@ const handleLogin = async () => {
 
 <style scoped>
 .login-container {
+  position: relative;
   width: 100%;
   height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #1677ff 0%, #4096ff 50%, #e6f4ff 100%);
+  background: linear-gradient(135deg, #0958d9 0%, #1677ff 40%, #69b1ff 100%);
+  overflow: hidden;
+}
+
+/* 背景装饰光斑 — 纯 CSS，不引入任何图片 */
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.bg-blob-1 {
+  width: 420px;
+  height: 420px;
+  background: #69b1ff;
+  top: -120px;
+  left: -100px;
+  animation: blobFloat 12s ease-in-out infinite;
+}
+.bg-blob-2 {
+  width: 360px;
+  height: 360px;
+  background: #91caff;
+  bottom: -100px;
+  right: -80px;
+  animation: blobFloat 15s ease-in-out infinite reverse;
+}
+.bg-blob-3 {
+  width: 280px;
+  height: 280px;
+  background: rgba(255,255,255,0.35);
+  top: 40%;
+  left: 55%;
+  animation: blobFloat 18s ease-in-out infinite;
+}
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -40px) scale(1.08); }
 }
 
 .login-box {
+  position: relative;
   width: 420px;
   max-width: 92%;
-  padding: 40px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  padding: 44px 40px 36px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow:
+    0 20px 60px rgba(9, 88, 217, 0.35),
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  animation: boxFadeIn 0.6s ease-out;
+}
+@keyframes boxFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .login-header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 28px;
+}
+
+.logo-mark {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.logo-dot {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1677ff, #69b1ff);
+  box-shadow: 0 6px 20px rgba(22, 119, 255, 0.45);
+  position: relative;
+}
+.logo-dot::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 4px;
+  border-radius: 2px;
+  background: #fff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 -8px 0 #fff, 0 8px 0 #fff;
 }
 
 .title {
-  color: #303133;
-  font-size: 28px;
-  font-weight: bold;
+  color: #1a1a2e;
+  font-size: 26px;
+  font-weight: 700;
   margin: 0;
+  letter-spacing: 1px;
 }
 
 .subtitle {
-  color: #606266;
-  font-size: 14px;
+  color: #8c8c8c;
+  font-size: 13px;
   margin: 8px 0 0 0;
+  letter-spacing: 0.5px;
 }
 
 .login-form {
-  margin-top: 20px;
+  margin-top: 16px;
 }
 
+/* ===== 登录模式 Tab 切换 —— 原来完全缺失！===== */
+.login-mode-tabs {
+  display: flex;
+  background: #f5f7fa;
+  border-radius: 10px;
+  padding: 4px;
+  margin-bottom: 24px;
+  gap: 4px;
+}
+.mode-tab {
+  flex: 1;
+  height: 40px;
+  line-height: 40px;
+  text-align: center;
+  font-size: 14px;
+  color: #606266;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 500;
+  user-select: none;
+}
+.mode-tab:hover {
+  color: #1677ff;
+}
+.mode-tab.active {
+  background: #fff;
+  color: #1677ff;
+  font-weight: 600;
+  box-shadow:
+    0 2px 8px rgba(22, 119, 255, 0.15),
+    0 1px 2px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
+}
+
+/* ===== 输入框聚焦美化 ===== */
+.login-form :deep(.el-input__wrapper) {
+  border-radius: 10px;
+  transition: all 0.3s;
+  box-shadow: 0 0 0 1px #e4e7ed inset;
+}
+.login-form :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px #4096ff inset;
+}
+.login-form :deep(.el-input__wrapper.is-focus) {
+  box-shadow:
+    0 0 0 1px #1677ff inset,
+    0 0 0 3px rgba(22, 119, 255, 0.12);
+}
+
+/* ===== 登录按钮美化 ===== */
 .login-button {
   width: 100%;
+  height: 46px;
   font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+  letter-spacing: 4px;
+  background: linear-gradient(135deg, #1677ff 0%, #4096ff 100%);
+  border: none;
+  box-shadow: 0 6px 20px rgba(22, 119, 255, 0.35);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.login-button:hover {
+  background: linear-gradient(135deg, #4096ff 0%, #69b1ff 100%) !important;
+  box-shadow: 0 8px 28px rgba(22, 119, 255, 0.45);
+  transform: translateY(-2px);
+}
+.login-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 14px rgba(22, 119, 255, 0.3);
 }
 
 /* 注：captcha-dialog 样式移到文件末尾独立的无 scoped style 块 */
@@ -618,41 +930,103 @@ const handleLogin = async () => {
   color: #67c23a;
 }
 
+/* ===== 平台主体选租户 dialog 样式（和 tenantLogin 同款） ===== */
+.dialog-tip {
+  color: #606266;
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+.tenant-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+.tenant-item {
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tenant-item:hover {
+  border-color: #409eff;
+  background-color: #f0f7ff;
+}
+.tenant-item.active {
+  border-color: #409eff;
+  background-color: #ecf5ff;
+}
+.tenant-info {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tenant-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: #303133;
+}
+.tenant-nick {
+  font-size: 13px;
+  color: #909399;
+}
+
 /* ===== 手机端响应式美化 ===== */
 @media (max-width: 768px) {
-  .login-container {
-    background: linear-gradient(160deg, #4096ff 0%, #1677ff 60%, #0958d9 100%);
-  }
+  .bg-blob-1 { width: 280px; height: 280px; top: -80px; left: -60px; }
+  .bg-blob-2 { width: 240px; height: 240px; bottom: -60px; right: -40px; }
+  .bg-blob-3 { display: none; }
+
   .login-box {
     width: 100%;
     max-width: 88%;
-    padding: 32px 24px 24px;
+    padding: 32px 24px 28px;
     border-radius: 20px;
-    box-shadow: 0 12px 48px rgba(0,0,0,0.25);
+    box-shadow: 0 16px 48px rgba(9, 88, 217, 0.3);
   }
+
   .login-header {
-    margin-bottom: 28px;
+    margin-bottom: 24px;
+  }
+  .logo-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+  .logo-dot::after {
+    width: 16px;
+    height: 3px;
+    box-shadow: 0 -7px 0 #fff, 0 7px 0 #fff;
   }
   .login-header .title {
-    font-size: 24px;
+    font-size: 22px;
     letter-spacing: 2px;
   }
   .login-header .subtitle {
-    font-size: 13px;
+    font-size: 12px;
     color: #909399;
     margin-top: 6px;
   }
+
+  .login-mode-tabs {
+    margin-bottom: 20px;
+  }
+  .mode-tab {
+    height: 38px;
+    line-height: 38px;
+    font-size: 13px;
+  }
+
   .login-form :deep(.el-input__wrapper) {
     border-radius: 10px;
-    box-shadow: 0 0 0 1px #dcdfe6 inset;
   }
+
   .login-button {
-    width: 100%;
     height: 46px;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     border-radius: 12px;
-    letter-spacing: 2px;
+    letter-spacing: 3px;
   }
 }
 </style>

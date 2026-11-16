@@ -20,7 +20,15 @@ logs/
 *.bak
 .DS_Store
 
-
-upload/
+# IDE / 编辑器
 .idea/
+.vscode/
 *.iml
+*.ipr
+*.iws
+
+# 构建 / 分析缓存
+.vite/
+coverage/
+stats.html
+

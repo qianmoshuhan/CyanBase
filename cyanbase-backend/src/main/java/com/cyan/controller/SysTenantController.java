@@ -5,12 +5,20 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.common.security.util.SecurityUtils;
+import com.cyan.dto.TenantDetailVO;
+import com.cyan.dto.TenantModuleItemVO;
 import com.cyan.entity.SysTenant;
 import com.cyan.entity.SysTenantMenu;
+import com.cyan.entity.SysTenantModule;
+import com.cyan.entity.SysUser;
 import com.cyan.mapper.SysTenantMenuMapper;
+import com.cyan.mapper.SysTenantModuleMapper;
+import com.cyan.mapper.SysUserMapper;
 import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.security.aspect.PermissionGuard;
 import com.cyan.security.datascope.ResourceScope;
+import com.cyan.security.domain.LoginUser;
+import com.cyan.service.PrincipalTenantScopeService;
 import com.cyan.service.SysTenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +26,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -32,8 +39,11 @@ public class SysTenantController {
 
     private final SysTenantService sysTenantService;
     private final SysTenantMenuMapper tenantMenuMapper;
+    private final SysTenantModuleMapper tenantModuleMapper;
+    private final SysUserMapper sysUserMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final PermissionGuard permissionGuard;
+    private final PrincipalTenantScopeService principalTenantScopeService;
 
     /**
      * 菜单缓存 key 前缀（和 SysMenuController.getUserMenu 保持一致）
@@ -110,7 +120,72 @@ public class SysTenantController {
     }
 
     /**
+     * 租户详情聚合接口（只读，独立于 list）
+     * 返回：基础信息 + 已用配额 + 已开通模块列表
+     */
+    @GetMapping("/{id}/detail")
+    public R<TenantDetailVO> detail(@PathVariable Long id) {
+        SysTenant tenant = sysTenantService.getById(id);
+        if (tenant == null) return R.fail("租户不存在");
+
+        // 读操作：L1 租户身份 + L2 DataScope（平台级对象，tenantId=null 跳过 L1 归属比对）
+        permissionGuard.check(ResourceScope.of(null, null, tenant.getCreateBy()));
+
+        // 1) 统计已用配额
+        LambdaQueryWrapper<SysUser> userWrapper = new LambdaQueryWrapper<>();
+        userWrapper.eq(SysUser::getTenantId, id);
+        int usedUserNum = sysUserMapper.selectCount(userWrapper).intValue();
+
+        // 2) 已开通模块列表
+        LambdaQueryWrapper<SysTenantModule> moduleWrapper = new LambdaQueryWrapper<>();
+        moduleWrapper.eq(SysTenantModule::getTenantId, id)
+                     .orderByAsc(SysTenantModule::getModuleCode);
+        List<TenantModuleItemVO> modules = tenantModuleMapper.selectList(moduleWrapper).stream()
+                .map(m -> {
+                    TenantModuleItemVO vo = new TenantModuleItemVO();
+                    vo.setModuleCode(m.getModuleCode());
+                    vo.setModuleName(m.getModuleName());
+                    vo.setEnabled(m.getEnabled());
+                    vo.setValidFrom(m.getValidFrom());
+                    vo.setValidTo(m.getValidTo());
+                    vo.setRemark(m.getRemark());
+                    return vo;
+                })
+                .collect(Collectors.toList());
+
+        // 3) 组装详情 VO
+        TenantDetailVO detail = new TenantDetailVO();
+        detail.setId(tenant.getId());
+        detail.setTenantName(tenant.getTenantName());
+        detail.setTenantCode(tenant.getTenantCode());
+        detail.setContactUser(tenant.getContactUser());
+        detail.setContactPhone(tenant.getContactPhone());
+        detail.setAddress(tenant.getAddress());
+        detail.setStatus(tenant.getStatus());
+        detail.setExpireDate(tenant.getExpireDate());
+        detail.setMaxUserNum(tenant.getMaxUserNum());
+        detail.setUsedUserNum(usedUserNum);
+        detail.setRemark(tenant.getRemark());
+        detail.setCreateBy(tenant.getCreateBy());
+        detail.setCreateTime(tenant.getCreateTime());
+        detail.setModules(modules);
+
+        // 4) 过期状态二次修正（和 list 接口保持一致：status=0 但 expire_date 已过 → 显示 2）
+        LocalDateTime now = LocalDateTime.now();
+        if (detail.getStatus() != null && detail.getStatus() == 0
+                && detail.getExpireDate() != null
+                && detail.getExpireDate().isBefore(now)) {
+            detail.setStatus(2);
+        }
+
+        return R.ok(detail);
+    }
+
+    /**
      * 获取全部启用的租户（不分页，给前端下拉选）
+     * <p>⚠️ 此接口返回全部启用租户 + tenantId=null 的平台主体（由数据库决定），
+     * 给租户管理页面、用户搜索等通用场景复用。<br>
+     * 平台侧新增用户弹窗请使用 /system/tenant/authorized（按操作者授权范围过滤）。</p>
      */
     @GetMapping("/all")
     public R<List<SysTenant>> all() {
@@ -118,6 +193,59 @@ public class SysTenantController {
         wrapper.eq(SysTenant::getStatus, 0)
                 .orderByAsc(SysTenant::getId);
         return R.ok(sysTenantService.list(wrapper));
+    }
+
+    /**
+     * 获取当前操作者「可授权的租户列表」
+     * <p>专供平台侧新增用户弹窗下拉，不在前端做二次过滤，后端直接按身份返回合法范围。</p>
+     *
+     * <h4>身份判定链：</h4>
+     * <ul>
+     *   <li>普通租户账号（rawTenantId &gt; 0）→ 直接拒绝调用</li>
+     *   <li>root 超管（rawTenantId == 0）→ 返回全部启用租户</li>
+     *   <li>平台主体（rawTenantId == null, platformPrincipal=true）→
+     *       查 PrincipalTenantScope 关联表，无分配则返回空列表</li>
+     * </ul>
+     *
+     * @return 可授权的启用租户列表（tenantId 均 ≥ 1，不含平台主体项）
+     */
+    @GetMapping("/authorized")
+    public R<List<SysTenant>> authorized() {
+        LoginUser currentUser = SecurityUtils.getLoginUser();
+        if (currentUser == null) return R.fail("未登录");
+
+        // ⚠️ 必须用 getRawTenantId：getTenantId() 会被 activeTenantId 替换，
+        // 导致平台主体选了活跃租户后被误判为普通租户账号
+        Long principalTenantId = SecurityUtils.getPrincipalTenantId();
+
+        // 1) 普通租户账号 → 无权调用平台侧授权接口
+        if (principalTenantId != null && principalTenantId > 0) {
+            return R.fail("普通租户账号无权调用此接口");
+        }
+
+        // 2) root 超管 → 全部启用租户
+        if (principalTenantId != null && principalTenantId == 0) {
+            LambdaQueryWrapper<SysTenant> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(SysTenant::getStatus, 0).orderByAsc(SysTenant::getId);
+            return R.ok(sysTenantService.list(wrapper));
+        }
+
+        // 3) 平台主体（tenantId=null 且 platformPrincipal=true）→ 按 PrincipalTenantScope 关联表过滤
+        if (principalTenantId == null && SecurityUtils.isPlatformPrincipal()) {
+            List<Long> scopedIds = principalTenantScopeService.listScopedTenantIds(currentUser.getUserId());
+            if (scopedIds.isEmpty()) {
+                // 无分配 → 返回空列表，不报错（前端下拉自然为空，提交时后端还会二次拦截）
+                return R.ok(List.of());
+            }
+            LambdaQueryWrapper<SysTenant> wrapper = new LambdaQueryWrapper<>();
+            wrapper.in(SysTenant::getId, scopedIds)
+                    .eq(SysTenant::getStatus, 0)
+                    .orderByAsc(SysTenant::getId);
+            return R.ok(sysTenantService.list(wrapper));
+        }
+
+        // 兜底：未知身份
+        return R.fail("无法识别当前登录身份");
     }
 
     @PostMapping

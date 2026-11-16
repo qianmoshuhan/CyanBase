@@ -1,9 +1,26 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import { resolve } from 'path'
+import { visualizer } from 'rollup-plugin-visualizer'
+
+// 判断是否是分析打包模式： npm run build -- --mode=analyze
+const isAnalyze = process.env.VITE_MODE === 'analyze'
 
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [
+    vue(),
+    // 只有分析模式才启用打包体积可视化插件，普通build不执行
+    ...(isAnalyze
+      ? [
+          visualizer({
+            open: false,
+            filename: 'stats.html',
+            gzipSize: true,
+            brotliSize: true
+          })
+        ]
+      : [])
+  ],
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src')

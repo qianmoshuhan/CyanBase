@@ -2,6 +2,7 @@ package com.cyan.tenant.aspect;
 
 import com.cyan.common.exception.BusinessException;
 import com.cyan.common.security.util.SecurityUtils;
+import com.cyan.security.domain.LoginUser;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,12 +56,28 @@ public class TenantAuthAspect {
             throw new BusinessException(401, "请先登录");
         }
 
-        // ========== 校验 2：必须是租户用户 OR 平台超级管理员 ==========
-        // 平台超级管理员(username=admin) tenantId 可能为 null/0，但必须能跨租户访问所有数据
+        // ========== 校验 2：租户侧接口身份校验 ==========
+        // 四种主体类型，全部放行：
+        //   ① 平台超管（username=admin）→ 天然放行，可跨租户访问所有数据
+        //   ② 普通租户用户（tenantId > 0）→ 标准租户隔离
+        //   ③ 平台主体已选活跃租户（platformPrincipal=true + activeTenantId!=null）→ 用 activeTenantId 参与隔离
+        //   ④ 平台超管 tenantId=0（与①同，username!=admin 的情况）→ 天然跳过拦截
+        // 拒绝：
+        //   ⑤ 平台主体未选活跃租户 → 不允许直接访问租户接口
         String username = SecurityUtils.getUsername();
         boolean isPlatformAdmin = "admin".equals(username);
-        if (!isPlatformAdmin && (tenantId == null || tenantId <= 0)) {
-            log.warn("[TenantAuth] 非租户用户越权访问: userId={}, tenantId={}, uri={}", userId, tenantId, uri);
+        boolean isPrincipalWithActiveTenant = false;
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (loginUser != null && Boolean.TRUE.equals(loginUser.getPlatformPrincipal())
+                && loginUser.getActiveTenantId() != null) {
+            isPrincipalWithActiveTenant = true;
+        }
+        if (!isPlatformAdmin && !isPrincipalWithActiveTenant && (tenantId == null || tenantId <= 0)) {
+            log.warn("[TenantAuth] 非租户用户越权访问: userId={}, tenantId={}, platformPrincipal={}, activeTenantId={}, uri={}",
+                    userId, tenantId,
+                    loginUser != null ? loginUser.getPlatformPrincipal() : null,
+                    loginUser != null ? loginUser.getActiveTenantId() : null,
+                    uri);
             throw new BusinessException(403, "非租户用户无权访问租户接口");
         }
 

@@ -102,3 +102,14 @@ export function checkUserPhone(phone, params = {}) {
     params: { phone, ...params }
   })
 }
+
+/**
+ * 获取用户详情（聚合：基础信息 + 归属 + 权限 + 运维）
+ * 仅平台侧接口，显式 /system/user 前缀，不走 getUrl 辅助函数
+ */
+export function getUserDetail(id) {
+  return request({
+    url: `/system/user/${id}/detail`,
+    method: 'get'
+  })
+}

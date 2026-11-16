@@ -24,6 +24,7 @@ import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.security.aspect.PermissionGuard;
 import com.cyan.security.datascope.ResourceScope;
 import com.cyan.security.service.PermissionService;
+import com.cyan.security.service.PermissionVersionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -63,6 +64,7 @@ public class TenantRoleController {
     private final SysMenuService sysMenuService;
     private final StringRedisTemplate stringRedisTemplate;
     private final PermissionService permissionService;
+    private final PermissionVersionService permissionVersionService;
     private final com.cyan.service.SysUserService sysUserService;
 
     /**
@@ -175,6 +177,12 @@ public class TenantRoleController {
         // ⚠️ 防御：强制清空 id，让数据库 IdType.AUTO 自增
         sysRole.setId(null);
         Long tenantId = SecurityUtils.getTenantId();
+        Long userId = SecurityUtils.getUserId();
+
+        // === 三层原子校验：预期目标 = 当前租户 + 角色归属部门（可选） + 当前操作用户 ===
+        permissionGuard.check(ResourceScope.of(tenantId, sysRole.getDeptId(), SecurityUtils.getUsername()),
+                              "system:role:add");
+
         sysRole.setTenantId(tenantId);
         sysRole.setRoleKey(sequenceService.generateRoleKey());
         // ⭐ 部门私有角色：前端不传 deptId 时自动填充
@@ -207,7 +215,12 @@ public class TenantRoleController {
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), null, exist.getCreateBy()),
                               "system:role:edit");
         sysRole.setTenantId(SecurityUtils.getTenantId());
-        return sysRoleService.updateById(sysRole) ? R.ok() : R.fail("更新失败");
+        boolean ok = sysRoleService.updateById(sysRole);
+        // 🔐 权限版本预埋：角色基础信息变更 → 所有关联用户版本号 +1
+        // 无论 updateById true/false 都 bump（字段值没变化不算真失败）
+        log.info("[TenantRoleUpdate] roleId={}, updateById ok={}, 准备触发 bumpForRole", sysRole.getId(), ok);
+        permissionVersionService.bumpVersionForRole(sysRole.getId());
+        return ok ? R.ok() : R.fail("更新失败");
     }
 
     /**
@@ -238,6 +251,10 @@ public class TenantRoleController {
             evictMenuCache();
             permissionService.evictAllPermCache();
         }
+        // 🔐 权限版本预埋：角色删除 → 所有关联用户版本号 +1
+        // 虽然前面已校验 boundUsers=0 才允许删除，但防御性仍执行 bump
+        log.info("[TenantRoleDelete] roleId={}, removed={}, 准备触发 bumpForRole", id, removed);
+        permissionVersionService.bumpVersionForRole(id);
         return removed ? R.ok() : R.fail("删除失败");
     }
 
@@ -376,6 +393,8 @@ public class TenantRoleController {
         permissionService.evictAllPermCache();
         log.info("[saveMenuPerm] tenantId={}, roleId={}, 提交 {} 个, 实际保存 {} 个", tenantId, roleId,
                 menuIds == null ? 0 : menuIds.size(), safeMenuIds.size());
+        // 🔐 权限版本预埋：角色菜单权限变更 → 所有关联用户版本号 +1
+        permissionVersionService.bumpVersionForRole(roleId);
         return R.ok();
     }
 
@@ -413,6 +432,9 @@ public class TenantRoleController {
                 sysRoleDeptService.saveBatch(binds);
             }
         }
+        log.info("[saveDataScope] roleId={}, dataScope={}, 准备触发 bumpForRole", roleId, dataScope);
+        // 🔐 权限版本预埋：角色数据范围变更 → 所有关联用户版本号 +1
+        permissionVersionService.bumpVersionForRole(roleId);
         return R.ok("数据范围已保存");
     }
 

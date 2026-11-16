@@ -96,3 +96,50 @@ export function refreshToken(refreshToken) {
     data: { refreshToken }
   })
 }
+
+/**
+ * ⭐ 平台主体查询自己允许访问的租户列表
+ *  - 平台超管（tenantId=0）→ 返回全部启用租户
+ *  - 平台主体（tenantId=NULL）→ 返回 principal_tenant_scope 分配范围
+ *  - 普通租户用户（tenantId>0）→ 仅返回所属租户
+ */
+export function getTenantScopes() {
+  return request({
+    url: '/auth/tenant-scopes',
+    method: 'get'
+  })
+}
+
+/**
+ * ⭐ 平台主体切换活跃租户 —— 换发带 activeTenantId 的新 token
+ * 调用成功后前端需立即：
+ *   storage.setToken(newAccess) + storage.setRefreshToken(newRefresh)
+ *   store.userInfo = null（下次 fetchUserInfo 拉新菜单池）
+ */// 平台主体切换活跃租户（已登录状态下切换，需要 Authorization header）
+export function switchTenant(tenantId) {
+  return request({
+    url: '/auth/switch-tenant',
+    method: 'post',
+    data: { tenantId }
+  })
+}
+
+// 平台主体首次选租户换 token（登录后还没业务 JWT，靠 credentialKey 安全屏障）
+export function switchTenantToken(data) {
+  return request({
+    url: '/auth/switch-tenant-token',
+    method: 'post',
+    data  // { userId, selectedTenantId, credentialKey }
+  })
+}
+
+/**
+ * 平台主体右上角下拉：获取当前主体的有效授权租户列表
+ *  - 需登录态 JWT，仅 tenantId IS NULL 的主体可调用
+ */
+export function getMyTenantScopes() {
+  return request({
+    url: '/auth/my-tenant-scopes',
+    method: 'get'
+  })
+}

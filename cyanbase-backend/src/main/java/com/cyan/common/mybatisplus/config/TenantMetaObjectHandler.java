@@ -41,6 +41,23 @@ import org.springframework.stereotype.Component;
 public class TenantMetaObjectHandler implements MetaObjectHandler {
 
     /**
+     * ThreadLocal 跳过标记：创建平台主体等场景需要 tenantId 保持 NULL，
+     * 调用 skip() 后本线程内下一次 insertFill 将跳过 tenantId 自动填充。
+     * 风格与 CustomTenantHandler.skip() 一致。
+     */
+    private static final ThreadLocal<Boolean> SKIP_TENANT_FILL = new ThreadLocal<>();
+
+    /** 外部调用：临时跳过本线程的 tenantId 自动填充 */
+    public static void skip() {
+        SKIP_TENANT_FILL.set(Boolean.TRUE);
+    }
+
+    /** 外部调用：恢复本线程的 tenantId 自动填充（务必在 finally 中调用） */
+    public static void reset() {
+        SKIP_TENANT_FILL.remove();
+    }
+
+    /**
      * 委托原有处理器，保持 createBy/createTime/updateBy/updateTime 填充能力不变。
      */
     @Autowired
@@ -84,9 +101,20 @@ public class TenantMetaObjectHandler implements MetaObjectHandler {
         // 1. 先让原有处理器填充 createBy / createTime / updateBy / updateTime
         delegate.insertFill(metaObject);
 
-        // 2. 追加填充 tenantId —— 复用 CustomTenantHandler 三级降级策略
+        // 2. 检查跳过标记：业务层明确要 tenantId=NULL 时（如创建平台主体），跳过自动填充
+        if (Boolean.TRUE.equals(SKIP_TENANT_FILL.get())) {
+            // ⭐ 关键：用 setFieldValByName（不走 strict 检查）显式把 tenantId 设为 null，
+            // 确保 MP 生成 INSERT SQL 时显式写 tenant_id = NULL，
+            // 而不是因实体 null + NOT_NULL 策略跳过该字段 → 触发数据库 DEFAULT 0 兜底
+            this.setFieldValByName("tenantId", null, metaObject);
+            log.debug("[TenantMeta] SKIP tenantId 自动填充，显式设置 tenantId=NULL");
+            return;
+        }
+
+        // 3. 追加填充 tenantId —— 复用 CustomTenantHandler 同源解析（已含平台主体 activeTenantId 最高优先级）
         Long tenantId = customTenantHandler.resolveTenantId();
         if (tenantId == null) {
+            // 无任何有效租户上下文 → 默认 0（系统级数据，如登录日志、定时任务）
             tenantId = 0L;
         }
 

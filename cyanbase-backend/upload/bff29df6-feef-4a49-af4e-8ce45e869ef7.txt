@@ -1,0 +1,356 @@
+YTMG3-N6DKC-DKB77-7M9GH-8HVX7
+
+export TOKEN=$(curl -s -X POST http://localhost:8090/tenant-auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"tenantId":6,"username":"test6","password":"123456"}' \
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['accessToken'])")
+
+export TOKEN=$(curl -s -X POST http://120.48.47.253:38024/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"userName":"admin","password":"654123"}' \
+  | python3 -c "import sys,json;print(json.load(sys.stdin)['data']['accessToken'])")
+
+SELECT rm.id,rm.role_id, rm.menu_id, rm.tenant_id, m.perms, m.menu_name
+    -> FROM sys_role_menu rm
+    -> JOIN sys_menu m ON rm.menu_id = m.id
+    -> WHERE rm.role_id = 1 AND rm.tenant_id = 0 AND rm.menu_id IN (122, 123, 124);
+
+ALTER TABLE sys_post ADD COLUMN del_flag tinyint DEFAULT 0 COMMENT '删除标志 0正常 1删除';
+
+pm.test("HTTP状态码=200", function () { pm.response.to.have.status(200); });
+pm.test("业务返回成功", function () {
+    const json = pm.response.json();
+    pm.expect(json.code).to.eql(200);
+    pm.expect(json.msg).to.eql("操作成功");
+});
+
+pm.test("HTTP状态码=200或403", function () {
+    // 可能 HTTP 401/403，也可能 HTTP 200 + 业务 code 403
+    const status = pm.response.code;
+    pm.expect([200, 401, 403]).to.include(status);
+});
+pm.test("PermissionGuard 拦截成功", function () {
+    const json = pm.response.json();
+    // 要么 HTTP 403，要么业务 code 非 200
+    const isBlocked = json.code !== 200 || pm.response.code !== 200;
+    pm.expect(isBlocked).to.eql(true);
+    console.log("✅ 越权被拦截，返回：" + JSON.stringify(json));
+});
+
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8090/system/menu/getUserMenu" \
+  | python3 -c "
+import sys, json
+data = json.load(sys.stdin)
+print(f'HTTP code: {data[\"code\"]}')
+# 递归遍历菜单树（后端通常返回树形结构）
+def print_menu(node, level=0):
+    indent = '  ' * level
+    print(f'{indent}菜单名: {node[\"menuName\"]:20} 类型: {node[\"menuType\"]} 权限: {node.get(\"perms\",\"\")} 路由: {node.get(\"routePath\",\"\")}')
+    for child in node.get('children', []):
+        print_menu(child, level+1)
+for m in data['data']:
+    print_menu(m)
+"
+
+curl -X POST http://localhost:8090/tenant/dept -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ" -d '{"parentId":0,"deptName":"峨眉集团总部","sortNum":1,"status":0,"remark":"根部门测试"}'
+
+
+curl http://localhost:8090/tenant/role/availableMenus -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ"
+
+
+curl -X POST http://localhost:8090/tenant/role -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ" -d '{"roleName":"峨眉部门经理","dataScope":1,"sortNum":1,"status":0,"remark":"测试角色"}'
+
+
+curl http://localhost:8090/tenant/role/list?pageNum=1\&pageSize=10 -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ"
+
+
+curl -X POST http://localhost:8090/tenant/role/saveMenuPerm/12 -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ" -d '[41]'
+
+
+curl http://localhost:8090/tenant/role/getMenuIds/12 -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ"
+
+
+curl -X POST http://localhost:8090/tenant/role/saveMenuPerm/12 -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ" -d '[28]'
+
+
+
+curl http://localhost:8090/system/menu/getUserMenu -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI3NTUxLCJleHAiOjE3OTIyMzQ3NTF9.5ZMqqJrep88gU3nW8bGhDfrSA5JfIM7KIFtWmzSCxAZrdaIAecp_tOGev__5KQPt"
+
+
+curl http://localhost:8090/tenant/dept/all -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI3OTg1LCJleHAiOjE3OTIyMzUxODV9.lpXxvE7vFhQytB8Tqxvgaxww9m7MEGj3ymN0EEkVTmRADP6vCVvppOhEgXLMNcet"
+
+
+
+curl -X PUT http://localhost:8090/system/job/execute/8   -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjQzOTEwLCJleHAiOjE3OTIyNTExMTB9.vzjn7GuQ3E6dBW01bjQ7MzMPLbQb2a2PBFWEg2D-maDyyrdJOd36DFObZ96LU9B7"
+
+
+curl http://localhost:8090/system/job/log/list?jobId=8   -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjQzOTEwLCJleHAiOjE3OTIyNTExMTB9.vzjn7GuQ3E6dBW01bjQ7MzMPLbQb2a2PBFWEg2D-maDyyrdJOd36DFObZ96LU9B7"
+
+
+
+
+<button data-v-955a94e5="" aria-disabled="false" type="button" class="el-button is-text"><!--v-if--><span class=""><i data-v-955a94e5="" class="el-icon" style="font-size: 20px;"><svg data-v-955a94e5="" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"><path fill="currentColor" d="M896 192H128v128h768zm0 256H384v128h512zm0 256H128v128h768zM320 384 128 512l192 128z"></path></svg></i></span></button>
+
+
+
+
+上面的接口顺序验证用例有吗？
+参照下面正确curl：
+curl -X POST http://localhost:8090/tenant-auth/login -H "Content-Type: application/json" -d '{"tenantId":6,"username":"Test6","password":"654123"}'
+和
+curl -X POST http://localhost:8090/tenant/dept -H "Content-Type: application/json" -H "Authorization: Bearer eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NiIsInVzZXJJZCI6NywiaWF0IjoxNzkyMjI2MjAwLCJleHAiOjE3OTIyMzM0MDB9.DAxuRA_jaDWqV6OX9UpT2392nktljI8R37mUnRwRoq1bOFGEpVPZhIsO6dOWyDgJ" -d '{"parentId":0,"deptName":"峨眉集团总部","sortNum":1,"status":0,"remark":"根部门测试"}'
+
+
+
+export TOKEN="eyJhbGciOiJIUzM4NCJ9.eyJyb2xlcyI6IjkiLCJ0ZW5hbnRJZCI6NiwidXNlck5hbWUiOiJ0ZXN0NyIsInVzZXJJZCI6MTEsImlhdCI6MTc5MjMwMTE0NiwiZXhwIjoxNzkyMzA4MzQ2fQ.ZgUEM7uGA3XILZRJkaRtgH_4T6BLWhB6pg7ixL38nhAUS7phM7BLvLAM9UCNa-ti"
+
+
+
+tail -f logs/cyanbase.log | grep -E "TenantAuth|TenantHandler|三重一大|BusinessException"
+
+
+
+执行Step 7 ：xjgh2025XZD@Gamma:~$ curl -s "http://localhost:8090/tenant/sydyd/meeting/$MEETING_ID/topics" \
+  -H "Authorization: Bearer $TOKEN"
+{"code":10011,"msg":"系统繁忙，请稍后重试","data":null}
+后台日志：Cause: java.sql.SQLSyntaxErrorException: (conn=122) Unknown column 'remark' in 'SELECT'
+
+
+
+curl -s -X GET "http://localhost:8090/workflow/definition/list?pageNum=1&pageSize=10" -H "Authorization: Bearer ${TOKEN}"
+
+
+
+
+ 后端控制台 SQL 日志里看到 FROM wf_process_definition WHERE tenant_id = 6 AND del_flag = 0 ...（CustomTenantHandler 正式生效，不再 IGNORED），我应该是没开SQL日志，怎么开？
+
+
+
+curl -s -X POST http://localhost:8090/workflow/node -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN}" -d '{
+  "definitionId": ${DEF_ID},
+  "nodeKey": "start",
+  "nodeName": "开始",
+  "nodeType": "start",
+  "nextNodeIds": "0",
+  "sortOrder": 1
+}'
+
+curl -s -X POST http://localhost:8090/workflow/node -H "Content-Type: application/json" -H "Authorization: Bearer ${TOKEN}" -d '{
+  "definitionId": ${DEF_ID},
+  "nodeKey": "userTask_1",
+  "nodeName": "部门经理审批",
+  "nodeType": "userTask",
+  "assigneeType": "user",
+  "assigneeValue": "7",
+  "approvalType": "or",
+  "nextNodeIds": "0",
+  "sortOrder": 2
+}'
+
+ALTER TABLE t_three_big_item    ADD COLUMN workflow_instance_id BIGINT(20) NULL COMMENT '关联工作流实例ID' AFTER submit_dept_id;
+ALTER TABLE t_three_big_meeting ADD COLUMN workflow_instance_id BIGINT(20) NULL COMMENT '关联工作流实例ID' AFTER meeting_status;
+ALTER TABLE t_three_big_execute ADD COLUMN workflow_instance_id BIGINT(20) NULL COMMENT '关联工作流实例ID' AFTER vote_result;
+
+
+
+INSERT INTO wf_process_node (definition_id, node_key, node_name, node_type, assignee_type, assignee_value, approval_type, sort_order, create_by, tenant_id, next_node_ids, create_time)
+
+
+curl -X GET "http://localhost:8090/workflow/definition/$DEF_ID/bpmn" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+
+
+curl -X GET "http://localhost:8090/workflow/instance/$NEW_INST_ID/trail" \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN"
+
+test7-----sl01
+
+GET http://120.48.47.253:38024/workflow/definition/35/bpmn-xml
+Authorization: Bearer $TOKEN
+
+
+curl -H "Authorization: Bearer $TOKEN" "http://120.48.47.253:38024/workflow/definition/35"
+
+
+ssh -L 3306:127.0.0.1:3306 xjgh2025XZD@120.48.47.253 -p 38014 -N
+
+120.48.47.253
+38014
+~\.ssh\id_ed25519
+
+TOKEN=$(curl -s -X POST http://localhost:8090/tenant-auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"tenantId":6,"username":"admin","password":"你的密码"}' | grep -o '"token":"[^"]*"' | cut -d'"' -f4)
+
+SELECT * FROM wf_process_approve WHERE instance_id = 25 ORDER BY id;
+
+SELECT id, node_name, node_type, assignee_type, assignee_value, next_node_ids 
+FROM wf_process_node 
+WHERE definition_id = 36
+ORDER BY id;
+
+tail -100 logs/cyanbase.log | grep -i "startup\|started\|CyanBase"
+
+SELECT * FROM wf_process_approve WHERE instance_id = 25;
+
+SELECT rm.role_id, rm.menu_id, m.menu_name, m.menu_type, m.perms
+FROM sys_role_menu rm
+JOIN sys_menu m ON rm.menu_id = m.id
+WHERE rm.role_id = 15
+  AND (m.perms LIKE '%workflow%' OR m.menu_name LIKE '%流程%')
+ORDER BY m.menu_type, m.sort_num;
+
+
+curl -s -H "Authorization: Bearer $TOKEN" \
+  http://127.0.0.1:8090/workflow/instance/29/trail | python3 -m json.tool
+
+
+
+mysqldump -u petclinic -p cyan_base wf_process_approve > /tmp/wf_approve_backup.sql
+
+
+SELECT instance_id, node_id, approver_id, COUNT(*) as cnt
+FROM wf_process_approve
+GROUP BY instance_id, node_id, approver_id
+HAVING cnt > 1;
+
+
+
+DELETE a FROM wf_process_approve a
+INNER JOIN wf_process_approve b 
+  ON a.instance_id = b.instance_id 
+  AND a.node_id = b.node_id 
+  AND a.approver_id = b.approver_id 
+  AND a.id < b.id
+WHERE a.action IS NULL AND b.action IS NOT NULL;
+
+
+
+curl -s -H "Authorization: Bearer $TOKEN" \
+  http://127.0.0.1:8090/workflow/instance/30/trail | python3 -m json.tool
+
+mysql -u petclinic -p cyan_base -e "SELECT COUNT(*) FROM wf_process_instance WHERE initiator_id=7;"
+
+
+curl -X DELETE -H "Authorization: Bearer $TOKEN" \
+  "http://120.48.47.253:38024/system/dict/type/39"
+
+curl -X DELETE -H "Authorization: Bearer $TOKEN" "http://120.48.47.253:38024/system/dict/data/91"
+curl -X DELETE -H "Authorization: Bearer $TOKEN" "http://120.48.47.253:38024/system/dict/data/92"
+
+
+
+金额：
+编号：ref_Fbe7mvjfn7wzaoc
+字段ID：F4ubmvjfn7wzamc
+
+
+
+curl -s -H "Authorization: Bearer $TOKEN" \
+  http://120.48.47.253:38024/workflow/definition/34 | jq '.data.definition | {id, processName, formDefinitionId}'
+
+
+curl -s -H "Authorization: Bearer $TOKEN" \
+  http://120.48.47.253:38024/form/definition/45 | jq '.data | {id, formName, layoutConfig}'
+
+
+
+SELECT id, variables FROM wf_process_instance 
+    ->   WHERE process_key = 'PROCESS_1792670306105' 
+    ->   ORDER BY create_time DESC LIMIT 1;
+
+SELECT n.id, n.node_name, n.condition_expr 
+  FROM wf_process_node n 
+  WHERE n.definition_id = 38 AND n.condition_expr IS NOT NULL AND n.condition_expr != '';
+
+curl -s -X POST http://localhost:8090/workflow/binding \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"definitionId":43,"processDefinitionId":37,"priority":10,"status":1}'
+
+curl -s "http://localhost:8090/workflow/binding/match?definitionId=43" \
+  -H "Authorization: Bearer $TOKEN"
+
+curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8090/workflow/binding \
+  -H "Authorization: Bearer $TOKEN7" \
+  -H "Content-Type: application/json" \
+  -d '{"definitionId":43,"processDefinitionId":37}'
+
+SELECT id, parent_id, menu_name, route_path, component, perms 
+FROM sys_menu 
+WHERE menu_name LIKE '%工作流%' OR menu_name LIKE '%管理%'
+ORDER BY parent_id, sort_num;
+
+  SELECT id FROM sys_menu 
+  WHERE menu_name = '工作流管理' AND parent_id = 0 
+  LIMIT 1
+
+SET @wfParent = (
+  SELECT id FROM sys_menu 
+  WHERE menu_name = '工作流管理' AND parent_id = 0 
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  parent_id, menu_name, route_path, component, perms, icon, sort_num, 
+  menu_type, visible, status, create_by, create_time, remark
+) VALUES (
+  @wfParent, '表单流程绑定', 'binding', 'workflow/binding/index',
+  'workflow:binding:query', 'el-icon-connection', 6,
+  '2', '0', '0', 'admin', NOW(), '表单与流程多对多绑定配置'
+);
+
+
+INSERT INTO sys_menu (parent_id, menu_name, route_path, perms, menu_type, sort_num, visible, status, create_by, create_time) VALUES
+(@myFormMenuId, '表单列表', '', 'workflow:myform:list',  'F', 1, '0', '0', 'admin', NOW()),
+(@myFormMenuId, '填报发起', '', 'workflow:myform:start', 'F', 2, '0', '0', 'admin', NOW());
+
+
+
+Phase 2 测试清单
+bash
+
+# 1. 后端 Accept enrichWithNames diff + 重新编译
+mvn compile -pl cyanbase-backend -am
+
+# 2. 执行菜单 SQL（替换 @wfParent 为实际 ID）
+mysql -u petclinic -p cyan_base < binding_menu.sql
+
+# 3. admin 登录前端 → 左侧菜单应出现"表单流程绑定"
+#    如果没出现，清 Redis RBAC 缓存后刷新
+redis-cli DEL "rbac:perms:*" "rbac:menu:*"
+
+# 4. 点进页面 → 下拉能看到所有表单 / 已发布流程
+# 5. 新增一条绑定（表单43 + 流程37，部门6 全部命中，优先级100）→ 保存成功
+# 6. 编辑 → 改优先级 → 保存
+# 7. 删除 → 确认后消失
+# 8. 测试路由匹配接口：
+curl -s "http://localhost:8090/workflow/binding/match?definitionId=43" \
+  -H "Authorization: Bearer $TOKEN"
+# 应该返回 matched:true, processDefinitionId:37
+
+# 9. test7（无 workflow:binding:* 权限）登录 → 菜单不应出现
+
+SELECT DISTINCT
+  u.user_name        AS 用户名,
+  u.tenant_id       AS 所属租户,
+  r.role_name       AS 角色名,
+  m.id              AS 菜单ID,
+  m.menu_name       AS 菜单名,
+  m.menu_type       AS 类型,
+  m.perms           AS 权限标识,
+  m.route_path      AS 前端路由
+FROM sys_user u
+INNER JOIN sys_user_role ur  ON u.id = ur.user_id
+INNER JOIN sys_role r        ON ur.role_id = r.id
+INNER JOIN sys_role_menu rm  ON r.id = rm.role_id
+INNER JOIN sys_menu m        ON rm.menu_id = m.id
+WHERE u.user_name = 'test6' 
+ORDER BY r.role_name, m.parent_id, m.sort_num;
+
+
+
+1.ma

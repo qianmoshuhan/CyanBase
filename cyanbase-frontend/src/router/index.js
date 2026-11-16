@@ -64,6 +64,20 @@ const routes = [
   component: () => import('@/views/system/tenant/index.vue'),
   meta: { title: '租户管理' }
 },
+      // Scope 管理（平台超管专属）
+      {
+        path: '/system/principalScope',
+        name: 'PrincipalScope',
+        component: () => import('@/views/system/principalScope/index.vue'),
+        meta: { title: 'Scope管理' }
+      },
+      // 经营单元授权管理（A 阶段独立页面）
+      {
+        path: '/system/bizUnitScope',
+        name: 'BizUnitScope',
+        component: () => import('@/views/system/bizUnitScope/index.vue'),
+        meta: { title: '经营单元授权' }
+      },
       // 用户管理
       {
         path: '/system/user',

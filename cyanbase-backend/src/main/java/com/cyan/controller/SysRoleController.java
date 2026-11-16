@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.cyan.common.R;
 import com.cyan.common.security.util.SecurityUtils;
 import com.cyan.config.CustomTenantHandler;
+import com.cyan.security.domain.LoginUser;
 import com.cyan.common.util.TreeBuildUtil;
 import com.cyan.entity.SysMenu;
 import com.cyan.entity.SysRole;
@@ -19,6 +20,7 @@ import com.cyan.security.annotation.RequiresPermission;
 import com.cyan.security.aspect.PermissionGuard;
 import com.cyan.security.datascope.ResourceScope;
 import com.cyan.security.service.PermissionService;
+import com.cyan.security.service.PermissionVersionService;
 import com.cyan.service.SysMenuService;
 import com.cyan.service.SysRoleDeptService;
 import com.cyan.service.SysRoleService;
@@ -51,6 +53,7 @@ public class SysRoleController {
     private final StringRedisTemplate stringRedisTemplate;
     private final PermissionService permissionService;
     private final PermissionGuard permissionGuard;
+    private final PermissionVersionService permissionVersionService;
 
     @GetMapping("/list")
     @RequiresPermission("system:role:list")
@@ -63,11 +66,33 @@ public class SysRoleController {
             @RequestParam(required = false) Long tenantId,
             @RequestParam(required = false) String userName) {
 
-        // ⭐ skip TenantLine：admin tenantId=0，TenantLine 自动隔离只能查平台角色
-        // skip 后手动按 tenantId 参数过滤（不传就是查全部）
+        // ⭐ skip TenantLine：原注释说为 admin(tenantId=0) 跳过 TenantLine 自动隔离
+        // 但实际上 admin tenantId=0 时 TenantHandler.getTenantId() 已返回 null，
+        // TenantLineInnerInterceptor 自动跳过所有表，根本不需要显式 skip。
+        // 真正需要 skip 的原因是：TenantLine 会强制加 tenant_id=?，
+        // 而角色列表接口需要手动按 tenantId 参数过滤（包括不传时的超管全查场景）。
+        // ⚠️ skip 后必须手动恢复租户隔离！否则租户用户/平台主体会看到全租户数据
         CustomTenantHandler.skip();
         try {
             LambdaQueryWrapper<SysRole> wrapper = new LambdaQueryWrapper<>();
+
+            // ====== ⭐ skip 后手动恢复租户隔离 ======
+            LoginUser currentUser = SecurityUtils.getLoginUser();
+            Long currentTenantId = SecurityUtils.getTenantId();
+            boolean isPlatformPrincipal = currentUser != null && Boolean.TRUE.equals(currentUser.getPlatformPrincipal());
+            Long activeTenantId = currentUser != null ? currentUser.getActiveTenantId() : null;
+
+            if (tenantId == null) {
+                if (isPlatformPrincipal && activeTenantId != null) {
+                    wrapper.eq(SysRole::getTenantId, activeTenantId);
+                } else if (currentTenantId != null && currentTenantId > 0) {
+                    wrapper.eq(SysRole::getTenantId, currentTenantId);
+                }
+                // 超管（tenantId=0）→ 允许查全部
+            } else {
+                wrapper.eq(SysRole::getTenantId, tenantId);
+            }
+
             if (roleName != null && !roleName.isEmpty()) {
                 wrapper.like(SysRole::getRoleName, roleName);
             }
@@ -80,8 +105,9 @@ public class SysRoleController {
             if (tenantId != null) {
                 wrapper.eq(SysRole::getTenantId, tenantId);
             }
-            // ⭐ 按用户名反查角色：先查 sys_user → 再查 sys_user_role → 最后 IN 过滤
+            // ⭐ 按用户名反查角色：skip 已生效，内部 sys_user 查询不会再被 TenantLine 拦截
             if (userName != null && !userName.isEmpty()) {
+                // skip 块已包裹，内部 sys_user 查询不会被 TenantLine 加 tenant_id 过滤
                 Set<Long> userIds = sysUserService.list(
                         new LambdaQueryWrapper<SysUser>().like(SysUser::getUserName, userName))
                         .stream().map(SysUser::getId).collect(Collectors.toSet());
@@ -184,6 +210,12 @@ public class SysRoleController {
         // ⚠️ 防御：强制清空 id，让数据库 IdType.AUTO 自增
         // 场景：前端从编辑页复制表单 POST 过来，id 字段可能残留
         sysRole.setId(null);
+        Long userId = SecurityUtils.getUserId();
+
+        // === 三层原子校验：预期目标 = 前端指定租户 + 角色归属部门（可选） + 当前操作用户 ===
+        permissionGuard.check(ResourceScope.of(sysRole.getTenantId(), sysRole.getDeptId(), SecurityUtils.getUsername()),
+                              "system:role:add");
+
         sysRole.setRoleKey(sequenceService.generateRoleKey());
         // ⭐ 部门私有角色：前端不传 deptId 时自动填充
         //   超管 (deptId=null) → role.deptId=null → 全局角色，全租户可见
@@ -211,7 +243,14 @@ public class SysRoleController {
         // 写操作：完整三层 L1 租户归属 + L2 DataScope + L3 system:role:edit
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), null, exist.getCreateBy()),
                               "system:role:edit");
-        return sysRoleService.updateById(sysRole) ? R.ok() : R.fail("更新失败");
+        boolean ok = sysRoleService.updateById(sysRole);
+        // 🔍 诊断日志：确认 updateById 状态
+        log.info("[RoleUpdate] roleId={}, updateById ok={}, 准备触发 bumpForRole", sysRole.getId(), ok);
+        // 🔐 权限版本预埋：角色基础信息/DataScope 变更 → 所有关联用户版本号 +1
+        // 注意：updateById 返回 false 最常见原因是字段值没变化（MySQL 受影响行=0），不算真失败
+        //       无论 ok 与否都 bump——让持有该角色的用户版本号递增即可
+        permissionVersionService.bumpVersionForRole(sysRole.getId());
+        return ok ? R.ok() : R.fail("更新失败");
     }
 
     @DeleteMapping("/{id}")
@@ -222,7 +261,12 @@ public class SysRoleController {
         // 写操作：完整三层校验
         permissionGuard.check(ResourceScope.of(exist.getTenantId(), null, exist.getCreateBy()),
                               "system:role:delete");
-        return sysRoleService.removeById(id) ? R.ok() : R.fail("删除失败");
+        boolean removed = sysRoleService.removeById(id);
+        // 🔐 权限版本预埋：角色删除 → 所有关联用户版本号 +1
+        // 无论 removeById true/false 都 bump（防御性）
+        log.info("[RoleDelete] roleId={}, removed={}, 准备触发 bumpForRole", id, removed);
+        permissionVersionService.bumpVersionForRole(id);
+        return removed ? R.ok() : R.fail("删除失败");
     }
 
     /**
@@ -383,6 +427,10 @@ public class SysRoleController {
             if (keys != null && !keys.isEmpty()) stringRedisTemplate.delete(keys);
         } catch (Exception ignored) {}
         permissionService.evictAllPermCache();
+        // 🔍 诊断日志
+        log.info("[saveRoleMenu] roleId={}, 缓存已清, 准备触发 bumpForRole", roleId);
+        // 🔐 权限版本预埋：角色菜单权限变更 → 所有关联用户版本号 +1
+        permissionVersionService.bumpVersionForRole(roleId);
 
         return R.ok("分配成功");
     }
@@ -422,6 +470,10 @@ public class SysRoleController {
                 sysRoleDeptService.saveBatch(binds);
             }
         }
+        // 🔍 诊断日志
+        log.info("[saveDataScope] roleId={}, dataScope={}, 准备触发 bumpForRole", roleId, dataScope);
+        // 🔐 权限版本预埋：角色数据范围变更 → 所有关联用户版本号 +1
+        permissionVersionService.bumpVersionForRole(roleId);
         return R.ok("数据范围已保存");
     }
 

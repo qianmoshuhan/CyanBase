@@ -200,6 +200,20 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理数据库唯一索引冲突（username / phone）。
+     * <p>
+     * 精确提示比 Exception 兜底的 500 + "系统繁忙" 更友好。
+     * 调用方（Controller）通常会有前置字段校验（用户名/手机号），
+     * 这里只兜并发绕过前置校验的极小概率场景。
+     */
+    @ExceptionHandler(org.springframework.dao.DuplicateKeyException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public R<?> handleDuplicateKey(org.springframework.dao.DuplicateKeyException e) {
+        log.warn("[唯一索引冲突] DuplicateKeyException: {}", e.getMessage());
+        return R.fail(400, "用户名或手机号已存在");
+    }
+
+    /**
      * 处理其他所有未知异常
      */
     @ExceptionHandler(Exception.class)

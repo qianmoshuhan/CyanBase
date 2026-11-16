@@ -77,3 +77,25 @@ export function getAllTenant() {
         method: 'get'
     })
 }
+
+/**
+ * 获取租户详情（聚合：基础信息 + 已用配额 + 已开通模块）
+ */
+export function getTenantDetail(id) {
+    return request({
+        url: `/system/tenant/${id}/detail`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取当前操作者「可授权的租户列表」
+ * ⚠️ 后端按身份直接过滤，返回的都是 tenantId≥1 的启用租户，不含平台主体项。
+ * 专供平台侧新增/编辑用户弹窗下拉，不做前端二次过滤。
+ */
+export function getAuthorizedTenants() {
+    return request({
+        url: '/system/tenant/authorized',
+        method: 'get'
+    })
+}

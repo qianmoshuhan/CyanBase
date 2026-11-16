@@ -76,3 +76,55 @@ export function deleteDept(id) {
     method: 'delete'
   })
 }
+
+/**
+ * 导出部门数据为 Excel（.xlsx）
+ * <p>
+ * 传参：deptName（模糊）、status（精确）。
+ *   平台侧可额外传 tenantId 精确过滤租户。
+ *   租户侧即使传了 tenantId 也被后端 CustomTenantHandler 拦截（MP 自动隔离）。
+ * responseType: blob —— 前端收到后构造 Blob + 动态 a 标签触发下载。
+ * </p>
+ */
+export function exportDept(params) {
+  return request({
+    url: getUrl('/dept/export'),
+    method: 'get',
+    params,
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 下载部门导入模板（.xlsx）
+ * <p>
+ * 模板内容：表头与导出 Excel 一致 + 表头上方灰色说明行 + 状态/是否经营单元列下拉。
+ * 本接口仅返回空模板，不处理实际导入业务逻辑（下一阶段实现）。
+ * </p>
+ */
+export function importTemplate() {
+  return request({
+    url: getUrl('/dept/importTemplate'),
+    method: 'get',
+    responseType: 'blob'
+  })
+}
+
+/**
+ * 执行部门导入（上传 .xlsx 文件）
+ * <p>
+ * 后端逻辑：读取 Excel → 逐行校验（带 Excel 真实行号）→ 全部通过才入库。
+ * 租户侧忽略 Excel 的租户列，数据归属当前登录租户。
+ * 返回结构：{ totalRows, successRows, failRows, failList: [{ rowNum, errorMsg }] }
+ * </p>
+ */
+export function importDept(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: getUrl('/dept/import'),
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  })
+}

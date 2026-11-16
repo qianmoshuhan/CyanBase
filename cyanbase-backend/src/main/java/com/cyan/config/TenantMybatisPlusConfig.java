@@ -23,10 +23,15 @@ import org.springframework.context.annotation.Primary;
  * 通过 @Primary 让我们这个 Bean 优先被选中，原有 Bean 自然被忽略，
  * 拦截器链中同时包含「分页 + 租户」，功能完整且零侵入。
  *
- * <h3>拦截器顺序</h3>
- * 外层：PaginationInnerInterceptor  → 先处理分页 / 物理删除
- * 内层：TenantLineInnerInterceptor  → 再处理租户条件
- * 顺序不能反，否则分页 SQL 里的租户条件会被分页器当成业务条件。
+ * <h3>拦截器顺序（2026-11-11 修正）</h3>
+ * 遵循 MyBatis-Plus 官方「先过滤、后分页」原则，SQL 改写类拦截器必须排在分页之前：
+ * <ol>
+ *   <li>TenantLineInnerInterceptor    → 追加 tenant_id</li>
+ *   <li>DataPermissionInterceptor     → 追加 dept_id / create_by</li>
+ *   <li>PaginationInnerInterceptor   → 最后基于已改写的 SQL 生成 COUNT(*) 与 LIMIT</li>
+ * </ol>
+ * ⚠️ 旧顺序把分页放在最前，导致 COUNT 用的是尚未追加 DataScope 条件的原始 SQL，
+ * 表现为「经营单元切换后 records=1 但 total=8」。分页放前面还会让 count 与列表口径不一致。
  *
  * <h3>Handler 注入方式</h3>
  * 不是继承 TenantLineInnerInterceptor 重写 getTenantId()（那是 TenantLineHandler 的方法），
@@ -55,19 +60,20 @@ public class TenantMybatisPlusConfig {
                                                                com.cyan.security.datascope.CyanDataPermissionHandler dataPermissionHandler) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
-        // 拦截顺序（外层先执行）：分页 → 数据权限 → 租户
-        // 外层：分页拦截器
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
+        // ⭐ 拦截顺序（先执行者先改写 SQL）：租户 → 数据权限 → 分页
+        // ① 租户拦截器（追加 tenant_id 过滤，最终 SQL 必然受限在本租户内）
+        interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(customTenantHandler));
 
-        // 中层：数据权限拦截器（追加 dept_id / create_by 过滤）
+        // ② 数据权限拦截器（追加 dept_id / create_by 过滤）
         DataPermissionInterceptor dataPermissionInterceptor = new DataPermissionInterceptor();
         dataPermissionInterceptor.setDataPermissionHandler(dataPermissionHandler);
         interceptor.addInnerInterceptor(dataPermissionInterceptor);
 
-        // 内层：租户拦截器（追加 tenant_id 过滤，最终 SQL 必然受限在本租户内）
-        interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(customTenantHandler));
+        // ③ 分页拦截器必须最后：此时 SQL 已带全 tenant_id + dept_id 条件，
+        //    由它生成的 COUNT(*) 才会包含同样的过滤条件，total 与 records 口径一致。
+        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
 
-        log.info("[Tenant] MyBatis-Plus 多租户拦截器已注册（分页 + 租户），Handler: {}",
+        log.info("[Tenant] MyBatis-Plus 拦截器已注册（租户 → 数据权限 → 分页），Handler: {}",
                 customTenantHandler.getClass().getSimpleName());
         return interceptor;
     }

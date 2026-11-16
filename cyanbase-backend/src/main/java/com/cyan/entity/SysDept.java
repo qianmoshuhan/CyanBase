@@ -1,6 +1,7 @@
 package com.cyan.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -14,6 +15,15 @@ public class SysDept implements Serializable {
 
     /** 租户ID */
     private Long tenantId;
+
+    /**
+     * 部门编码（技术字段，租户内唯一，导入导出时用于替代自增 ID 做父子引用）
+     * 前端完全无感：@JsonIgnore 阻止所有 JSON 接口序列化输出，
+     * 新增/编辑时 Controller 在 insert 前自动生成，不接受前端传入值。
+     */
+    @JsonIgnore
+    @TableField("dept_code")
+    private String deptCode;
 
     /** 父部门ID */
     @TableField("parent_id")
@@ -50,6 +60,10 @@ public class SysDept implements Serializable {
     @TableLogic
     @TableField("del_flag")
     private Integer delFlag;
+
+    /** 是否独立法人经营单元 0-否 1-是 */
+    @TableField("is_biz_unit")
+    private Integer isBizUnit;
 
     /** 备注 */
     private String remark;

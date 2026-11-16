@@ -16,7 +16,9 @@ import com.cyan.modules.workflow.mapper.WorkflowDefinitionMapper;
 import com.cyan.modules.workflow.service.WfDefinitionTenantService;
 import com.cyan.modules.workflow.service.WorkflowDefinitionService;
 import com.cyan.modules.workflow.service.WorkflowNodeService;
+import com.cyan.entity.SysTenant;
 import com.cyan.service.SysRoleService;
+import com.cyan.service.SysTenantService;
 import com.cyan.service.SysUserRoleService;
 import com.cyan.service.SysUserService;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +41,7 @@ public class WorkflowDefinitionServiceImpl extends ServiceImpl<WorkflowDefinitio
     private final SysRoleService sysRoleService;
     private final SysUserRoleService sysUserRoleService;
     private final WfDefinitionTenantService wfDefinitionTenantService;
+    private final SysTenantService sysTenantService;
 
     /**
      * ⭐ 获取当前租户接收到的所有已分发 definitionId
@@ -67,13 +70,16 @@ public class WorkflowDefinitionServiceImpl extends ServiceImpl<WorkflowDefinitio
      * ⭐ 回填每条 definition 的 source + allowEdit
      * definition.tenantId == 当前用户 tenantId → OWN, allowEdit=true
      * definition.id 在 distMeta 里 → DISTRIBUTED, allowEdit=分发记录.allowEdit
+     * ⚠️ 只对租户侧用户（myTenantId>0）设置语义，平台侧前端改用 creatorTenantName 显示创建租户
      */
     private void fillSourceAndAllowEdit(Collection<WorkflowDefinition> list,
                                         Map<Long, WfDefinitionTenant> distMeta) {
         Long myTenantId = SecurityUtils.getTenantId();
+        // 平台 admin：不设置 OWN/DISTRIBUTED，前端用 creatorTenantName 显示创建租户
+        if (myTenantId == null || myTenantId <= 0) return;
+
         for (WorkflowDefinition d : list) {
-            boolean isOwn = (myTenantId != null && myTenantId > 0
-                    && myTenantId.equals(d.getTenantId()));
+            boolean isOwn = myTenantId.equals(d.getTenantId());
             WfDefinitionTenant dist = distMeta.get(d.getId());
             if (isOwn) {
                 d.setSource("OWN");
@@ -82,7 +88,7 @@ public class WorkflowDefinitionServiceImpl extends ServiceImpl<WorkflowDefinitio
                 d.setSource("DISTRIBUTED");
                 d.setAllowEdit(dist.getAllowEdit() != null && dist.getAllowEdit() == 1);
             } else {
-                // 平台管理员场景：tenantId=null → 全部视为 OWN
+                // 租户侧看到了不属于自己的流程（理论上不会，因为查询条件已过滤），兜底标记
                 d.setSource("OWN");
                 d.setAllowEdit(true);
             }
@@ -222,9 +228,94 @@ public class WorkflowDefinitionServiceImpl extends ServiceImpl<WorkflowDefinitio
             result.setTotal(total);
 
             fillSourceAndAllowEdit(result.getRecords(), distMeta);
+            fillDistributeTenantNames(result.getRecords());
+            fillCreatorTenantNames(result.getRecords());
             return result;
         } finally {
             CustomTenantHandler.reset();
+        }
+    }
+
+    /**
+     * ⭐ 填充每条 definition 的创建租户名称（platform 侧来源列显示用）
+     * 批量收集 definition.tenantId → 批量查 sys_tenant → 组装 creatorTenantName
+     * tenantId=0 或 null → 显示"平台"
+     */
+    private void fillCreatorTenantNames(List<WorkflowDefinition> definitions) {
+        if (definitions == null || definitions.isEmpty()) return;
+
+        // 1. 收集所有非零的 tenantId
+        Set<Long> tenantIds = new HashSet<>();
+        for (WorkflowDefinition d : definitions) {
+            if (d.getTenantId() != null && d.getTenantId() > 0) {
+                tenantIds.add(d.getTenantId());
+            }
+        }
+
+        // 2. 批量查租户名称
+        Map<Long, String> tenantIdToName = new HashMap<>();
+        if (!tenantIds.isEmpty()) {
+            List<SysTenant> tenants = sysTenantService.listByIds(tenantIds);
+            for (SysTenant t : tenants) tenantIdToName.put(t.getId(), t.getTenantName());
+        }
+
+        // 3. 回填 creatorTenantName
+        for (WorkflowDefinition d : definitions) {
+            if (d.getTenantId() == null || d.getTenantId() <= 0) {
+                d.setCreatorTenantName("平台");
+            } else {
+                d.setCreatorTenantName(tenantIdToName.getOrDefault(d.getTenantId(),
+                        "租户#" + d.getTenantId()));
+            }
+        }
+    }
+
+    /**
+     * ⭐ 填充每条 definition 已分发到的租户名称
+     * 批量查 wf_definition_tenant → 收集 tenantIds → 批量查 sys_tenant → 组装
+     */
+    private void fillDistributeTenantNames(List<WorkflowDefinition> definitions) {
+        if (definitions == null || definitions.isEmpty()) return;
+
+        // 1. 收集所有 definitionId
+        List<Long> definitionIds = new ArrayList<>();
+        for (WorkflowDefinition d : definitions) definitionIds.add(d.getId());
+
+        // 2. 批量查所有有效分发记录 (status=1)
+        LambdaQueryWrapper<WfDefinitionTenant> distWrapper = new LambdaQueryWrapper<>();
+        distWrapper.in(WfDefinitionTenant::getDefinitionId, definitionIds)
+                .eq(WfDefinitionTenant::getStatus, 1);
+        List<WfDefinitionTenant> allDists = wfDefinitionTenantService.list(distWrapper);
+
+        if (allDists.isEmpty()) return;
+
+        // 3. 收集所有 tenantId，批量查租户名称
+        Set<Long> tenantIds = new HashSet<>();
+        for (WfDefinitionTenant dist : allDists) tenantIds.add(dist.getTenantId());
+
+        Map<Long, String> tenantIdToName = new HashMap<>();
+        if (!tenantIds.isEmpty()) {
+            List<SysTenant> tenants = sysTenantService.listByIds(tenantIds);
+            for (SysTenant t : tenants) tenantIdToName.put(t.getId(), t.getTenantName());
+        }
+
+        // 4. 按 definitionId 分组，组装租户名称字符串
+        Map<Long, List<WfDefinitionTenant>> distByDefId = new HashMap<>();
+        for (WfDefinitionTenant dist : allDists) {
+            distByDefId.computeIfAbsent(dist.getDefinitionId(), k -> new ArrayList<>()).add(dist);
+        }
+
+        for (WorkflowDefinition d : definitions) {
+            List<WfDefinitionTenant> dists = distByDefId.get(d.getId());
+            if (dists != null && !dists.isEmpty()) {
+                List<String> names = new ArrayList<>();
+                for (WfDefinitionTenant dist : dists) {
+                    String name = tenantIdToName.getOrDefault(dist.getTenantId(),
+                            "租户#" + dist.getTenantId());
+                    names.add(name);
+                }
+                d.setDistributeTenantNames(String.join(", ", names));
+            }
         }
     }
 

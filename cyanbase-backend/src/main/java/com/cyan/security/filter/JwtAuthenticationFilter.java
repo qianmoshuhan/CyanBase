@@ -4,6 +4,7 @@ import com.cyan.common.R;
 import com.cyan.entity.SysUser;
 import com.cyan.security.domain.LoginUser;
 import com.cyan.security.service.PermissionService;
+import com.cyan.security.service.PermissionVersionService;
 import com.cyan.security.service.RefreshTokenService;
 import com.cyan.security.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,6 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
     private final RefreshTokenService refreshTokenService;
     private final PermissionService permissionService;
+    private final PermissionVersionService permissionVersionService;
 
     @Value("${jwt.tokenHeader}")
     private String tokenHeader;
@@ -80,6 +82,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         String roles = jwtUtil.getRolesFromToken(token);
                         Long tenantId = jwtUtil.getTenantIdFromToken(token);
                         Long deptId = jwtUtil.getDeptIdFromToken(token);   // ✅ L2 DataScope
+                        Long activeTenantId = jwtUtil.getActiveTenantIdFromToken(token);  // ⭐ 平台主体活跃租户
+                        Boolean platformPrincipal = jwtUtil.getPlatformPrincipalFromToken(token);  // ⭐ 平台主体标记
+                        Long activeBizUnitId = jwtUtil.getActiveBizUnitIdFromToken(token);  // ⭐ 租户内经营单元
+
+                        // 🔐 权限版本预埋 · warn 模式校验（不阻断，仅告警）
+                        if (permissionVersionService.isWarnEnabled()) {
+                            Long tokenPermVer = jwtUtil.getPermVerFromToken(token);
+                            Long currentPermVer = permissionVersionService.getCurrentVersion(userId);
+                            // token 里没 permVer（旧 token）或 Redis key 不存在或读异常 → 跳过
+                            if (tokenPermVer != null && currentPermVer != null) {
+                                if (tokenPermVer < currentPermVer) {
+                                    log.warn("🔐【权限快照已过期，当前为 warn 放行模式】userId={}, token permVer={}, redis currentPermVer={}",
+                                            userId, tokenPermVer, currentPermVer);
+                                } else {
+                                    log.debug("[PermVer] 版本一致: userId={}, permVer={}", userId, tokenPermVer);
+                                }
+                            }
+                        }
 
                         // 构建LoginUser
                         LoginUser loginUser = new LoginUser();
@@ -87,6 +107,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         loginUser.setUserName(userName);
                         loginUser.setRoles(roles);
                         loginUser.setTenantId(tenantId);
+                        loginUser.setActiveTenantId(activeTenantId);        // ⭐ 平台主体活跃租户
+                        loginUser.setPlatformPrincipal(platformPrincipal);   // ⭐ 平台主体标记
+                        loginUser.setActiveBizUnitId(activeBizUnitId);       // ⭐ 租户内经营单元（仅普通租户用户）
 
                         // ✅ 构造轻量 SysUser（仅填 deptId，供 CyanDataPermissionHandler 使用）
                         // 不查 DB，只用 JWT claims 里的信息，与 tenantId 处理模式一致
@@ -110,7 +133,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     .toList());
                         }
                         // 加载用户权限码（含 Redis 缓存）
-                        Set<String> perms = permissionService.getPermsByUserId(userId);
+                        // ⭐ 显式传入 JWT 已解析出的 activeTenantId + platformPrincipal + activeBizUnitId，
+                        // 不依赖 SecurityContext（此时 setAuthentication 还没执行！）
+                        Set<String> perms = permissionService.getPermsByUserId(
+                                userId, activeTenantId, platformPrincipal, activeBizUnitId);
                         loginUser.setPermissions(perms);
                         for (String p : perms) {
                             authorities.add(new SimpleGrantedAuthority(p));

@@ -67,6 +67,34 @@ public class JwtUtil {
         }
     }
 
+    // 🔐 权限版本预埋：安全写入 permVer（Long），null 不写入
+    public void putPermVer(Map<String, Object> claims, Long permVer) {
+        if (permVer != null) {
+            claims.put("permVer", permVer);
+        }
+    }
+
+    // ⭐ 平台主体能力：安全写入 activeTenantId（Long），null 不写入
+    public void putActiveTenantId(Map<String, Object> claims, Long activeTenantId) {
+        if (activeTenantId != null) {
+            claims.put("activeTenantId", activeTenantId);
+        }
+    }
+
+    // ⭐ 平台主体能力：安全写入 platformPrincipal（Boolean），null/false 不写入
+    public void putPlatformPrincipal(Map<String, Object> claims, Boolean platformPrincipal) {
+        if (Boolean.TRUE.equals(platformPrincipal)) {
+            claims.put("platformPrincipal", true);
+        }
+    }
+
+    // ⭐ 租户内经营单元能力：安全写入 activeBizUnitId（Long），null 不写入
+    public void putActiveBizUnitId(Map<String, Object> claims, Long activeBizUnitId) {
+        if (activeBizUnitId != null) {
+            claims.put("activeBizUnitId", activeBizUnitId);
+        }
+    }
+
     // 👉本次新增：从Claims中读取tenantId，取不到返回null（代表超级管理员）
     public Long getTenantId(Claims claims) {
         Object tenantId = claims.get("tenantId");
@@ -185,6 +213,77 @@ public class JwtUtil {
                 return null;
             }
             return Long.valueOf(deptId.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 🔐 权限版本预埋：从令牌获取 permVer。
+     * <p>
+     * token 中没有 permVer（旧格式 token）时返回 null —— 过滤器把 null 当作 "版本功能未就绪"，正常放行。
+     * 与 getTenantIdFromToken / getDeptIdFromToken 范式完全对齐。
+     * </p>
+     */
+    public Long getPermVerFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            Object permVer = claims.get("permVer");
+            if (permVer == null) {
+                return null;
+            }
+            return Long.valueOf(permVer.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * ⭐ 平台主体能力：从令牌获取 activeTenantId（当前活跃租户 ID）。
+     * <p>
+     * 平台主体本身 sys_user.tenant_id=NULL，选中活跃租户后 activeTenantId 被写入 JWT。
+     * token 中没有该 claim 时返回 null —— 表示平台主体尚未选择活跃租户。
+     * </p>
+     */
+    public Long getActiveTenantIdFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            Object val = claims.get("activeTenantId");
+            if (val == null) {
+                return null;
+            }
+            return Long.valueOf(val.toString());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * ⭐ 平台主体能力：从令牌判断是否为平台控制面主体。
+     */
+    public Boolean getPlatformPrincipalFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            Object val = claims.get("platformPrincipal");
+            return Boolean.TRUE.equals(val);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * ⭐ 租户内经营单元能力：从令牌获取 activeBizUnitId（当前激活经营单元 ID）。
+     * <p>
+     * token 中没有该 claim 时返回 null —— 表示当前用户未选中任何经营单元。
+     */
+    public Long getActiveBizUnitIdFromToken(String token) {
+        try {
+            Claims claims = parseToken(token);
+            Object val = claims.get("activeBizUnitId");
+            if (val == null) {
+                return null;
+            }
+            return Long.valueOf(val.toString());
         } catch (Exception e) {
             return null;
         }

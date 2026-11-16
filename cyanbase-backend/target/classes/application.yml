@@ -39,9 +39,29 @@ mybatis-plus:
 # JWT配置
 jwt:
   secret: cyanbase2026secretkey666888999abcdefghijklmnopqrstuvwxyz123456
-  expire: 3600000
+  # Access Token 有效期 2 小时（毫秒）
+  accessExpire: 7200000
+  # Refresh Token 有效期 7 天（毫秒）
+  refreshExpire: 604800000
+  # 单设备在线（true=同一用户后登录会踢掉前一个）
+  singleDevice: true
   tokenHeader: Authorization
   tokenPrefix: Bearer
+
+# ==================== AJ-Captcha 滑块验证码 ====================
+# ⚠️ 此块仅作活文档保留！AJ 自动配置（com.anji.captcha.config.*）已在
+#    AjCaptchaConfig.java 中排除，实际运行时 CaptchaService 引擎的配置
+#    完全由 AjCaptchaConfig#captchaService() 里的 Properties 手动装配控制。
+#    想改参数 → 改 AjCaptchaConfig.java，不要改这里。
+aj:
+  captcha:
+    type: blockpuzzle                 # 滑块类型：blockpuzzle（拼图）
+    aes-status: true                  # 坐标 AES 加密（前端 doCheck 里 AES.encrypt 提交密文）
+    slip-offset: 15                   # X 轴像素容差（引擎默认 5px 太苛刻）
+    cache-type: local                 # 引擎答案缓存：local（内存），和下方凭证 Redis 独立
+    water-mark: ''                    # 右下角水印（空串 = 关闭）
+    jigsaw: classpath:captcha/images/jigsaw  # 自定义底图目录（几何图），缺省用 jar 内置植物图
+
 
 # ==================== 阶段八新增配置 ====================
 
@@ -76,6 +96,8 @@ logging:
   level:
     root: INFO
     com.cyan: DEBUG
+    com.cyan.security.datascope.CyanDataPermissionHandler: DEBUG
+    com.cyan.security.filter.JwtAuthenticationFilter: DEBUG
   file:
     name: logs/cyanbase.log
   logback:
@@ -93,3 +115,9 @@ thread-pool:
 
 # 允许循环依赖（临时方案，后续优化）
 spring.main.allow-circular-references: true
+
+# ==================== 权限版本预埋（warn 模式） ====================
+# true  = 开启版本校验，JWT permVer 落后 Redis currentPermVer 时打 WARN 日志但放行
+# false = 一键关闭整套检查（Redis 不读、不打日志，回到纯 JWT 自包含模式）
+permission:
+  version-warn-enabled: true

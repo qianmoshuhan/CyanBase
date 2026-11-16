@@ -263,6 +263,40 @@ cyan-base-master/
 | 39 | **角色菜单回显必须过滤脏数据**：`getMenuIds` 接口返回时必须按 tenant_menu 池做交集过滤，历史越权数据不能回显到前端弹窗。 |
 | 40 | **PermissionGuard.checkDataScope 必须 DataScopeContext.skip() 整体包裹** | 方法体内部 roleService.listByIds / deptService.list / roleDeptService.list 三个 DB 查询，移除 sys_role 的 IGNORED 后会被 Handler 二次过滤导致 scope 解析残缺。必须在方法入口 skip + try-finally reset（`checkDataScope` 仅做上下文管理，纯业务逻辑下沉到 `doCheckDataScope`）。 |
 | 41 | **返回 jsqlparser Expression 时 OrExpression 必须用 Parenthesis 整体包裹** | AND 优先级 > OR，不加括号会生成 `WHERE tenant_id=N AND (scope条件) OR dept_id IS NULL` → **所有全局角色被放出来** → TooManyResultsException。统一写法：`new Parenthesis(new OrExpression(scopeCond, isNullCond))`。 |
+| 42 | **双 Controller 镜像写操作必须同步后处理逻辑** | 平台侧 `system/*` 和租户侧 `tenant/*` 是完整镜像——租户侧用户操作请求路径走 `/tenant/**`，**根本不进平台侧 Controller**；任何"修改角色→权限版本递增→清缓存"等后处理逻辑，**平台侧加一处，租户侧镜像必须 grep 同步**，漏改 = 租户侧变更永远不触发 bump。 |
+| 43 | **CustomTenantHandler.skip() 对所有主体类型生效，不是超管专属** | ThreadLocal 开关一旦开启，TenantLineInnerInterceptor 对**所有主体（普通租户/平台主体/超管）**全部跳过拦截。原以为 skip 只给 admin 跨租户查询用，实际普通租户或平台主体 skip 后同样失去租户隔离——**skip 后必须手动补 tenantId 过滤条件**。 |
+| 44 | **列表接口 skip 后必须按主体类型自动注入 tenantId 过滤** | skip 绕开 TenantLine 后，SQL 无任何 tenant_id 条件。前端不传 tenantId 参数 → 查出全租户数据 = P0 跨租户泄露。标准三档决策：前端传了→用前端参数；前端没传+主体 tenantId>0→自动注入 SecurityUtils.getTenantId()（已封装 platformPrincipal→activeTenantId 优先级）；前端没传+tenantId 为 0/null→不注入（超管查全部）。 |
+| 45 | **新增功能页面三处必做操作，缺一则跳转空白** | ① `cyanbase-frontend/src/router/index.js` 硬编码静态路由（path + component）；② sys_menu 数据库插入菜单记录（前端通过此表渲染侧边栏）；③ nginx 反代加精确 regex（如 `workflow/(approve|instance|definition)`），**禁止用 `workflow` 全匹配 regex**（会吞掉 API 请求）。路由表和数据库菜单必须同时新增，缺一则 Element Plus 菜单→路由跳转空白。 |
+| 46 | **SecurityUtils.getTenantId() 透明适配平台主体 activeTenantId** | 优先级：platformPrincipal已选activeTenantId → LoginUser.tenantId。全项目 28+ 处业务代码调用此方法，**平台主体选租户后代码零改动就能正确过滤**，任何需要区分主体类型的底层组件（PermissionGuard/CustomTenantHandler）必须用 SecurityUtils.getPrincipalTenantId() 取原始值。 |
+
+## 今日修复摘要（2026-11-xx · 平台主体 auditor01 跨租户可见漏洞）
+
+### 根因
+```
+SysUserController.list() / SysRoleController.list() 硬编码 CustomTenantHandler.skip()
+    ↓ 期望：admin 跨租户查询（admin tenantId=0 天然 skip，skip 防御性）
+    ↓ 实际：skip 对所有主体生效（包括普通租户 / 平台主体）
+    ↓ skip 后只按前端传入的 tenantId 参数过滤
+    ↓ 前端列表页不传 tenantId 参数（期望看当前租户数据）
+    ↓ SQL 无 tenant_id 条件 → 查出全租户数据
+    ↓ 平台主体 auditor01 选 tenantId=6 后能看到 tenantId=3/4/5/6 全部用户/角色
+```
+
+### 三层修复链路
+| 层 | 文件 | 改动 |
+|---|------|------|
+| ① Controller | SysUserController.list() | skip 后补 tenantId 三档决策：前端传参→用前端；主体 tenantId>0→注入 SecurityUtils.getTenantId()；tenantId 0/null→不注入 |
+| ② Controller | SysRoleController.list() | 同上，完全一致的修复模板 |
+| ③ 防御 | SecurityUtils.getTenantId() | 已封装好 platformPrincipal→activeTenantId 优先级，业务代码零改动即生效 |
+
+### 验证
+| # | 步骤 | 预期 |
+|---|------|------|
+| ① | mvn clean compile | ✅ 编译通过 |
+| ② | auditor01 重新登录 + 选租户 6 | 用户/角色列表只显示 tenantId=6 的数据 |
+| ③ | admin 超管登录（tenantId=0） | 用户/角色列表仍显示全租户数据（前端不传 tenantId 时 tenantId 为 0 不触发自动注入） |
+| ④ | admin 手动在前端选 tenantId=6 筛选 | 只显示 tenantId=6 的数据 |
+
 ---
 
 ## 今日修复摘要（2026-11-05 · RBAC+DataScope+sys_role 部门私有角色）
@@ -288,14 +322,6 @@ PermissionGuard.checkDataScope 内部 roleService.listByIds(roleIds)
 | ③ PermissionGuard | PermissionGuard.checkDataScope | 内部 3 个 DB 查询被 Handler 二次过滤 | `DataScopeContext.skip() + try { doCheckDataScope() } finally { reset() }` — 方法入口做上下文管理，业务逻辑下沉到 private `doCheckDataScope()` |
 | ④ Controller | SysRoleController.add / TenantRoleController.add | 新增角色不会自动填部门归属 | `if (sysRole.getDeptId() == null) sysRole.setDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId())` → 超管登录(deptId=null) 自动创建全局角色；部门管理员登录自动填当前部门创建部门私有角色 |
 
-### DB 变更（已执行）
-```sql
-ALTER TABLE sys_role 
-  ADD COLUMN dept_id BIGINT NULL DEFAULT NULL 
-    COMMENT '部门私有角色归属部门（NULL=全局角色，非NULL=部门私有角色）' 
-    AFTER tenant_id,
-  ADD INDEX idx_sys_role_dept (dept_id);
-```
 
 ### 验证清单
 | # | 步骤 | 预期 |
@@ -387,31 +413,6 @@ ALTER TABLE sys_role
 | [08 - 冒烟测试工作.md](./08%20-%20冒烟测试工作.md) | 冒烟测试用例手册 + 权限专项 Apifox 自动化方向 + 已完成节点 | 01/02/03(全模块回归) | test6 写操作 403 是预期还是 Bug？如何清理脏缓存？ |
 | [09 - 后面要做的事情.md](./09%20-%20后面要做的事情.md) | TODO 清单：P0 立即完成 / P1 近期需求 / P2 优化改进 / P3 代码清理 | 03(bpmn render 改造)、全模块 | 后面还要做什么？验收 Checklist？ |
 
-##使用CURL测试接口样式：
-1.获取平台侧admin的TOKEN：
-export TOKEN=$(curl -s -X POST http://120.48.47.253:38024/auth/login \
--H "Content-Type: application/json" \
--d '{"userName":"admin","password":"654123"}' \
-| python3 -c "import sys,json;print(json.load(sys.stdin)['data']['accessToken'])")
-
-2.获取租户侧管理员test6的TOKEN：
-export TOKEN=$(curl -s -X POST http://localhost:8090/tenant-auth/login \
--H "Content-Type: application/json" \
--d '{"tenantId":6,"username":"test6","password":"654123"}' \
-| python3 -c "import sys,json;print(json.load(sys.stdin)['data']['accessToken'])")
-
-3.获取租户侧填报人员的TOKEN：
-export TOKEN=$(curl -s -X POST http://localhost:8090/tenant-auth/login \
--H "Content-Type: application/json" \
--d '{"tenantId":6,"username":"test7","password":"654123"}' \
-| python3 -c "import sys,json;print(json.load(sys.stdin)['data']['accessToken'])")
-
-##日志路径：
-1.后端日志：/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/logs/cyanbase.log
-##数据库访问：
-1.在终端输入:
-mysql -u petclinic -p cyan_base -e "查询语句？？？"，等待我输入密码即可。
-例：mysql -u petclinic -p cyan_base -e "SELECT COUNT(*) FROM wf_process_instance WHERE initiator_id=7;"
 
 ---
 

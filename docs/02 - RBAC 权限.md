@@ -387,6 +387,11 @@ admin 超管角色（role_id=1, tenant_id=0）
 | 49 | PermissionGuard 三层与 MP 拦截器链的 skip 保护范围不一致 | Handler 内部已有 skip 保护，但 PermissionGuard 内部没有 → 双层不统一 | **Handler 决策阶段 + PermissionGuard.checkDataScope + 任何需要查元数据的 Service 内部方法**，三处统一 DataScopeContext.skip() | 2026-11-05 |
 | 50 | 移除 IGNORED_TABLES 前没全局排查该表的 Service 调用点 | 只改了 Handler 忘了 PermissionGuard → L2 静默失效 | **改 IGNORED_TABLES 前 grep 全项目该表名的 service/mapper 调用**，逐一确认调用点是否需要 skip 保护 | 2026-11-05 |
 | 51 | 改完 PermissionGuard skip 保护忘了清 Redis + 重新登录 | Redis 里 `rbac:perms:*` 缓存旧的 scope 数据；旧 JWT 无 deptId | **mvn clean compile + 清 rbac:* 缓存 + 重新登录**（JWT 必须重新签发才带 deptId） | 2026-11-05 |
+| 52 | **双 Controller 镜像后处理逻辑漏改** | 只在平台侧 SysRoleController 加了 bumpVersionForRole，租户侧 TenantRoleController 三个变更点完全漏掉 | **任何写操作的后处理（清缓存/bump版本号），平台侧每加一处，租户侧镜像必须 grep 同步**，见 01-租户底座.md [双 Controller 同步 Checklist] | 2026-11-06 |
+| 53 | **bumpVersionForRole 静默无日志 + 提前 return** | 入口、查询结果、空结果分支全没打日志，排障时完全无法定位"为什么没执行" | 日志覆盖 4 点：①入口 roleId ②查询用户数 ③空结果 WARN ④完成 INFO；**提前 return 分支也必须打 WARN 日志** | 2026-11-06 |
+| 54 | **bump 调用被 updateById 返回值包裹** | `if(ok) { bump() }` → 字段无变化返回 false 时 bump 被跳过 | bump 是"权限变更的副作用"，与业务 update 成功与否无关，**必须写在 if 判断外部** | 2026-11-06 |
+| 55 | **bumpVersionForRole 内部查 sys_user_role 无 skip 保护** | sys_user_role 从 IGNORED 移除 → TenantLine 追加 tenant_id 条件 → 查不到关联用户 | **必须显式 `CustomTenantHandler.skip() + try-finally reset` 防御性包裹**，即使表当前在 IGNORED 里也不能假设永远安全 | 2026-11-06 |
+| 56 | **JWT Token 签发入口漏 putPermVer** | 三处签发（AuthController login/refresh + TenantAuthServiceImpl），少一处对应登录方式的用户永远没有 permVer | **grep 全项目 putPermVer 或 getOrInitVersion，确保三个入口全覆盖**，与 putTenantId/putDeptId 范式一致 | 2026-11-06 |
 
 ## 15. PermissionGuard L2/L3 细节与 Controller 散落替换清单
 
@@ -632,9 +637,154 @@ private void doCheckDataScope(ResourceScope targetScope) {
 
 ---
 
-## 18. 文件管理菜单停用 vs 按钮权限边界（2026-10-26）
+## 18. 权限版本预埋（permVer）warn 模式完整设计（2026-11-06）
 
-### 18.1 两层含义不能混淆
+👉 全局约束参考：00-README.md [约束 #43] [约束 #44] [约束 #45] [约束 #46] [约束 #47]
+👉 双 Controller 镜像同步参考：01-租户底座.md [双 Controller 同步 Checklist]
+
+### 18.1 设计定位：预埋 warn 模式，不阻断
+
+| 维度 | 设计 |
+|---|---|
+| 存储 | Redis `sys:user:perm:ver:{userId}` 存 Long 单调递增计数器 |
+| JWT 携带 | claims `permVer` 字段，与 `tenantId`/`deptId` 范式对齐 |
+| 校验方式 | 过滤器比对：JWT permVer < Redis current → **打 WARN 放行** |
+| 阻断模式 | 同一处分支把 `log.warn` 换成 `reject` 即可，架构已预埋 |
+| 降级策略 | Redis 异常/key 不存在 → **静默放行**，不阻断业务 |
+| 开关 | `permission.version-warn-enabled: true`（配置文件） |
+
+### 18.2 完整链路
+
+```
+① 权限变更（角色菜单/dataScope/基础信息变更 / 用户角色绑定变更）
+  → Controller 调用 PermissionVersionService.bumpVersionForRole(roleId)
+    或 bumpVersion(userId)
+  → Redis INCR sys:user:perm:ver:{userId}
+  → 关联用户版本号 +1
+
+② 用户下次请求
+  → JwtAuthenticationFilter 解析 JWT 拿到 permVer
+  → 从 Redis 读 currentPermVer
+  → permVer < currentPermVer → log.warn 放行（warn 模式）
+  → permVer == currentPermVer → 正常放行
+
+③ 用户重新登录
+  → PermissionVersionService.getOrInitVersion(userId)
+  → Lua 原子：key 已存在返回当前值；不存在 SET 为 0
+  → JWT 携带最新版本号
+```
+
+### 18.3 Token 签发点 Checklist（三处，缺一不可）
+
+| # | 文件 | 方法 | putPermVer |
+|---|------|------|------------|
+| ① | `AuthController.java` | `login()` | `jwtUtil.putPermVer(claims, getOrInitVersion(sysUser.getId()))` |
+| ② | `AuthController.java` | `refresh()` | `jwtUtil.putPermVer(claims, getOrInitVersion(userId))` |
+| ③ | `TenantAuthServiceImpl.java` | `buildLoginResponse()` | `jwtUtil.putPermVer(claims, getOrInitVersion(sysUser.getId()))` |
+
+> 🔐 这三处任何一处漏了 putPermVer，对应登录方式的用户 JWT 就永远没有版本号，过滤器比对时 permVer=null → 静默放行 → warn 模式失效。
+
+### 18.4 bump 变更点全量清单（平台侧 + 租户侧镜像）✅ 全部已落地
+
+| # | 变更类型 | 平台侧入口 | 租户侧镜像入口 | bump 调用 | 状态 |
+|---|----------|-----------|---------------|-----------|------|
+| ① | 角色基础信息修改 | `SysRoleController.update()` | `TenantRoleController.update()` | `bumpVersionForRole(roleId)` | ✅ |
+| ② | 角色菜单权限变更 | `SysRoleController.saveRoleMenu()` | `TenantRoleController.saveMenuPerm()` | `bumpVersionForRole(roleId)` | ✅ |
+| ③ | 角色数据范围变更 | `SysRoleController.saveDataScope()` | `TenantRoleController.saveDataScope()` | `bumpVersionForRole(roleId)` | ✅ |
+| ④ | **角色删除** | `SysRoleController.delete()` | `TenantRoleController.delete()` | `bumpVersionForRole(roleId)` | ✅ |
+| ⑤ | 用户角色绑定变更 | `SysUserServiceImpl.updateUserAndRole()` | `TenantUserController.saveRolePerm()` | `bumpVersion(userId)` | ✅ |
+| ⑥ | **用户基础信息修改（含部门）** | `SysUserServiceImpl.updateUserAndRole()`（ServiceImpl 内 bump） | `TenantUserController.update()`（同上 ServiceImpl 间接） | `bumpVersion(userId)` | ✅ |
+
+> ⚠️ **隐性坑**：⑥ TenantUserController.update 没有直接调 bump——bump 在 `SysUserServiceImpl.updateUserAndRole()` 内部执行。Controller 层只补了诊断日志（`log.info("[TenantUser-update] userId=...")`）。如果未来 ServiceImpl 被绕过直接调 updateById，就会漏 bump。
+
+### 18.5 bumpVersionForRole 内部 skip 保护的必要性
+
+```
+bumpVersionForRole(roleId) 内部执行：
+  sysUserRoleMapper.selectList(eq(roleId))
+  → 查 sys_user_role 表
+
+虽然 sys_user_role 在 IGNORED_TABLES 里（TenantLine 自动跳过），
+但仍需显式 CustomTenantHandler.skip() + try-finally reset，原因：
+
+1. 防御性：未来如果 sys_user_role 被移出 IGNORED，这里不会静默坏
+2. 查关联用户时可能跨租户（平台 admin 给租户角色 bump）
+3. IGNORED_TABLES 不是永久契约，随时可能因业务调整变动
+```
+
+### 18.6 bump 必须写在 if(ok) 判断外部
+
+```java
+// ❌ 错误：updateById 返回 false（字段无变化）时 bump 被跳过
+boolean ok = sysRoleService.updateById(sysRole);
+if (ok) {
+    permissionVersionService.bumpVersionForRole(sysRole.getId());
+}
+
+// ✅ 正确：版本号递增是权限变更的副作用，与 update 成功与否无关
+boolean ok = sysRoleService.updateById(sysRole);
+permissionVersionService.bumpVersionForRole(sysRole.getId());  // 在 if 外部
+return ok ? R.ok() : R.fail("更新失败");
+```
+
+### 18.7 ⚠️⚠️⚠️ warn → block 切换点（全局唯一拦截入口，后续必改）
+
+> 🔴🔴🔴 **这是架构预埋的核心切换点**。从 warn 模式（仅打日志放行）切到 block 模式（拦截拒绝），**全项目只改这一处代码**。
+>
+> 切换时机：等线上观察一段时间，确认权限变更 → bump 链路稳定、无漏改、无误伤后执行。
+
+**位置**：`JwtAuthenticationFilter.java`，JWT 校验通过后的版本比对分支
+
+**当前 warn 模式代码**：
+```java
+if (permVer != null && currentPermVer != null && permVer < currentPermVer) {
+    // ✅ 当前：warn 模式 —— 只打日志，放行请求
+    log.warn("[PermVer] 权限快照过期: userId={}, jwtPermVer={}, currentPermVer={}",
+             userId, permVer, currentPermVer);
+}
+```
+
+**切换步骤（三步走）**：
+
+| 步骤 | 改动 | 文件/位置 |
+|------|------|-----------|
+| ① | 把上面 `log.warn(...)` 换成 `throw new AccessDeniedException("权限已变更，请重新登录")` | `JwtAuthenticationFilter.java` 版本比对分支 |
+| ② | 关闭开关：`application.yml` 里 `permission.version-warn-enabled: false` | 配置文件（如需灰度控制） |
+| ③ | 清 Redis 所有 `sys:user:perm:ver:*` + 强制全部用户重新登录（重新签发带最新 permVer 的 JWT） | 运维操作 |
+
+**注意事项**：
+- 切换后旧 JWT（permVer < currentPermVer）访问会**直接 403 AccessDeniedException**，前端跳登录页
+- 首次切换建议先灰度：开关只对部分租户关闭 warn，或先在测试环境全量验证
+- 如果发现某个 bump 变更点漏改 → 某个场景权限变更不触发 bump → 用户版本号不变 → block 模式下永远不被拦截 → 等于白切
+
+### 18.8 修复链路完整回顾（2026-11-06）
+
+```
+问题：修改角色菜单/dataScope → bumpForRole 无日志、未执行
+  ↓ 排查
+  根因 ①：租户侧用户请求走 /tenant/role/** → 完全不进 SysRoleController
+           → 只改了平台侧，TenantRoleController 三个变更点完全漏改
+  根因 ②：bump 被 if(updateById 返回值) 包裹 → 字段无变化返回 false 时 bump 跳过
+  根因 ③：bumpVersionForRole 入口静默无日志 + 提前 return → 完全无法排障
+  根因 ④：内部查 sys_user_role 无 skip 保护 → 表移出 IGNORED 会静默坏
+  ↓ 修复（5 步）
+  ① 新增 PermissionVersionService → Lua 原子版本号管理 + skip + 全链路日志
+  ② Token 三处签发入口补 putPermVer（login + refresh + buildLoginResponse）
+  ③ 过滤器 warn 模式比对分支（配置开关）
+  ④ 补全 平台侧 5 个 + 租户侧 6 个 bump 变更点（含角色删除）
+  ⑤ bump 全部移到 if(ok) 外部
+  ↓ 验证
+  ✅ mvn clean compile 编译通过
+  ✅ 三个修复场景日志精准打出
+  ✅ 租户侧删角色 → boundUsers=0 → bumpForRole WARN（预期行为，已 boundUsers 校验拦截在前面）
+  ✅ warn 模式下旧 token 权限过期 → log.warn + 放行
+```
+
+---
+
+## 19. 文件管理菜单停用 vs 按钮权限边界（2026-10-26）
+
+### 19.1 两层含义不能混淆
 
 sys_menu 表里的记录有两层含义，**修改时必须只改一层**：
 
@@ -654,7 +804,7 @@ sys_menu 表里的记录有两层含义，**修改时必须只改一层**：
 └───────────────────────────────────────────────────────┘
 ```
 
-### 18.2 文件管理停用 SQL
+### 19.2 文件管理停用 SQL
 
 ```sql
 -- 只禁用文件管理主菜单（让前端侧边栏入口消失）
@@ -665,7 +815,7 @@ UPDATE sys_menu SET visible = 1, status = 1 WHERE id = 13;
 -- ✅ 保留：menu_id=126 删除文件（system:file:remove，后端已 403，前端可不管）
 ```
 
-### 18.3 download/preview 不加 L3 的设计决策
+### 19.3 download/preview 不加 L3 的设计决策
 
 ```java
 // ✅ upload：加 L3 add 权限（租户需要上传能力）
@@ -682,7 +832,7 @@ public ResponseEntity<?> download(@PathVariable Long fileId) {
 
 **决策理由**：附件权限依附于所属业务单据的 DataScope，不单独提供「查看本租户全部附件」的入口。如果 download/preview 也加 `system:file:query` 权限码，租户管理员角色必须同时分配 add 和 query 才能上传后再下载，多一道配置容易漏配。
 
-### 18.4 风险提示
+### 19.4 风险提示
 
 download/preview 不加 L3 只靠 L1 是**设计选择**而非安全缺陷。如果未来需要引入「某个角色不能下载附件但能上传」的细粒度控制，再补上 L3 即可。当前版本租户安全由以下三层兜底：
 
@@ -694,15 +844,15 @@ download/preview 不加 L3 只靠 L1 是**设计选择**而非安全缺陷。如
 
 ---
 
-## 19. sys_menu route_path 重复导致 Element Plus 菜单高亮冲突
+## 20. sys_menu route_path 重复导致 Element Plus 菜单高亮冲突
 
-### 19.1 现象
+### 20.1 现象
 平台侧登录 → 系统监控下面有两个「接口监控」菜单 → 点任意一个 → **两个按钮都显示选中状态**。
 
-### 19.2 根因
+### 20.2 根因
 数据库里有两条 API 监控菜单 `route_path` 完全一样（比如一条是 `apiMonitor`，另一条是 `api-monitor` 但最终都匹配前端的 `/monitor/apiMonitor` 路由），导致 Element Plus 菜单组件的高亮匹配了两个菜单项。
 
-### 19.3 修复
+### 20.3 修复
 
 ```sql
 -- 先确认重复记录
@@ -713,7 +863,7 @@ FROM sys_menu WHERE route_path LIKE '%apiMonitor%' OR route_path LIKE '%api-moni
 UPDATE sys_menu SET visible = 1, status = 1 WHERE id = <重复那条的id>;
 ```
 
-### 19.4 预防
+### 20.4 预防
 
 **新增菜单前必须查 route_path 唯一性**：
 ```sql
@@ -722,7 +872,7 @@ SELECT COUNT(*) FROM sys_menu WHERE parent_id = <同一父菜单id> AND route_pa
 
 ---
 
-## 20. 按钮权限 Checklist 更新（含今日增量）
+## 21. 按钮权限 Checklist 更新（含今日增量）
 
 | # | 步骤 | 今日新增注意事项 |
 |---|------|------|
@@ -739,7 +889,7 @@ SELECT COUNT(*) FROM sys_menu WHERE parent_id = <同一父菜单id> AND route_pa
 
 ---
 
-## 租户菜单池越权修复（2026-11-04 · P0 全链路修复）
+## 租户菜单池越权修复（2026-11-04 · P0 全链路修复）（见原 §21 节，编号冲突保留）
 
 ### 四层防御体系
 
@@ -796,16 +946,8 @@ SELECT COUNT(*) FROM sys_menu WHERE parent_id = <同一父菜单id> AND route_pa
 | 30 | 新增 availableMenus 接口后 SysRoleController 编译不过 | SysMenu / TreeBuildUtil / SysTenantMenuService 没 import + 没 @Resource | 新增接口前先 grep 项目已有类似代码的 import 列表，不要猜包路径 | 2026-11-04 |
 | 31 | PermissionServiceImpl 重复定义 filterByTenantMenuPool | 同时在 ServiceImpl 和 Controller 各写了一份 → javac 编译中断 → Lombok 注解处理器不执行 → 大量 get/set 连锁报错 | **一个方法只定义一份**；编译报大量 get/set 错时，第一条错误才是根因，后面全是连锁反应 | 2026-11-04 |
 | 32 | SysRoleController saveTenantMenus 接口描述错误 | 之前文档写「saveMenuPerm 会自动维护 sys_tenant_menu」→ 反向污染根因 | 租户菜单池只能由平台侧维护，角色菜单写入前只做校验截断，**绝对不能反向同步** | 2026-11-04 |
- 单独一条 | 2026-11-XX |
-| 42 | jsqlparser `cannot find symbol IsNull` | 项目依赖 4.6 版本，类名是 IsNullExpression 不是 IsNull | **统一用 `CCJSqlParserUtil.parseExpression("col IS NULL")`** 字符串解析，绕开所有版本差异 | 2026-11-XX |
-| 43 | SecurityUtils.getDeptId() 编译报错 | deptId 不在 SecurityUtils 静态上下文，存在 LoginUser.sysUser.deptId | 正确写法 `SecurityUtils.getLoginUser().getSysUser().getDeptId()`，必须 try-catch 防空指针 | 2026-11-XX |
-| 44 | OrExpression 未包 Parenthesis → TooManyResultsException | MyBatisPlus 用 AND 拼接 Handler 返回值，AND>OR 优先级逃逸 → 所有全局角色被放出来 | **返回 OrExpression 前必须用 Parenthesis 整体包裹**：`new Parenthesis().setExpression(or)` | 2026-11-XX |
-| 45 | PermissionGuard.checkDataScope 内部查 sys_role 被 DataScope 二次过滤 | 移除 sys_role IGNORED 后，roleService.listByIds 又进 Handler 构造 scope 条件 | **PermissionGuard.checkDataScope 方法体也需要 DataScopeContext.skip/try-finally/reset 包裹**（已知遗留） | 2026-11-XX |
-| 46 | 业务表 NOT NULL 列无默认值 | `Field 'meeting_time' doesn't have a default value` | Service 层 create 方法必须兜底填充（LocalDateTime.now()），不能依赖 DB DEFAULT | 2026-11-XX |
-| 47 | 配置/关联表误加 dept_id 污染全局数据 | t_three_big_system 是全局制度表，误加 dept_id → 不同部门看到不同制度 | **铁律**：配置/定义/关联类表→IGNORED不加dept_id；业务单据/实例表→必须加dept_id从IGNORED移除 | 2026-11-XX |
-| 48 | DEPT_COLUMN_MAP 遗漏非标准列名 | t_three_big_execute 用 execute_dept_id 不是 dept_id | 新增业务表必须先 SHOW FULL COLUMNS，非 dept_id 列名→加 DEPT_COLUMN_MAP 映射 | 2026-11-XX |
-| 49 | 以为所有角色都必须归属于部门 | 忽略 dept_id=NULL 代表全局角色的语义 | sys_role.dept_id=NULL 是**全局角色**（全租户可见），非NULL才是部门私有；Handler 里所有 scope 条件都追加 OR dept_id IS NULL | 2026-11-XX |
-| 50 | Controller 自动填充 deptId 链式空指针 | `getLoginUser().getSysUser().getDeptId()` 旧token时 SysUser 未 set | 自动填充逻辑必须 try-catch 包裹，catch 里静默跳过让 deptId 保持 null | 2026-11-XX |
+
+> 📌 后续踩坑补录统一维护在 **§14 主坑点表**（line 362+），本节专题区域不再重复。
 
 ---
 
@@ -827,7 +969,6 @@ SELECT COUNT(*) FROM sys_menu WHERE parent_id = <同一父菜单id> AND route_pa
 | 24 | **新增实体必须先 SHOW FULL COLUMNS 确认是否有 dept_id 字段** | 有 dept_id → 自动被 DataPermissionInterceptor 覆盖；没有 → 必须加进 CyanDataPermissionHandler.IGNORED_TABLES（否则 SQL 报错 Unknown column） |
 | 25 | **Handler 内部 DB 查询必须整体 skip 保护** | doGetSqlSegment 内部查 sys_role（isSuperAdmin + listByIds）、查 sys_dept（collectChildren）、查 sys_role_dept（CUSTOM scope）全部用 `DataScopeContext.skip()` 包裹 + finally reset；任何漏保护都会导致 ♻️ 无限递归 StackOverflow |
 | 26 | **sys_dept 表过滤用 id 不用 dept_id** | CyanDataPermissionHandler.DEPT_COLUMN_MAP.put("sys_dept", "id") 映射硬编码；业务表统一默认 dept_id；以后新增特殊表必须加映射 |
- 必须覆盖所有无尾斜杠的业务端点 |
 
 ---
 

@@ -115,3 +115,9 @@ thread-pool:
 
 # 允许循环依赖（临时方案，后续优化）
 spring.main.allow-circular-references: true
+
+# ==================== 权限版本预埋（warn 模式） ====================
+# true  = 开启版本校验，JWT permVer 落后 Redis currentPermVer 时打 WARN 日志但放行
+# false = 一键关闭整套检查（Redis 不读、不打日志，回到纯 JWT 自包含模式）
+permission:
+  version-warn-enabled: true
