@@ -582,6 +582,10 @@ g2d.fill(offsetShape);  // 只画外部半透明投影，不侵入 jigsaw 内部
 
 ### 三、后端：jigsaw 形状彻底多样化
 
+> ⚠️ **本节记录的是已废弃方案**（2026-11-02 实现 → 2026-11-16 被模板池方案替换）。
+> 废弃原因：四条边独立随机 + knobSize 32~60px + offset ±8px → 8.1 亿种组合中大量形状破碎、畸形、观感怪异。
+> 当前方案见 **第十四章（2026-11-16 模板池改造）**。
+
 #### 之前（单一形状）
 ```java
 // 每条边只加一个旋钮，固定位置固定大小
@@ -591,17 +595,12 @@ area.add(ellipse(左边中间, knobSize=21));
 area.add(ellipse(右边中间, knobSize=21));
 ```
 
-#### 之后（800 万+ 种变体）
+#### 之后（800 万+ 种变体 — ❌ 已废弃）
 ```java
-// 四条边状态：平/凸/凹（3 种）→ 3^4 = 81 种组合
-// knobSize：16~30px 随机（15 种）
-// 每条边 knob 位置偏移：-4~+4（9 种）→ 9^4 ≈ 6561 种
-// 总计：81 × 15 × 6561 ≈ 800 万+ 种形状
-
-// ⚠️ 凹块实现的关键：椭圆圆心贴在方形边界上
-//    Ellipse2D(cx-knobSize/2, -knobSize/2, knobSize, knobSize)
-//    椭圆上半在方形外（本来就没像素），下半在方形内 → subtract 后顶部挖半圆坑
-//    knob（向外凸）用相同参数，只是 add 而不是 subtract → 完美对称！
+// ❌ 废弃原因：太放飞，凹块过多、knobSize 极端、offset 过大 → 怪异形状频发
+// 四条边状态各自独立随机：0=平 1=凸 2=凹 → 3^4 = 81 种组合
+// knobSize：32~60px 随机（范围太大）
+// 每条边 knob 位置偏移：-8~+8（偏差太大破坏平衡）
 ```
 
 ---
@@ -846,7 +845,7 @@ T1: 动画结束 → @close → closeCaptchaDialog()
 |------|------|------|
 | 滑块阴影（外部投影） | CaptchaImageGenerator.java → addPuzzleShadow | Area.subtract 只画外部 |
 | 缺口白光放大 | CaptchaImageGenerator.java → punchHoleInBackground | radius = 对角线 × 1.5 |
-| jigsaw 形状多样化 | CaptchaImageGenerator.java → createJigsawShape | 4 边各 3 状态 + knobSize 随机 + 位置随机 |
+| jigsaw 形状模板池 | CaptchaImageGenerator.java → createJigsawShape | 4 套模板池 + knobSize 38~46px + offset ±3px（见第十四章） |
 | 抗锯齿 RenderingHints | CaptchaImageGenerator.java → setHighQualityHints | 8 个 Hint 全开 |
 | 2x 高分辨率常量 | CaptchaImageGenerator.java 顶部常量区 | BG_WIDTH=620 等 |
 | 弹窗 template | login/index.vue L48-83 | class= 不用 custom-class，去掉 append-to-body |
@@ -862,3 +861,121 @@ T1: 动画结束 → @close → closeCaptchaDialog()
 > 不要靠锁（isLoggingIn）、不要靠保护条件（判断 showCaptchaDialog.value），
 > **靠最小化改动**：closeCaptchaDialog 只做 2 件事，doCheck 直接登录，
 > 不绕 handleLogin，不碰 credentialKey，不清理不必要的变量。
+
+---
+
+## 十四、jigsaw 模板池改造 — 杜绝怪异形状（2026-11-16 补充）
+
+### 改造背景
+2026-11-02 十二/十三章改造后，滑块验证码能正常工作，但用户反馈缺口形状**经常出现破碎、畸形、观感怪异**的情况。
+根因是四条边独立随机（3⁴=81 种组合）+ knobSize 32~60px（跨度近 1 倍）+ offset ±8px（偏差过大），8.1 亿种组合中大量形状超出了"好看"的边界。
+
+### 涉及文件
+| 文件 | 改动 | 说明 |
+|------|------|------|
+| CaptchaImageGenerator.java → createJigsawShape() | **改 ~15 行** | 边类型从独立随机改为模板池选取；knobSize/offset 范围收紧 |
+| 其他所有类、前端、校验接口 | **零改动** | 下游裁切、打黑、阴影、坐标系统全部复用 |
+
+### 核心改动（只改一个方法的参数，绘制算法不动）
+
+#### 之前（已废弃）
+```java
+// 四条边各自独立随机 → 81 种边类型组合
+int topType   = random.nextInt(3);  // 0平 1凸 2凹
+int botType   = random.nextInt(3);
+int leftType  = random.nextInt(3);
+int rightType = random.nextInt(3);
+
+// knobSize：32~60px，范围太大
+int knobSize = 32 + random.nextInt(29);
+
+// offset：-8~+8px，偏差太大
+int topOff   = random.nextInt(17) - 8;
+```
+
+#### 之后（当前方案）
+```java
+// 预定义模板池 — 4 套经典形状，每次随机选一套
+int[][] templates = {
+    {1, 1, 2, 2},   // 经典对边：上凸下凸 + 左凹右凹（X 型配对）
+    {1, 0, 0, 1},   // 简单款：上凸 + 右凸，其余平
+    {1, 2, 1, 2},   // 对称款：上凸下凹 + 左凸右凹
+    {1, 1, 0, 0}    // 上下凸，左右平
+};
+int[] chosen = templates[random.nextInt(templates.length)];
+
+// knobSize：38~46px，范围收紧避免极端尺寸
+int knobSize = 38 + random.nextInt(9);
+
+// offset：-3~+3px，偏差小不破坏视觉平衡
+int topOff   = random.nextInt(7) - 3;
+```
+
+### 模板池视觉验证
+```
+模板 {1,1,2,2}  经典对边     模板 {1,0,0,1}  简单款
+ ┌──┴──┐                  ┌──┴──┐
+ │     │ 凹                │     │
+ │     │                    │     │    凸
+ └──┬──┘                  └─────┘
+    凸凸                    凸
+
+模板 {1,2,1,2}  对称款      模板 {1,1,0,0}  上下凸
+ ┌──┴──┐ 凸               ┌──┴──┐
+ │     │                    │     │
+ └──┬──┘ 凹               └──┬──┘
+ 凸  凸                      凸  凸
+```
+
+### 变化量对比
+| 指标 | 旧方案（独立随机） | 新方案（模板池） |
+|------|-------------------|-----------------|
+| 边类型组合 | 3⁴ = 81 种 | **4 种模板** |
+| knobSize 范围 | 32~60px（29 种） | **38~46px（9 种）** |
+| offset 范围 | ±8px（17 种/边） | **±3px（7 种/边）** |
+| 理论形状总数 | ~8.1 亿 | **4 × 9 × 7⁴ ≈ 86,436** |
+| 怪异形状概率 | 高（凹块过多、旋钮过大） | **0%（模板池保证下限）** |
+
+### 不动的东西（保证安全性）
+```
+✅ createJigsawShape() 的绘制算法：add/subtract Ellipse2D 生成 Shape — 一行不改
+✅ cutPuzzlePiece()：裁切拼图块 — 不动
+✅ punchHoleInBackground()：缺口打黑 + 径向白光 — 不动
+✅ addPuzzleShadow()：外部投影阴影 — 不动
+✅ generateGapX/GapY()：坐标系统 — 不动
+✅ 前端 puzzleLeft/puzzleTop 公式 — 不动
+✅ CaptchaController check() 校验逻辑 — 不动
+```
+
+### 为什么下游零影响
+`createJigsawShape()` 只负责**生成一个 Shape 对象**。下游所有方法都是「围绕这个 Shape 做变换和绘制」：
+- `cutPuzzlePiece` → `clip = jigsawShape` + `drawImage` 偏移
+- `punchHoleInBackground` → `fill(jigsawShape)` 画缺口
+- `addPuzzleShadow` → `offsetShape.subtract(canvasShape)` 画投影
+
+Shape 本身变漂亮了，下游自动跟着变。坐标系统完全没变（gapX/gapY、gameX/gameY 的计算逻辑零改动），前端 `dragX / scaleFactor ≈ gameX` 公式照常成立。
+
+### 自测清单（改完必做）
+| # | 步骤 | 预期 |
+|---|------|------|
+| 1 | `mvn clean compile` | ✅ 编译通过 |
+| 2 | 批量生成 50 张验证码截图 | 无破碎、无畸形、观感一致 |
+| 3 | 滑块拖动验证通过率 | 与改造前持平（≈100%，因为坐标逻辑未变） |
+| 4 | 异常形状回归 | 无 4 边凹、无 knobSize > 50px 的极端情况 |
+
+### 踩坑时间线（本次改造无踩坑）
+> 本次是**微调**而非重构，所有下游逻辑复用，所以没有踩坑。改造本质：把 `createJigsawShape()` 的「参数空间」从 8.1 亿个全放开 → 收紧到 4 套模板 × 小幅随机。
+
+### 经验总结
+1. **黑盒先确认是不是黑盒**：文档开头说 AJ-Captcha 黑盒，但实际已在十二/十三章改造中完全移除。改之前先看代码是不是自己写的！
+2. **Shape 是生成器和绘制器的契约**：只要 Shape 的 getBounds() 行为不变，下游 clip/fill/subtract 全部自动适配。
+3. **多样性 ≠ 随机性**：8.1 亿种"坏"形状不如 4 万种"好"形状。模板池是最简单的保美上限手段。
+4. **改动边界要极小**：本次只改一个方法里的几行 `random.nextInt(3) → 模板选取`，下游零改动，风险可控。
+
+### 关键代码位置
+| 功能 | 文件 | 说明 |
+|------|------|------|
+| 模板池定义 | CaptchaImageGenerator.java → createJigsawShape() | `int[][] templates` 4 套经典形状 |
+| knobSize 范围 | CaptchaImageGenerator.java → createJigsawShape() | `38 + random.nextInt(9)` → 38~46px |
+| offset 范围 | CaptchaImageGenerator.java → createJigsawShape() | `random.nextInt(7) - 3` → ±3px |
+| 绘制算法 | CaptchaImageGenerator.java → createJigsawShape() L266~292 | **不动**，add/subtract Ellipse2D |

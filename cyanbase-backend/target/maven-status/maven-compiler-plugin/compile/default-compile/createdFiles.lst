@@ -34,6 +34,7 @@ com/cyan/modules/workflow/service/WorkflowDefinitionService.class
 com/cyan/entity/SysTenant.class
 com/cyan/modules/message/controller/SseController.class
 com/cyan/modules/workflow/service/WfDefVersionService.class
+com/cyan/modules/workflow/bpmn/entity/WfBpmnDefinition.class
 com/cyan/modules/sydyd/entity/ThreeBigMeeting.class
 com/cyan/modules/workflow/entity/FormProcessBinding.class
 com/cyan/modules/message/controller/SysMessageController$SendToRolesRequest.class
@@ -183,6 +184,7 @@ com/cyan/common/exception/BaseException.class
 com/cyan/service/impl/SysDictTypeServiceImpl.class
 com/cyan/mapper/SysTenantModuleMapper.class
 com/cyan/controller/SysMenuController.class
+com/cyan/modules/workflow/bpmn/service/WfBpmnDefinitionService.class
 com/cyan/entity/SysRoleMenu.class
 com/cyan/modules/form/service/FormFieldService.class
 com/cyan/security/domain/LoginUser.class
@@ -215,11 +217,13 @@ com/cyan/service/SysApiMonitorService.class
 com/cyan/modules/job/service/SysJobService.class
 com/cyan/dto/TenantDetailVO.class
 com/cyan/modules/form/service/FormDataService.class
+com/cyan/modules/workflow/bpmn/controller/WfBpmnDefinitionController.class
 com/cyan/modules/job/controller/SysJobController.class
 com/cyan/modules/sydyd/mapper/ThreeBigMeetingMapper.class
 com/cyan/mapper/SysConfigMapper.class
 com/cyan/modules/log/service/SysOperLogService.class
 com/cyan/service/SysUserOnlineService.class
+com/cyan/modules/workflow/bpmn/mapper/WfBpmnDefinitionMapper.class
 com/cyan/entity/PrincipalTenantScope.class
 com/cyan/entity/SysDictType.class
 com/cyan/service/SysDeptService.class
@@ -302,6 +306,7 @@ com/cyan/entity/SysNotice.class
 com/cyan/service/impl/SysDictDataServiceImpl.class
 com/cyan/service/TenantBizUnitScopeService.class
 com/cyan/modules/workflow/controller/WorkflowInstanceController$StartProcessRequest.class
+com/cyan/modules/workflow/bpmn/service/impl/WfBpmnDefinitionServiceImpl.class
 com/cyan/entity/BaseEntity.class
 com/cyan/service/impl/SysDeptServiceImpl$1.class
 com/cyan/common/pool/config/ThreadPoolConfig.class

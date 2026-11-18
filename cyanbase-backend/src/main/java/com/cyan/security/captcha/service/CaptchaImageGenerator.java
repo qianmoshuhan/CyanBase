@@ -228,11 +228,15 @@ public class CaptchaImageGenerator {
     // ============== Jigsaw 形状 & 裁切 ==============
 
     /**
-     * 创建多样化 jigsaw 形状 — 四条边（上下左右）各自独立随机。
-     * <p>每条边 3 种状态：0=平、1=凸(knob, add)、2=凹(hole, subtract)</p>
-     * <p>knobSize 大范围随机（16-30px），位置带 ±4px 偏移，不总在正中。</p>
-     * <p>subtract 安全性保证：椭圆圆心正好在方形边界上，只会挖掉边上的半圆坑，不会穿透！</p>
-     * <p>变化量：3^4(边状态) × 15(大小) × 9^4(位置偏移) ≈ 100万+ 种形状</p>
+     * 创建 jigsaw 形状 — 从预定义模板池选取，杜绝怪异畸形，保留小幅随机。
+     * <p>模板池 4 套经典形状，每次随机选一套：</p>
+     * <ul>
+     *   <li>{1,1,2,2} — 上凸下凸 + 左凹右凹（经典对边 X 型配对）</li>
+     *   <li>{1,0,0,1} — 上凸 + 右凸（简单款，其余平）</li>
+     *   <li>{1,2,1,2} — 上凸下凹 + 左凸右凹（对称款）</li>
+     *   <li>{1,1,0,0} — 上凸下凸（上下款，左右平）</li>
+     * </ul>
+     * <p>knobSize 收紧到 38-46px，offset 收紧到 ±3px，位置偏差小不破坏平衡。</p>
      */
     private Shape createJigsawShape(int pieceSize) {
         int cx = pieceSize / 2;
@@ -240,28 +244,26 @@ public class CaptchaImageGenerator {
 
         Area area = new Area(new Rectangle(0, 0, pieceSize, pieceSize));
 
-        // 四条边独立随机状态
-        int topType   = random.nextInt(3);  // 0平 1凸 2凹
-        int botType   = random.nextInt(3);
-        int leftType  = random.nextInt(3);
-        int rightType = random.nextInt(3);
+        // 预定义模板池 — int[4] = {上, 下, 左, 右}；0=平 1=凸 2=凹
+        int[][] templates = {
+            {1, 1, 2, 2},   // 经典对边：上凸下凸 + 左凹右凹
+            {1, 0, 0, 1},   // 简单款：上凸 + 右凸，其余平
+            {1, 2, 1, 2},   // 对称款：上凸下凹 + 左凸右凹
+            {1, 1, 0, 0}    // 上下凸，左右平
+        };
+        int[] chosen = templates[random.nextInt(templates.length)];
+        int topType   = chosen[0];
+        int botType   = chosen[1];
+        int leftType  = chosen[2];
+        int rightType = chosen[3];
 
-        // 全平太无聊 → 保底强制一条边凸
-        if (topType == 0 && botType == 0 && leftType == 0 && rightType == 0) {
-            int force = random.nextInt(4);
-            if (force == 0) topType = 1;
-            else if (force == 1) botType = 1;
-            else if (force == 2) leftType = 1;
-            else rightType = 1;
-        }
-
-        // knob 大小：32-60px（16~30 × 2），大范围变化
-        int knobSize = 32 + random.nextInt(29);
-        // 每条边独立位置偏移：-8 到 +8（×2）
-        int topOff   = random.nextInt(17) - 8;
-        int botOff   = random.nextInt(17) - 8;
-        int leftOff  = random.nextInt(17) - 8;
-        int rightOff = random.nextInt(17) - 8;
+        // knob 大小：38-46px，范围收紧避免极端尺寸
+        int knobSize = 38 + random.nextInt(9);
+        // 每条边独立位置偏移：-3 到 +3，偏差小不破坏视觉平衡
+        int topOff   = random.nextInt(7) - 3;
+        int botOff   = random.nextInt(7) - 3;
+        int leftOff  = random.nextInt(7) - 3;
+        int rightOff = random.nextInt(7) - 3;
 
         // ===== 上边：椭圆圆心正好在 y=0 边界 =====
         if (topType == 1) {

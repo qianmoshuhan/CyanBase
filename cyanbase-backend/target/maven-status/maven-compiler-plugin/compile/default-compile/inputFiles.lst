@@ -52,6 +52,7 @@
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/tenant/controller/ThreeBigMeetingController.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/mapper/SysUserRoleMapper.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/sydyd/service/impl/ThreeBigItemWorkflowBinder.java
+/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/bpmn/service/impl/WfBpmnDefinitionServiceImpl.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/sydyd/mapper/ThreeBigExecuteMapper.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/dto/TenantDetailVO.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/service/impl/SysDictDataServiceImpl.java
@@ -197,6 +198,7 @@
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/entity/SysLogLogin.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/service/SysDictDataService.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/sydyd/mapper/ThreeBigMeetingMapper.java
+/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/bpmn/entity/WfBpmnDefinition.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/form/mapper/FormDefVersionMapper.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/service/impl/GenTableServiceImpl.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/form/service/FormFieldService.java
@@ -246,6 +248,7 @@
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/entity/SysMenu.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/mapper/SysOperLogMapper.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/controller/system/SysThirdConfigController.java
+/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/bpmn/service/WfBpmnDefinitionService.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/service/impl/WfDefinitionTenantServiceImpl.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/form/entity/FormData.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/service/SysUserRoleService.java
@@ -305,6 +308,7 @@
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/common/monitor/config/ActuatorMonitorConfig.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/security/service/PermissionService.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/log/service/impl/SysOperLogServiceImpl.java
+/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/bpmn/controller/WfBpmnDefinitionController.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/service/PrincipalTenantScopeService.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/entity/SysDictType.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/dto/DeptImportResultVO.java
@@ -330,6 +334,7 @@
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/entity/BaseEntity.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/sydyd/entity/ThreeBigMeetingTopic.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/util/BpmnXmlGenerator.java
+/home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/bpmn/mapper/WfBpmnDefinitionMapper.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/form/service/FormDefinitionService.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/workflow/entity/WorkflowCopy.java
 /home/xjgh2025XZD/Cyan/CyanBase/cyanbase-backend/src/main/java/com/cyan/modules/job/entity/SysJob.java

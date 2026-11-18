@@ -109,7 +109,20 @@ export function checkUserPhone(phone, params = {}) {
  */
 export function getUserDetail(id) {
   return request({
-    url: `/system/user/${id}/detail`,
+    url: getUrl(`/user/${id}/detail`),
     method: 'get'
+  })
+}
+
+/**
+ * 远程搜索用户（工作流节点配置下拉用）
+ * 后端: GET /system/user/search?keyword=xxx&limit=30
+ * 返回: [{ id, label }]
+ */
+export function searchUsersApi(params) {
+  return request({
+    url: getUrl('/user/search'),
+    method: 'get',
+    params
   })
 }

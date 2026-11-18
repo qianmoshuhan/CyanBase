@@ -56,7 +56,17 @@ export default defineConfig({
       '/form': { target: 'http://localhost:8090', changeOrigin: true },
       '/wf': { target: 'http://localhost:8090', changeOrigin: true },
       '/log': { target: 'http://localhost:8090', changeOrigin: true },
-      '/workflow': { target: 'http://localhost:8090', changeOrigin: true },
+      '/workflow': {
+        target: 'http://localhost:8090',
+        changeOrigin: true,
+        // ⭐ SPA 路由硬刷新 fallback：GET + Accept:html 的请求不走 proxy，直接返回 index.html
+        // 和 /system 的 bypass 对齐，否则 /workflow/bpmn/** 等前端路由硬刷新会 404
+        bypass(req, res, options) {
+          if (req.method === 'GET' && req.headers.accept?.includes('html')) {
+            return '/index.html'
+          }
+        }
+      },
       '/api': {
         target: 'http://localhost:8090',
         changeOrigin: true,

@@ -263,6 +263,19 @@ const routes = [
         component: () => import('@/views/workflow/designer/index.vue'),
         meta: { title: '流程设计器' }
       },
+      // ===== BPMN 可视化流程设计器（与自研配置式完全平行、解耦）=====
+        {
+          path: '/workflow/bpmn/definition',
+          name: 'WfBpmnDefinition',
+          component: () => import('@/views/workflow/bpmn/list/index.vue'),
+          meta: { title: 'BPMN流程设计器' }
+        },
+        {
+          path: '/workflow/bpmn/designer',
+          name: 'WfBpmnDesigner',
+          component: () => import('@/views/workflow/bpmn/designer/index.vue'),
+          meta: { title: 'BPMN可视化编辑器' }
+        },
       // 我的待办
       {
         path: '/workflow/todo',

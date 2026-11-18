@@ -339,6 +339,31 @@ public class TenantUserController {
     }
 
     /**
+     * ⭐ 远程搜索用户（工作流节点配置下拉用，租户侧路由镜像）
+     * 自动按当前登录租户隔离，keyword 匹配 user_name / nick_name
+     * <p>TenantLine 拦截器已自动追加 tenant_id 过滤，无需显式设置</p>
+     */
+    @GetMapping("/search")
+    public R<List<Map<String, Object>>> searchUsers(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "30") Integer limit) {
+        LambdaQueryWrapper<SysUser> wrapper = new LambdaQueryWrapper<>();
+        if (keyword != null && !keyword.isEmpty()) {
+            wrapper.and(w -> w.like(SysUser::getUserName, keyword)
+                              .or().like(SysUser::getNickName, keyword));
+        }
+        wrapper.last("limit " + limit);
+        List<Map<String, Object>> result = sysUserService.list(wrapper).stream()
+                .map(u -> {
+                    Map<String, Object> m = new HashMap<>();
+                    m.put("id", u.getId());
+                    m.put("label", u.getNickName() + "(" + u.getUserName() + ")");
+                    return m;
+                }).collect(Collectors.toList());
+        return R.ok(result);
+    }
+
+    /**
      * ⭐ 获取当前租户的角色下拉选项
      * <p>MP 自动隔离 → 只返回本租户创建的角色（不是全局角色！）</p>
      */
